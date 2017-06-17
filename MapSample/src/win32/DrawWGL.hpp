@@ -15,7 +15,7 @@ namespace draw
 
 	public:
 		//コンストラクタ
-		DrawWGL(HWND hWnd);
+		DrawWGL(HWND hWnd = nullptr);
 		//デストラクタ
 		virtual ~DrawWGL();
 		//セットアップ

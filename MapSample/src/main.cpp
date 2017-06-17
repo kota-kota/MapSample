@@ -1,15 +1,12 @@
 ﻿#include <cstdint>
-
-namespace win32
-{
-	void StartApplication();
-}
-
+#include "win32/WindowWGL.hpp"
 
 //メイン処理
 std::int32_t main()
 {
-	win32::StartApplication();
+	//ウィンドウ作成・スタート
+	window::WindowWGL window;
+	window.start();
 
 	return 0;
 }

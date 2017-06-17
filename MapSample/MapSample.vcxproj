@@ -113,13 +113,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\UiMng.cpp" />
     <ClCompile Include="src\win32\DrawWGL.cpp" />
-    <ClCompile Include="src\win32\MainWin32.cpp" />
+    <ClCompile Include="src\win32\WindowWGL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Common.hpp" />
     <ClInclude Include="inc\DrawIF.hpp" />
+    <ClInclude Include="src\UiMng.hpp" />
     <ClInclude Include="src\win32\DrawWGL.hpp" />
+    <ClInclude Include="src\win32\WindowWGL.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
