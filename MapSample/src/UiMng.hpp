@@ -1,16 +1,16 @@
-#pragma once
+ï»¿#pragma once
 #include "DrawIF.hpp"
 
 namespace ui
 {
 	class UiMng {
-		//ƒƒ“ƒo•Ï”
+		//ãƒ¡ãƒ³ãƒå¤‰æ•°
 		draw::DrawIF*	drawIF;
 
 	public:
-		//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		UiMng(draw::DrawIF* drawIF = nullptr);
-		//•`‰æ
+		//æç”»
 		void draw();
 	};
 }

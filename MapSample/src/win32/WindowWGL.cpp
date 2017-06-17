@@ -1,34 +1,34 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 #include <cstdint>
 #include <cstdio>
 #include <new>
 #include "WindowWGL.hpp"
 
-//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 window::WindowWGL::WindowWGL()
 	: hInstance(nullptr)
 {
-	//ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹æ“¾
+	//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«å–å¾—
 	this->hInstance = ::GetModuleHandle(nullptr);
 }
 
-//ƒEƒBƒ“ƒhƒEƒXƒ^[ƒg
+//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¹ã‚¿ãƒ¼ãƒˆ
 void window::WindowWGL::start()
 {
 	bool ret = true;
 
-	//ƒRƒ“ƒ\[ƒ‹ƒEƒBƒ“ƒhƒE¶¬
+	//ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”Ÿæˆ
 	FILE* fConsole = nullptr;
 	::AllocConsole();
 	freopen_s(&fConsole, "CONOUT$", "w", stdout);
 
-	//ƒEƒBƒ“ƒhƒEƒEƒ‰ƒX“o˜^
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¦ãƒ©ã‚¹ç™»éŒ²
 	ret = this->registerWindowClass();
 	if (!ret) {
 		return;
 	}
 
-	//ƒEƒCƒ“ƒhƒEì¬
+	//ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ä½œæˆ
 	ret = this->createMainWindow();
 	if (!ret) {
 		return;
@@ -40,12 +40,12 @@ void window::WindowWGL::start()
 		DispatchMessage(&msg);
 	}
 
-	//ƒRƒ“ƒ\[ƒ‹ƒEƒBƒ“ƒhƒE”jŠü
+	//ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç ´æ£„
 	fclose(fConsole);
-	//::FreeConsole();	//x64‚Å—áŠO”­¶
+	//::FreeConsole();	//x64ã§ä¾‹å¤–ç™ºç”Ÿ
 }
 
-//ƒEƒBƒ“ƒhƒEƒNƒ‰ƒX“o˜^
+//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¯ãƒ©ã‚¹ç™»éŒ²
 bool window::WindowWGL::registerWindowClass()
 {
 	bool result = true;
@@ -74,7 +74,7 @@ bool window::WindowWGL::registerWindowClass()
 	return result;
 }
 
-//ƒEƒBƒ“ƒhƒEì¬
+//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ä½œæˆ
 bool window::WindowWGL::createMainWindow()
 {
 	bool result = true;
@@ -98,13 +98,13 @@ bool window::WindowWGL::createMainWindow()
 	else {
 		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL, &this->uiMng);
 
-		//•`‰æƒCƒ“ƒ^[ƒtƒF[ƒX¶¬
+		//æç”»ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ç”Ÿæˆ
 		new(&this->drawWGL) draw::DrawWGL(hWnd);
 
-		//UiMng¶¬
+		//UiMngç”Ÿæˆ
 		new(&this->uiMng) ui::UiMng(&this->drawWGL);
 
-		// ƒEƒBƒ“ƒhƒE•\¦
+		// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦è¡¨ç¤º
 		ShowWindow(hWnd, SW_SHOW);
 		UpdateWindow(hWnd);
 	}
@@ -112,7 +112,7 @@ bool window::WindowWGL::createMainWindow()
 	return result;
 }
 
-// ƒEƒBƒ“ƒhƒEƒvƒƒV[ƒWƒƒ
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 LRESULT CALLBACK window::WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
@@ -129,36 +129,36 @@ LRESULT CALLBACK window::WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wPara
 		break;
 
 	default:
-		//ƒfƒtƒHƒ‹ƒgˆ—
+		//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå‡¦ç†
 		return ::DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 	return (0L);
 }
 
-//WM_CREATEƒCƒxƒ“ƒgˆ—
+//WM_CREATEã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 void window::WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
 {
-	//CreateWindow‚Ìƒpƒ‰ƒ[ƒ^‚©‚çUiMng‚ğæ“¾
+	//CreateWindowã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‹ã‚‰UiMngã‚’å–å¾—
 	LPCREATESTRUCT lpCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
 	ui::UiMng* uiMng = static_cast<ui::UiMng*>(lpCreateStruct->lpCreateParams);
 
-	//hWnd‚ÉUiMng‚ğŠÖ˜A•t‚¯
+	//hWndã«UiMngã‚’é–¢é€£ä»˜ã‘
 	::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(uiMng));
 
 	printf("[%s] hWnd:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, uiMng);
 }
 
-//WM_DESTROYƒCƒxƒ“ƒgˆ—
+//WM_DESTROYã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 void window::WindowWGL::windowProcWMDestroy()
 {
 	::PostQuitMessage(0);
 }
 
-//WM_PAINTƒCƒxƒ“ƒgˆ—
+//WM_PAINTã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 void window::WindowWGL::windowProcWMPaint(HWND hWnd)
 {
-	//hWnd‚ÉŠÖ˜A•t‚¯‚½’l‚©‚çUiMng‚ğæ“¾
+	//hWndã«é–¢é€£ä»˜ã‘ãŸå€¤ã‹ã‚‰UiMngã‚’å–å¾—
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	printf("[%s] UiMng:0x%p\n", __FUNCTION__, uiMng);
@@ -167,6 +167,6 @@ void window::WindowWGL::windowProcWMPaint(HWND hWnd)
 	::BeginPaint(hWnd, &ps);
 	::EndPaint(hWnd, &ps);
 
-	//•`‰æ
+	//æç”»
 	uiMng->draw();
 }

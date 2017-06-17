@@ -1,15 +1,15 @@
-#include <cstdio>
+ï»¿#include <cstdio>
 #include "UiMng.hpp"
 
 
-//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ui::UiMng::UiMng(draw::DrawIF* drawIF)
 	: drawIF(drawIF)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 }
 
-//•`‰æ
+//æç”»
 void ui::UiMng::draw()
 {
 	cmn::ColorU8 color = { 230,231, 232, 255 };

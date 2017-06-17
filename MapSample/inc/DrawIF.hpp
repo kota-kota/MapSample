@@ -1,21 +1,21 @@
-#pragma once
+ï»¿#pragma once
 #include "Common.hpp"
 
 namespace draw
 {
 	class DrawIF {
 	public:
-		//ƒfƒXƒgƒ‰ƒNƒ^
+		//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		virtual ~DrawIF() {}
-		//ƒZƒbƒgƒAƒbƒv
+		//ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 		virtual void setup() = 0;
-		//•`‰æƒJƒŒƒ“ƒg
+		//æç”»ã‚«ãƒ¬ãƒ³ãƒˆ
 		virtual void makeCurrent(const bool current) = 0;
-		//•`‰æXV
+		//æç”»æ›´æ–°
 		virtual void swapBuffers() = 0;
-		//ƒNƒŠƒA
+		//ã‚¯ãƒªã‚¢
 		virtual void clear(const cmn::ColorU8& color) = 0;
-		//“_•`‰æ
+		//ç‚¹æç”»
 		virtual void drawPoint(const cmn::PointI32& point) = 0;
 	};
 }

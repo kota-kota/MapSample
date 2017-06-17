@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <Windows.h>
 #include <gl/GL.h>
 
@@ -14,19 +14,19 @@ namespace draw
 		HGLRC	hGLRC;
 
 	public:
-		//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		DrawWGL(HWND hWnd = nullptr);
-		//ƒfƒXƒgƒ‰ƒNƒ^
+		//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		virtual ~DrawWGL();
-		//ƒZƒbƒgƒAƒbƒv
+		//ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 		virtual void setup();
-		//•`‰æƒJƒŒƒ“ƒg
+		//æç”»ã‚«ãƒ¬ãƒ³ãƒˆ
 		virtual void makeCurrent(const bool current);
-		//•`‰æXV
+		//æç”»æ›´æ–°
 		virtual void swapBuffers();
-		//ƒNƒŠƒA
+		//ã‚¯ãƒªã‚¢
 		virtual void clear(const cmn::ColorU8& color);
-		//“_•`‰æ
+		//ç‚¹æç”»
 		virtual void drawPoint(const cmn::PointI32& point);
 	};
 }

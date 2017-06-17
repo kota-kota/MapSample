@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <Windows.h>
 #include "DrawWGL.hpp"
 #include "../UiMng.hpp"
@@ -6,29 +6,29 @@
 namespace window
 {
 	class WindowWGL {
-		//ƒƒ“ƒo•Ï”
+		//ãƒ¡ãƒ³ãƒå¤‰æ•°
 		HINSTANCE		hInstance;
 		draw::DrawWGL	drawWGL;
 		ui::UiMng		uiMng;
 
 	public:
-		//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		WindowWGL();
-		//ƒEƒBƒ“ƒhƒEƒXƒ^[ƒg
+		//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¹ã‚¿ãƒ¼ãƒˆ
 		void start();
 
 	private:
-		//ƒEƒBƒ“ƒhƒEƒNƒ‰ƒX“o˜^
+		//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¯ãƒ©ã‚¹ç™»éŒ²
 		bool registerWindowClass();
-		//ƒEƒBƒ“ƒhƒEì¬
+		//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ä½œæˆ
 		bool createMainWindow();
-		// ƒEƒBƒ“ƒhƒEƒvƒƒV[ƒWƒƒ
+		// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 		static LRESULT CALLBACK windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-		//WM_CREATEƒCƒxƒ“ƒgˆ—
+		//WM_CREATEã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 		static void windowProcWMCreate(HWND hWnd, LPARAM lParam);
-		//WM_DESTROYƒCƒxƒ“ƒgˆ—
+		//WM_DESTROYã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 		static void windowProcWMDestroy();
-		//WM_PAINTƒCƒxƒ“ƒgˆ—
+		//WM_PAINTã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
 		static void windowProcWMPaint(HWND hWnd);
 	};
 }

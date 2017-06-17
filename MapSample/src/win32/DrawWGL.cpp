@@ -1,4 +1,4 @@
-#include <Windows.h>
+Ôªø#include <Windows.h>
 #include <cstdint>
 #include <vector>
 
@@ -7,15 +7,15 @@
 #pragma comment(lib, "opengl32.lib")
 
 
-//ÉRÉìÉXÉgÉâÉNÉ^
+//„Ç≥„É≥„Çπ„Éà„É©„ÇØ„Çø
 draw::DrawWGL::DrawWGL(HWND hWnd)
 	: hWnd(hWnd), hDC(nullptr), hGLRC(nullptr)
 {
 	if (this->hWnd != nullptr) {
-		//ÉfÉoÉCÉXÉRÉìÉeÉLÉXÉgÉnÉìÉhÉãÇéÊìæ
+		//„Éá„Éê„Ç§„Çπ„Ç≥„É≥„ÉÜ„Ç≠„Çπ„Éà„Éè„É≥„Éâ„É´„ÇíÂèñÂæó
 		this->hDC = ::GetDC(this->hWnd);
 
-		//ÉsÉNÉZÉãÉtÉHÅ[É}ÉbÉg
+		//„Éî„ÇØ„Çª„É´„Éï„Ç©„Éº„Éû„ÉÉ„Éà
 		const PIXELFORMATDESCRIPTOR pFormat = {
 			sizeof(PIXELFORMATDESCRIPTOR),	//nSize
 			1,		//nVersion
@@ -45,26 +45,26 @@ draw::DrawWGL::DrawWGL(HWND hWnd)
 			0		//dwDamageMask
 		};
 
-		//ÉsÉNÉZÉãÉtÉHÅ[É}ÉbÉgÇëIë
+		//„Éî„ÇØ„Çª„É´„Éï„Ç©„Éº„Éû„ÉÉ„Éà„ÇíÈÅ∏Êäû
 		std::int32_t format = ::ChoosePixelFormat(this->hDC, &pFormat);
 		::SetPixelFormat(this->hDC, format, &pFormat);
 
-		//ï`âÊÉRÉìÉeÉLÉXÉgÉnÉìÉhÉãÇçÏê¨
+		//ÊèèÁîª„Ç≥„É≥„ÉÜ„Ç≠„Çπ„Éà„Éè„É≥„Éâ„É´„Çí‰ΩúÊàê
 		this->hGLRC = ::wglCreateContext(this->hDC);
 	}
 }
 
-//ÉfÉXÉgÉâÉNÉ^
+//„Éá„Çπ„Éà„É©„ÇØ„Çø
 draw::DrawWGL::~DrawWGL()
 {
-	//ï`âÊÉRÉìÉeÉLÉXÉgÉnÉìÉhÉãÇîjä¸
+	//ÊèèÁîª„Ç≥„É≥„ÉÜ„Ç≠„Çπ„Éà„Éè„É≥„Éâ„É´„ÇíÁ†¥Ê£Ñ
 	::wglDeleteContext(this->hGLRC);
 
-	//ÉfÉoÉCÉXÉRÉìÉeÉLÉXÉgÇîjä¸
+	//„Éá„Éê„Ç§„Çπ„Ç≥„É≥„ÉÜ„Ç≠„Çπ„Éà„ÇíÁ†¥Ê£Ñ
 	::ReleaseDC(this->hWnd, this->hDC);
 }
 
-//ï`âÊÉZÉbÉgÉAÉbÉv
+//ÊèèÁîª„Çª„ÉÉ„Éà„Ç¢„ÉÉ„Éó
 void draw::DrawWGL::setup()
 {
 	RECT rect;
@@ -72,30 +72,30 @@ void draw::DrawWGL::setup()
 	std::int32_t width = rect.right - rect.left;
 	std::int32_t height = rect.bottom - rect.top;
 
-	//ÉrÉÖÅ[É|Å[Égê›íË
+	//„Éì„É•„Éº„Éù„Éº„ÉàË®≠ÂÆö
 	glViewport(0, 0, width, height);
 }
 
-//ï`âÊÉJÉåÉìÉg
+//ÊèèÁîª„Ç´„É¨„É≥„Éà
 void draw::DrawWGL::makeCurrent(const bool current)
 {
 	if (current) {
-		//ÉJÉåÉìÉgê›íË
+		//„Ç´„É¨„É≥„ÉàË®≠ÂÆö
 		::wglMakeCurrent(this->hDC, this->hGLRC);
 	}
 	else {
-		//ÉJÉåÉìÉgâèú
+		//„Ç´„É¨„É≥„ÉàËß£Èô§
 		::wglMakeCurrent(this->hDC, nullptr);
 	}
 }
 
-//ï`âÊçXêV
+//ÊèèÁîªÊõ¥Êñ∞
 void draw::DrawWGL::swapBuffers()
 {
 	::SwapBuffers(this->hDC);
 }
 
-//ÉNÉäÉA
+//„ÇØ„É™„Ç¢
 void draw::DrawWGL::clear(const cmn::ColorU8& color)
 {
 	GLclampf r = static_cast<GLclampf>(color.r) / 255.0f;
@@ -107,7 +107,7 @@ void draw::DrawWGL::clear(const cmn::ColorU8& color)
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-//ì_ï`âÊ
+//ÁÇπÊèèÁîª
 void draw::DrawWGL::drawPoint(const cmn::PointI32& point)
 {
 }
