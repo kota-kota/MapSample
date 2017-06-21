@@ -120,9 +120,9 @@
   <ItemGroup>
     <ClInclude Include="inc\Common.hpp" />
     <ClInclude Include="inc\DrawIF.hpp" />
-    <ClInclude Include="src\UiMng.hpp" />
-    <ClInclude Include="src\win32\DrawWGL.hpp" />
-    <ClInclude Include="src\win32\WindowWGL.hpp" />
+    <ClInclude Include="inc\ui\UiMng.hpp" />
+    <ClInclude Include="inc\win32\DrawWGL.hpp" />
+    <ClInclude Include="inc\win32\WindowWGL.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,10 +2,21 @@
 #include <cstdint>
 #include <cstdio>
 #include <new>
-#include "WindowWGL.hpp"
+#include "win32/WindowWGL.hpp"
+
+using std::int8_t;
+using std::int16_t;
+using std::int32_t;
+using std::int64_t;
+using std::uint8_t;
+using std::uint16_t;
+using std::uint32_t;
+using std::uint64_t;
+using window::WindowWGL;
+using cmn::CoordI16;
 
 //コンストラクタ
-window::WindowWGL::WindowWGL()
+WindowWGL::WindowWGL()
 	: hInstance(nullptr)
 {
 	//インスタンスハンドル取得
@@ -13,7 +24,7 @@ window::WindowWGL::WindowWGL()
 }
 
 //ウィンドウスタート
-void window::WindowWGL::start()
+void WindowWGL::start()
 {
 	bool ret = true;
 
@@ -46,7 +57,7 @@ void window::WindowWGL::start()
 }
 
 //ウィンドウクラス登録
-bool window::WindowWGL::registerWindowClass()
+bool WindowWGL::registerWindowClass()
 {
 	bool result = true;
 
@@ -55,7 +66,7 @@ bool window::WindowWGL::registerWindowClass()
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = window::WindowWGL::windowProc;
+	wcex.lpfnWndProc = WindowWGL::windowProc;
 	wcex.lpszClassName = TEXT("MapSample");
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
@@ -75,7 +86,7 @@ bool window::WindowWGL::registerWindowClass()
 }
 
 //ウィンドウ作成
-bool window::WindowWGL::createMainWindow()
+bool WindowWGL::createMainWindow()
 {
 	bool result = true;
 
@@ -113,55 +124,67 @@ bool window::WindowWGL::createMainWindow()
 }
 
 // ウィンドウプロシージャ
-LRESULT CALLBACK window::WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	bool ret = true;
+
 	switch (msg) {
 	case WM_CREATE:
-		windowProcWMCreate(hWnd, lParam);
+		ret = windowProcWMCreate(hWnd, lParam);
 		break;
 
 	case WM_DESTROY:
-		windowProcWMDestroy();
+		ret = windowProcWMDestroy();
 		break;
 
 	case WM_PAINT:
-		windowProcWMPaint(hWnd);
+		ret = windowProcWMPaint(hWnd);
 		break;
 
 	default:
-		//デフォルト処理
-		return ::DefWindowProc(hWnd, msg, wParam, lParam);
+		ret = windowProcUserOperation(hWnd, msg, wParam, lParam);
+		if (!ret) {
+			//デフォルト処理
+			return ::DefWindowProc(hWnd, msg, wParam, lParam);
+		}
 	}
 
 	return (0L);
 }
 
 //WM_CREATEイベント処理
-void window::WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
+bool WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
 {
 	//CreateWindowのパラメータからUiMngを取得
 	LPCREATESTRUCT lpCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
 	ui::UiMng* uiMng = static_cast<ui::UiMng*>(lpCreateStruct->lpCreateParams);
 
+	if (uiMng == nullptr) {
+		return false;
+	}
+
 	//hWndにUiMngを関連付け
 	::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(uiMng));
 
 	printf("[%s] hWnd:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, uiMng);
+
+	return true;
 }
 
 //WM_DESTROYイベント処理
-void window::WindowWGL::windowProcWMDestroy()
+bool WindowWGL::windowProcWMDestroy()
 {
 	::PostQuitMessage(0);
+
+	return true;
 }
 
 //WM_PAINTイベント処理
-void window::WindowWGL::windowProcWMPaint(HWND hWnd)
+bool WindowWGL::windowProcWMPaint(HWND hWnd)
 {
 	//hWndに関連付けた値からUiMngを取得
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
-	printf("[%s] UiMng:0x%p\n", __FUNCTION__, uiMng);
+	printf("%s\n", __FUNCTION__);
 
 	PAINTSTRUCT ps;
 	::BeginPaint(hWnd, &ps);
@@ -169,4 +192,47 @@ void window::WindowWGL::windowProcWMPaint(HWND hWnd)
 
 	//描画
 	uiMng->draw();
+
+	return true;
+}
+
+//ユーザ操作イベント処理
+bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	//hWndに関連付けた値からUiMngを取得
+	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+	if (msg == WM_LBUTTONDOWN) {
+		CoordI16 screenPos = { LOWORD(lParam), HIWORD(lParam), 0 };
+		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
+
+		//画面中心座標の更新
+		uiMng->setScreenPosition(screenPos);
+
+		RECT rect;
+		::GetClientRect(hWnd, &rect);
+		::InvalidateRect(hWnd, &rect, false);
+
+		return true;
+	}
+	else if (msg == WM_MOUSEMOVE) {
+		if (wParam & MK_LBUTTON) {
+			CoordI16 screenPos = { LOWORD(lParam), HIWORD(lParam), 0 };
+			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
+
+			//画面中心座標の更新
+			uiMng->setScreenPosition(screenPos);
+
+			//描画更新イベント通知
+			RECT rect;
+			::GetClientRect(hWnd, &rect);
+			::InvalidateRect(hWnd, &rect, false);
+
+			return true;
+		}
+		return false;
+	}
+	else {
+		return false;
+	}
 }

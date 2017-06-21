@@ -1,14 +1,27 @@
 ﻿#include <Windows.h>
 #include <cstdint>
 #include <vector>
-
-#include "DrawWGL.hpp"
+#include "win32/DrawWGL.hpp"
 
 #pragma comment(lib, "opengl32.lib")
 
+using std::int8_t;
+using std::int16_t;
+using std::int32_t;
+using std::int64_t;
+using std::uint8_t;
+using std::uint16_t;
+using std::uint32_t;
+using std::uint64_t;
+using std::vector;
+using cmn::ColorU8;
+using cmn::CoordI32;
+using cmn::Area;
+using draw::DrawWGL;
+using draw::DrawSetup;
 
 //コンストラクタ
-draw::DrawWGL::DrawWGL(HWND hWnd)
+DrawWGL::DrawWGL(HWND hWnd)
 	: hWnd(hWnd), hDC(nullptr), hGLRC(nullptr)
 {
 	if (this->hWnd != nullptr) {
@@ -35,8 +48,8 @@ draw::DrawWGL::DrawWGL(HWND hWnd)
 			0,		//cAccumGreenBits
 			0,		//cAccumBlueBits
 			0,		//cAccumAlphaBits
-			0,		//cDepthBits
-			0,		//cStencilBits
+			24,		//cDepthBits
+			8,		//cStencilBits
 			0,		//cAuxBuffers
 			0,		//iLayerType
 			0,		//bReserved
@@ -55,7 +68,7 @@ draw::DrawWGL::DrawWGL(HWND hWnd)
 }
 
 //デストラクタ
-draw::DrawWGL::~DrawWGL()
+DrawWGL::~DrawWGL()
 {
 	//描画コンテキストハンドルを破棄
 	::wglDeleteContext(this->hGLRC);
@@ -65,19 +78,27 @@ draw::DrawWGL::~DrawWGL()
 }
 
 //描画セットアップ
-void draw::DrawWGL::setup()
+void DrawWGL::setup(DrawSetup& drawSetup)
 {
-	RECT rect;
-	::GetClientRect(this->hWnd, &rect);
-	std::int32_t width = rect.right - rect.left;
-	std::int32_t height = rect.bottom - rect.top;
+	//描画エリア取得
+	Area area;
+	this->getDrawArea(&area);
 
 	//ビューポート設定
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, area.w, area.h);
+
+	//プロジェクション設定
+	double left = drawSetup.mMapPos.x - area.w / 2;
+	double right = left + area.w;
+	double top = drawSetup.mMapPos.y - area.h / 2;
+	double bottom = top + area.h;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(left, right, bottom, top, -1, 1);
 }
 
 //描画カレント
-void draw::DrawWGL::makeCurrent(const bool current)
+void DrawWGL::makeCurrent(const bool current)
 {
 	if (current) {
 		//カレント設定
@@ -90,13 +111,13 @@ void draw::DrawWGL::makeCurrent(const bool current)
 }
 
 //描画更新
-void draw::DrawWGL::swapBuffers()
+void DrawWGL::swapBuffers()
 {
 	::SwapBuffers(this->hDC);
 }
 
 //クリア
-void draw::DrawWGL::clear(const cmn::ColorU8& color)
+void DrawWGL::clear(const cmn::ColorU8& color)
 {
 	GLclampf r = static_cast<GLclampf>(color.r) / 255.0f;
 	GLclampf g = static_cast<GLclampf>(color.g) / 255.0f;
@@ -104,10 +125,65 @@ void draw::DrawWGL::clear(const cmn::ColorU8& color)
 	GLclampf a = static_cast<GLclampf>(color.a) / 255.0f;
 
 	glClearColor(r, g, b, a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearDepth(1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 //点描画
-void draw::DrawWGL::drawPoint(const cmn::PointI32& point)
+void DrawWGL::drawPoint(const ColorU8& color, const vector<CoordI32>& coord, const float size)
 {
+	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
+	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
+	GLfloat b = static_cast<GLfloat>(color.b) / 255.0f;
+	GLfloat a = static_cast<GLfloat>(color.a) / 255.0f;
+
+	//点の大きさを設定
+	glPointSize(size);
+
+	//点描画
+	glBegin(GL_POINTS);
+	{
+		//色
+		glColor4f(r, g, b, a);
+
+		//座標
+		for (auto itr = coord.begin(); itr != coord.end(); itr++) {
+			glVertex3i(itr->x, itr->y, itr->z);
+		}
+	}
+	glEnd();
+}
+
+//ライン描画
+void DrawWGL::drawLine(const cmn::ColorU8& color, const std::vector<cmn::CoordI32>& coord, const float width)
+{
+	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
+	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
+	GLfloat b = static_cast<GLfloat>(color.b) / 255.0f;
+	GLfloat a = static_cast<GLfloat>(color.a) / 255.0f;
+
+	//ラインの太さを設定
+	glLineWidth(width);
+
+	//ライン描画
+	glBegin(GL_LINE_LOOP);
+	{
+		//色
+		glColor4f(r, g, b, a);
+
+		//座標
+		for (auto itr = coord.begin(); itr != coord.end(); itr++) {
+			glVertex3i(itr->x, itr->y, itr->z);
+		}
+	}
+	glEnd();
+}
+
+//描画エリア取得
+void DrawWGL::getDrawArea(Area* area)
+{
+	RECT rect;
+	::GetClientRect(this->hWnd, &rect);
+	area->w = static_cast<int16_t>(rect.right - rect.left);
+	area->h = static_cast<int16_t>(rect.bottom - rect.top);
 }

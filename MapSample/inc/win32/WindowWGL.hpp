@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <Windows.h>
-#include "DrawWGL.hpp"
-#include "../UiMng.hpp"
+#include "win32/DrawWGL.hpp"
+#include "ui/UiMng.hpp"
 
 namespace window
 {
@@ -25,10 +25,12 @@ namespace window
 		// ウィンドウプロシージャ
 		static LRESULT CALLBACK windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		//WM_CREATEイベント処理
-		static void windowProcWMCreate(HWND hWnd, LPARAM lParam);
+		static bool windowProcWMCreate(HWND hWnd, LPARAM lParam);
 		//WM_DESTROYイベント処理
-		static void windowProcWMDestroy();
+		static bool windowProcWMDestroy();
 		//WM_PAINTイベント処理
-		static void windowProcWMPaint(HWND hWnd);
+		static bool windowProcWMPaint(HWND hWnd);
+		//ユーザ操作イベント処理
+		static bool windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	};
 }

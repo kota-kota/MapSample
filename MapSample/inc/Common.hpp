@@ -11,24 +11,30 @@ namespace cmn
 		std::uint8_t	a;
 	};
 
-	class PointI16 {
+	class CoordI16 {
 	public:
 		std::int16_t	x;
 		std::int16_t	y;
 		std::int16_t	z;
 	};
 
-	class PointI32 {
+	class CoordI32 {
 	public:
 		std::int32_t	x;
 		std::int32_t	y;
 		std::int32_t	z;
 	};
 
-	class PointD {
+	class CoordD {
 	public:
 		double	x;
 		double	y;
 		double	z;
+	};
+
+	class Area {
+	public:
+		std::int16_t	w;
+		std::int16_t	h;
 	};
 }
