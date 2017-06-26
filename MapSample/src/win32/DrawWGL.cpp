@@ -94,7 +94,12 @@ void DrawWGL::setup(DrawSetup& drawSetup)
 	double bottom = top + area.h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(left, right, bottom, top, -1, 1);
+	//glOrtho(left, right, bottom, top, -1, 1);
+	glOrtho(left, right, top, bottom, -1, 1);
+
+	//モデルビュー設定
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 //描画カレント
@@ -177,6 +182,54 @@ void DrawWGL::drawLine(const cmn::ColorU8& color, const std::vector<cmn::CoordI3
 		}
 	}
 	glEnd();
+}
+
+//テクスチャ描画
+void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& texture, const Area textureSize)
+{
+	//テクスチャ作成
+	GLuint texID;
+	glGenTextures(1, &texID);
+
+	//テクスチャ割り当て
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSize.w, textureSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texture[0]);
+
+	//テクスチャ画像は1バイト単位
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	//テクスチャパラメータ
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//テクスチャ環境
+	//テクスチャカラーを使用する
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	//テクスチャ描画
+	glEnable(GL_TEXTURE_2D);
+	glBegin(GL_TRIANGLE_STRIP);
+	{
+		//色
+		//念のためフラグメントカラーを1.0fで初期化する
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		//座標
+		auto itr = coord.begin();
+		while(itr != coord.end()) {
+			glTexCoord2i(itr->x, itr->y);
+			itr++;
+			glVertex3i(itr->x, itr->y, itr->z);
+			itr++;
+		}
+	}
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteTextures(1, &texID);
 }
 
 //描画エリア取得

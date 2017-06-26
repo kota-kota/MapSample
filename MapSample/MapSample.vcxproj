@@ -112,15 +112,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\image\Bitmap.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\UiMng.cpp" />
+    <ClCompile Include="src\utl\File.cpp" />
     <ClCompile Include="src\win32\DrawWGL.cpp" />
     <ClCompile Include="src\win32\WindowWGL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Common.hpp" />
     <ClInclude Include="inc\DrawIF.hpp" />
+    <ClInclude Include="inc\image\Bitmap.hpp" />
     <ClInclude Include="inc\ui\UiMng.hpp" />
+    <ClInclude Include="inc\utl\File.hpp" />
     <ClInclude Include="inc\win32\DrawWGL.hpp" />
     <ClInclude Include="inc\win32\WindowWGL.hpp" />
   </ItemGroup>

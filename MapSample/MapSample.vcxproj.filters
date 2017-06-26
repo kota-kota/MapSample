@@ -25,6 +25,18 @@
     <Filter Include="ヘッダー ファイル\ui">
       <UniqueIdentifier>{3e9ce924-acd9-4992-9fea-831c25d7039b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\image">
+      <UniqueIdentifier>{05590a7c-e657-4f10-821e-9a01fa9ee3ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\image">
+      <UniqueIdentifier>{b6cd807e-6105-44b5-a48b-b421ac8e0ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\utl">
+      <UniqueIdentifier>{41d1be98-5b24-4a39-8d28-08c1ab386e0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\utl">
+      <UniqueIdentifier>{46437198-9afd-43cc-a797-b47053ccb73a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -38,6 +50,12 @@
     </ClCompile>
     <ClCompile Include="src\UiMng.cpp">
       <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\image\Bitmap.cpp">
+      <Filter>ソース ファイル\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utl\File.cpp">
+      <Filter>ソース ファイル\utl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +73,12 @@
     </ClInclude>
     <ClInclude Include="inc\win32\DrawWGL.hpp">
       <Filter>ヘッダー ファイル\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\image\Bitmap.hpp">
+      <Filter>ヘッダー ファイル\image</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\utl\File.hpp">
+      <Filter>ヘッダー ファイル\utl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

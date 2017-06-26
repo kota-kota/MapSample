@@ -26,6 +26,8 @@ namespace draw
 		virtual void drawPoint(const cmn::ColorU8& color, const std::vector<cmn::CoordI32>& coord, const float size) = 0;
 		//ライン描画
 		virtual void drawLine(const cmn::ColorU8& color, const std::vector<cmn::CoordI32>& coord, const float width) = 0;
+		//テクスチャ描画
+		virtual void drawTextrue(const std::vector<cmn::CoordI32>& coord, const std::vector<std::uint8_t>& texture, const cmn::Area textureSize) = 0;
 
 		//描画エリア取得
 		virtual void getDrawArea(cmn::Area* area) = 0;

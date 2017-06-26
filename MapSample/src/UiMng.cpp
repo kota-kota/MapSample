@@ -1,4 +1,6 @@
-﻿#include <cstdio>
+﻿#include "ui/UiMng.hpp"
+#include <cstdio>
+#include <string>
 #include <vector>
 #include "ui/UiMng.hpp"
 
@@ -10,6 +12,7 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+using std::string;
 using std::vector;
 using ui::UiMng;
 using draw::DrawIF;
@@ -29,6 +32,15 @@ UiMng::UiMng(DrawIF* drawIF)
 		this->mDrawIF->getDrawArea(&area);
 		this->mDrawSetup.mScreenPos = { area.w / 2, area.h / 2, 0 };
 	}
+
+	this->mFile.create("./image/bitmap/win-8.bmp");
+	this->mFile.open("rb");
+	size_t fileSize = this->mFile.getFileSize();
+	vector<uint8_t> buf(fileSize);
+	this->mFile.read(0, fileSize, &buf);
+
+	this->mBitmap.create(buf);
+	this->mBitmap.decode();
 }
 
 //画面中心位置を設定
@@ -54,22 +66,37 @@ void UiMng::draw()
 	}
 	{
 		ColorU8 color = { 255, 0, 0, 255 };
-		vector<CoordI32> coord;
-		coord.resize(1);
+		vector<CoordI32> coord(1);
 		coord[0] = { 63230028, 16092608, 0 };
-		//coord[0] = { 0, 0, 0 };
 		this->mDrawIF->drawPoint(color, coord, 10.0f);
 	}
 	{
 		ColorU8 color = { 255, 0, 0, 255 };
-		vector<CoordI32> coord;
-		coord.resize(5);
+		vector<CoordI32> coord(5);
 		coord[0] = { 63230028 - 100, 16092608 - 100, 0 };
 		coord[1] = { 63230028 - 100, 16092608 + 100, 0 };
 		coord[2] = { 63230028 + 100, 16092608 + 100, 0 };
 		coord[3] = { 63230028 + 100, 16092608 - 100, 0 };
 		coord[4] = { 63230028 - 100, 16092608 - 100, 0 };
 		this->mDrawIF->drawLine(color, coord, 2.0f);
+	}
+	{
+		vector<uint8_t> texture;
+		int32_t width, height, bytePerPixel;
+		this->mBitmap.getRaw(&texture);
+		this->mBitmap.getRawInfo(&width, &height, &bytePerPixel);
+
+		Area textureSize = {width, height};
+		vector<CoordI32> coord(8);
+		coord[0] = { 0, 0, 0 };
+		coord[1] = { 63230028 - width, 16092608 + height, 0 };
+		coord[2] = { 1, 0, 0 };
+		coord[3] = { 63230028 + width, 16092608 + height, 0 };
+		coord[4] = { 0, 1, 0 };
+		coord[5] = { 63230028 - width, 16092608 - height, 0 };
+		coord[6] = { 1, 1, 0 };
+		coord[7] = { 63230028 + width, 16092608 - height, 0 };
+		this->mDrawIF->drawTextrue(coord, texture, textureSize);
 	}
 
 	this->mDrawIF->swapBuffers();

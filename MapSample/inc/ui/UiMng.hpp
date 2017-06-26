@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Common.hpp"
 #include "DrawIF.hpp"
+#include "utl/File.hpp"
+#include "image/Bitmap.hpp"
 
 namespace ui
 {
@@ -8,6 +10,9 @@ namespace ui
 		//メンバ変数
 		draw::DrawIF*	mDrawIF;
 		draw::DrawSetup	mDrawSetup;
+
+		utl::File		mFile;
+		image::Bitmap	mBitmap;
 
 	public:
 		//コンストラクタ

@@ -203,7 +203,9 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	if (msg == WM_LBUTTONDOWN) {
-		CoordI16 screenPos = { LOWORD(lParam), HIWORD(lParam), 0 };
+		CoordI16 screenPos = { 0, 0, 0 };
+		screenPos.x = static_cast<int16_t>(LOWORD(lParam));
+		screenPos.y = static_cast<int16_t>(HIWORD(lParam));
 		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
 
 		//画面中心座標の更新
@@ -217,7 +219,9 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	else if (msg == WM_MOUSEMOVE) {
 		if (wParam & MK_LBUTTON) {
-			CoordI16 screenPos = { LOWORD(lParam), HIWORD(lParam), 0 };
+			CoordI16 screenPos = { 0, 0, 0 };
+			screenPos.x = static_cast<int16_t>(LOWORD(lParam));
+			screenPos.y = static_cast<int16_t>(HIWORD(lParam));
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
 
 			//画面中心座標の更新
