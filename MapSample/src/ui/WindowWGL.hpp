@@ -1,15 +1,19 @@
-﻿#pragma once
+﻿#ifndef INCLUDED_WINDOWWGL
+#define INCLUDED_WINDOWWGL
+
+#include "Common.hpp"
+#include "graphics/win32/DrawWGL.hpp"
+#include "UiMng.hpp"
 #include <Windows.h>
-#include "win32/DrawWGL.hpp"
-#include "ui/UiMng.hpp"
+#include <new>
 
 namespace window
 {
 	class WindowWGL {
 		//メンバ変数
-		HINSTANCE		hInstance;
-		draw::DrawWGL	drawWGL;
-		ui::UiMng		uiMng;
+		HINSTANCE			hInstance_;
+		graphics::DrawWGL	drawWGL_;
+		ui::UiMng			uiMng_;
 
 	public:
 		//コンストラクタ
@@ -34,3 +38,5 @@ namespace window
 		static bool windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	};
 }
+
+#endif //INCLUDED_WINDOWWGL

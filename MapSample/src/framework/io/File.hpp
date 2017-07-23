@@ -1,15 +1,17 @@
-﻿#pragma once
-#include <cstdint>
+﻿#ifndef INCLUDED_FILE
+#define INCLUDED_FILE
+
+#include "Common.hpp"
 #include <string>
 #include <vector>
 
-namespace utl
+namespace io
 {
 	class File {
 		//メンバ変数
-		std::string		mFilePath;
-		size_t			mFileSize;
-		FILE*			mFp;
+		std::string		filePath_;
+		size_t			fileSize_;
+		FILE*			fp_;
 
 	public:
 		//コンストラクタ
@@ -28,3 +30,5 @@ namespace utl
 		size_t getFileSize();
 	};
 }
+
+#endif //INCLUDED_FILE

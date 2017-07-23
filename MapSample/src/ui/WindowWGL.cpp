@@ -1,26 +1,16 @@
-﻿#include <Windows.h>
-#include <cstdint>
-#include <cstdio>
-#include <new>
-#include "win32/WindowWGL.hpp"
+﻿#include "WindowWGL.hpp"
 
-using std::int8_t;
-using std::int16_t;
-using std::int32_t;
-using std::int64_t;
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-using window::WindowWGL;
 using cmn::CoordI16;
+using graphics::DrawWGL;
+using window::WindowWGL;
+using ui::UiMng;
 
 //コンストラクタ
 WindowWGL::WindowWGL()
-	: hInstance(nullptr)
+	: hInstance_(nullptr), drawWGL_(), uiMng_()
 {
 	//インスタンスハンドル取得
-	this->hInstance = ::GetModuleHandle(nullptr);
+	this->hInstance_ = ::GetModuleHandle(nullptr);
 }
 
 //ウィンドウスタート
@@ -70,7 +60,7 @@ bool WindowWGL::registerWindowClass()
 	wcex.lpszClassName = TEXT("MapSample");
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = this->hInstance;
+	wcex.hInstance = this->hInstance_;
 	wcex.hIcon = ::LoadIcon(nullptr, IDI_APPLICATION);
 	wcex.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = nullptr;
@@ -100,20 +90,20 @@ bool WindowWGL::createMainWindow()
 		400,
 		nullptr,
 		nullptr,
-		this->hInstance,
-		static_cast<LPVOID>(&this->uiMng)
+		this->hInstance_,
+		static_cast<LPVOID>(&this->uiMng_)
 	);
 	if (hWnd == nullptr) {
 		result = false;
 	}
 	else {
-		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL, &this->uiMng);
+		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL_, &this->uiMng_);
 
 		//描画インターフェース生成
-		new(&this->drawWGL) draw::DrawWGL(hWnd);
+		new(&this->drawWGL_) DrawWGL(hWnd);
 
 		//UiMng生成
-		new(&this->uiMng) ui::UiMng(&this->drawWGL);
+		new(&this->uiMng_) UiMng(&this->drawWGL_);
 
 		// ウィンドウ表示
 		ShowWindow(hWnd, SW_SHOW);

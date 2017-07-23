@@ -1,20 +1,12 @@
-﻿#include "utl/File.hpp"
+﻿#include "File.hpp"
 
-using std::int8_t;
-using std::int16_t;
-using std::int32_t;
-using std::int64_t;
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
 using std::string;
 using std::vector;
-using utl::File;
+using io::File;
 
 //コンストラクタ
 File::File()
-	: mFilePath(), mFileSize(0), mFp(nullptr)
+	: filePath_(), fileSize_(0), fp_(nullptr)
 {
 }
 
@@ -22,18 +14,18 @@ File::File()
 File::~File()
 {
 	this->close();
-	this->mFilePath.clear();
+	this->filePath_.clear();
 }
 
 //作成
 bool File::create(const string& filePath)
 {
-	if (!this->mFilePath.empty()) {
+	if (!this->filePath_.empty()) {
 		//作成済み
 		return false;
 	}
 
-	this->mFilePath = filePath;
+	this->filePath_ = filePath;
 
 	return true;
 }
@@ -41,28 +33,28 @@ bool File::create(const string& filePath)
 //ファイルオープン
 bool File::open(const string& mode)
 {
-	if (this->mFilePath.empty()) {
+	if (this->filePath_.empty()) {
 		//未作成
 		return false;
 	}
-	if (this->mFp != nullptr) {
+	if (this->fp_ != nullptr) {
 		//オープン済み
 		return false;
 	}
 
 	//ファイルオープン
-	(void)fopen_s(&this->mFp, this->mFilePath.c_str(), mode.c_str());
-	if (this->mFp == nullptr) {
+	(void)fopen_s(&this->fp_, this->filePath_.c_str(), mode.c_str());
+	if (this->fp_ == nullptr) {
 		//オープン失敗
 		return false;
 	}
 
 	//ファイルサイズ取得
 	fpos_t pos;
-	(void)fseek(this->mFp, 0, SEEK_END);
-	(void)fgetpos(this->mFp, &pos);
-	(void)fseek(this->mFp, 0, SEEK_SET);
-	this->mFileSize = static_cast<size_t>(pos);
+	(void)fseek(this->fp_, 0, SEEK_END);
+	(void)fgetpos(this->fp_, &pos);
+	(void)fseek(this->fp_, 0, SEEK_SET);
+	this->fileSize_ = static_cast<size_t>(pos);
 
 	return true;
 }
@@ -70,26 +62,26 @@ bool File::open(const string& mode)
 //ファイルクローズ
 void File::close()
 {
-	if (this->mFp != nullptr) {
+	if (this->fp_ != nullptr) {
 		//ファイルクローズ
-		(void)fclose(this->mFp);
-		this->mFp = nullptr;
+		(void)fclose(this->fp_);
+		this->fp_ = nullptr;
 	}
-	this->mFileSize = 0;
+	this->fileSize_ = 0;
 }
 
 //ファイル読み込み
 bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
 {
-	if (this->mFilePath.empty()) {
+	if (this->filePath_.empty()) {
 		//未作成
 		return false;
 	}
-	if (this->mFp == nullptr) {
+	if (this->fp_ == nullptr) {
 		//未オープン
 		return false;
 	}
-	if (this->mFileSize < (offset + size)) {
+	if (this->fileSize_ < (offset + size)) {
 		//読み込み範囲がファイルサイズを超える
 		return false;
 	}
@@ -98,10 +90,10 @@ bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
 		return false;
 	}
 
-	FILE* fp = this->mFp;
+	FILE* fp = this->fp_;
 
 	//読み込み位置を移動
-	(void)fseek(this->mFp, offset, SEEK_SET);
+	(void)fseek(this->fp_, offset, SEEK_SET);
 
 	//ファイル読み込み
 	size_t readSize = fread_s(&(*data)[0], size, 1, size, fp);
@@ -116,5 +108,5 @@ bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
 //ファイルサイズ取得
 size_t File::getFileSize()
 {
-	return this->mFileSize;
+	return this->fileSize_;
 }

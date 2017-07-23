@@ -13,72 +13,63 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="ソース ファイル\win32">
-      <UniqueIdentifier>{49fbb5b8-f764-4795-8c39-d5af76a331ff}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\win32">
-      <UniqueIdentifier>{65dee0d2-1ab3-45d9-9437-702bb6bee0b1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\ui">
       <UniqueIdentifier>{1e6eaf70-a972-4e77-a82d-208032e4c8ef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\ui">
-      <UniqueIdentifier>{3e9ce924-acd9-4992-9fea-831c25d7039b}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\framework">
+      <UniqueIdentifier>{a85332ec-fbbb-4691-97df-2df56ba1ca4c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\image">
-      <UniqueIdentifier>{05590a7c-e657-4f10-821e-9a01fa9ee3ac}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\framework\graphics">
+      <UniqueIdentifier>{4ad55521-ae26-42bc-83ef-dfe59a590e62}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\image">
-      <UniqueIdentifier>{b6cd807e-6105-44b5-a48b-b421ac8e0ee9}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\framework\graphics\win32">
+      <UniqueIdentifier>{44cfa1b0-ae18-4672-8006-09469cdb802e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\utl">
-      <UniqueIdentifier>{41d1be98-5b24-4a39-8d28-08c1ab386e0f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\utl">
-      <UniqueIdentifier>{46437198-9afd-43cc-a797-b47053ccb73a}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\framework\io">
+      <UniqueIdentifier>{0247f668-fbdb-4da1-bb17-051b03ff4e06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\DrawWGL.cpp">
-      <Filter>ソース ファイル\win32</Filter>
+    <ClCompile Include="src\framework\graphics\Bitmap.cpp">
+      <Filter>ソース ファイル\framework\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\WindowWGL.cpp">
-      <Filter>ソース ファイル\win32</Filter>
+    <ClCompile Include="src\framework\graphics\win32\DrawWGL.cpp">
+      <Filter>ソース ファイル\framework\graphics\win32</Filter>
     </ClCompile>
-    <ClCompile Include="src\UiMng.cpp">
+    <ClCompile Include="src\framework\io\File.cpp">
+      <Filter>ソース ファイル\framework\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WindowWGL.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
-    <ClCompile Include="src\image\Bitmap.cpp">
-      <Filter>ソース ファイル\image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utl\File.cpp">
-      <Filter>ソース ファイル\utl</Filter>
+    <ClCompile Include="src\ui\UiMng.cpp">
+      <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\DrawIF.hpp">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="src\framework\graphics\Bitmap.hpp">
+      <Filter>ソース ファイル\framework\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Common.hpp">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="src\framework\graphics\DrawIF.hpp">
+      <Filter>ソース ファイル\framework\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="inc\win32\WindowWGL.hpp">
-      <Filter>ヘッダー ファイル\win32</Filter>
+    <ClInclude Include="src\framework\graphics\win32\DrawWGL.hpp">
+      <Filter>ソース ファイル\framework\graphics\win32</Filter>
     </ClInclude>
-    <ClInclude Include="inc\ui\UiMng.hpp">
-      <Filter>ヘッダー ファイル\ui</Filter>
+    <ClInclude Include="src\framework\io\File.hpp">
+      <Filter>ソース ファイル\framework\io</Filter>
     </ClInclude>
-    <ClInclude Include="inc\win32\DrawWGL.hpp">
-      <Filter>ヘッダー ファイル\win32</Filter>
+    <ClInclude Include="src\ui\UiMng.hpp">
+      <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
-    <ClInclude Include="inc\image\Bitmap.hpp">
-      <Filter>ヘッダー ファイル\image</Filter>
+    <ClInclude Include="src\framework\Common.hpp">
+      <Filter>ソース ファイル\framework</Filter>
     </ClInclude>
-    <ClInclude Include="inc\utl\File.hpp">
-      <Filter>ヘッダー ファイル\utl</Filter>
+    <ClInclude Include="src\ui\WindowWGL.hpp">
+      <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

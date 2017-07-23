@@ -1,10 +1,6 @@
-﻿#include <Windows.h>
-#include <cstdint>
-#include <vector>
-#include "win32/DrawWGL.hpp"
+﻿#include "DrawWGL.hpp"
 
-#pragma comment(lib, "opengl32.lib")
-
+//using指定
 using std::int8_t;
 using std::int16_t;
 using std::int32_t;
@@ -14,11 +10,11 @@ using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 using std::vector;
-using cmn::ColorU8;
+using cmn::Color;
 using cmn::CoordI32;
-using cmn::Area;
-using draw::DrawWGL;
-using draw::DrawSetup;
+using cmn::Size;
+using graphics::DrawWGL;
+using graphics::DrawSetup;
 
 //コンストラクタ
 DrawWGL::DrawWGL(HWND hWnd)
@@ -80,18 +76,18 @@ DrawWGL::~DrawWGL()
 //描画セットアップ
 void DrawWGL::setup(DrawSetup& drawSetup)
 {
-	//描画エリア取得
-	Area area;
-	this->getDrawArea(&area);
+	//描画領域取得
+	Size drawSize;
+	this->getDrawSize(drawSize);
 
 	//ビューポート設定
-	glViewport(0, 0, area.w, area.h);
+	glViewport(0, 0, drawSize.w, drawSize.h);
 
 	//プロジェクション設定
-	double left = drawSetup.mMapPos.x - area.w / 2;
-	double right = left + area.w;
-	double top = drawSetup.mMapPos.y - area.h / 2;
-	double bottom = top + area.h;
+	GLdouble left = drawSetup.mapPos_.x - drawSize.w / 2;
+	GLdouble right = left + drawSize.w;
+	GLdouble top = drawSetup.mapPos_.y - drawSize.h / 2;
+	GLdouble bottom = top + drawSize.h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//glOrtho(left, right, bottom, top, -1, 1);
@@ -122,7 +118,7 @@ void DrawWGL::swapBuffers()
 }
 
 //クリア
-void DrawWGL::clear(const cmn::ColorU8& color)
+void DrawWGL::clear(const Color& color)
 {
 	GLclampf r = static_cast<GLclampf>(color.r) / 255.0f;
 	GLclampf g = static_cast<GLclampf>(color.g) / 255.0f;
@@ -135,7 +131,7 @@ void DrawWGL::clear(const cmn::ColorU8& color)
 }
 
 //点描画
-void DrawWGL::drawPoint(const ColorU8& color, const vector<CoordI32>& coord, const float size)
+void DrawWGL::drawPoint(const Color& color, const vector<CoordI32>& coord, const float size)
 {
 	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
 	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
@@ -160,7 +156,7 @@ void DrawWGL::drawPoint(const ColorU8& color, const vector<CoordI32>& coord, con
 }
 
 //ライン描画
-void DrawWGL::drawLine(const cmn::ColorU8& color, const std::vector<cmn::CoordI32>& coord, const float width)
+void DrawWGL::drawLine(const Color& color, const std::vector<CoordI32>& coord, const float width)
 {
 	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
 	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
@@ -185,7 +181,7 @@ void DrawWGL::drawLine(const cmn::ColorU8& color, const std::vector<cmn::CoordI3
 }
 
 //テクスチャ描画
-void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& texture, const Area textureSize)
+void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& tex, const Size texSize)
 {
 	//テクスチャ作成
 	GLuint texID;
@@ -193,7 +189,7 @@ void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& 
 
 	//テクスチャ割り当て
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSize.w, textureSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texture[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSize.w, texSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex[0]);
 
 	//テクスチャ画像は1バイト単位
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -218,7 +214,7 @@ void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& 
 
 		//座標
 		auto itr = coord.begin();
-		while(itr != coord.end()) {
+		while (itr != coord.end()) {
 			glTexCoord2i(itr->x, itr->y);
 			itr++;
 			glVertex3i(itr->x, itr->y, itr->z);
@@ -232,11 +228,11 @@ void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& 
 	glDeleteTextures(1, &texID);
 }
 
-//描画エリア取得
-void DrawWGL::getDrawArea(Area* area)
+//描画領域取得
+void DrawWGL::getDrawSize(Size& drawSize)
 {
 	RECT rect;
 	::GetClientRect(this->hWnd, &rect);
-	area->w = static_cast<int16_t>(rect.right - rect.left);
-	area->h = static_cast<int16_t>(rect.bottom - rect.top);
+	drawSize.w = static_cast<int16_t>(rect.right - rect.left);
+	drawSize.h = static_cast<int16_t>(rect.bottom - rect.top);
 }

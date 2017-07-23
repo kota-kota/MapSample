@@ -1,14 +1,8 @@
-﻿#include <cstdint>
-#include "win32/WindowWGL.hpp"
+﻿#include "Common.hpp"
+#include "ui/WindowWGL.hpp"
 
-using std::int8_t;
-using std::int16_t;
+//using指定
 using std::int32_t;
-using std::int64_t;
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
 using window::WindowWGL;
 
 //メイン処理
