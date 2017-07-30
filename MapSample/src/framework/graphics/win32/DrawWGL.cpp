@@ -14,7 +14,6 @@ using cmn::Color;
 using cmn::CoordI32;
 using cmn::Size;
 using graphics::DrawWGL;
-using graphics::DrawSetup;
 
 //コンストラクタ
 DrawWGL::DrawWGL(HWND hWnd)
@@ -74,7 +73,7 @@ DrawWGL::~DrawWGL()
 }
 
 //描画セットアップ
-void DrawWGL::setup(DrawSetup& drawSetup)
+void DrawWGL::setup(cmn::CoordI32 mapPos)
 {
 	//描画領域取得
 	Size drawSize;
@@ -84,9 +83,9 @@ void DrawWGL::setup(DrawSetup& drawSetup)
 	glViewport(0, 0, drawSize.w, drawSize.h);
 
 	//プロジェクション設定
-	GLdouble left = drawSetup.mapPos_.x - drawSize.w / 2;
+	GLdouble left = mapPos.x - drawSize.w / 2;
 	GLdouble right = left + drawSize.w;
-	GLdouble top = drawSetup.mapPos_.y - drawSize.h / 2;
+	GLdouble top = mapPos.y - drawSize.h / 2;
 	GLdouble bottom = top + drawSize.h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

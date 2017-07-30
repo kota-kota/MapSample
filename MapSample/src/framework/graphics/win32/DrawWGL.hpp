@@ -19,7 +19,7 @@ namespace graphics
 		//デストラクタ
 		virtual ~DrawWGL();
 		//セットアップ
-		virtual void setup(DrawSetup& drawSetup);
+		virtual void setup(cmn::CoordI32 mapPos);
 		//描画カレント
 		virtual void makeCurrent(const bool current);
 		//描画更新

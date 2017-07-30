@@ -11,43 +11,87 @@ using ui::UiMng;
 
 //コンストラクタ
 UiMng::UiMng(DrawIF* drawIF)
-	: drawIF_(drawIF), drawSetup_()
+	: drawIF_(drawIF), mapPos_(), screenPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
-	this->drawSetup_.mapPos_ = { 63230028, 16092608, 0 };
 	if (this->drawIF_ != nullptr) {
+		//地図中心座標
+		this->mapPos_ = { 63230028, 16092608, 0 };
+
+		//画面中心座標
 		Size drawSize;
 		this->drawIF_->getDrawSize(drawSize);
-		this->drawSetup_.screenPos_ = { drawSize.w / 2, drawSize.h / 2, 0 };
+		this->screenPos_ = { drawSize.w / 2, drawSize.h / 2, 0 };
+
+		this->file_.create("./data_image/bitmap/win-8.bmp");
+		this->file_.open("rb");
+		size_t fileSize = this->file_.getFileSize();
+		vector<uint8_t> buf(fileSize);
+		this->file_.read(0, fileSize, &buf);
+
+		this->bitmap_.create(buf);
+		this->bitmap_.decode();
 	}
-
-	this->file_.create("./data_image/bitmap/win-8.bmp");
-	this->file_.open("rb");
-	size_t fileSize = this->file_.getFileSize();
-	vector<uint8_t> buf(fileSize);
-	this->file_.read(0, fileSize, &buf);
-
-	this->bitmap_.create(buf);
-	this->bitmap_.decode();
 }
 
-//画面中心位置を設定
-void UiMng::setScreenPosition(CoordI16 screenPos)
+//タッチON
+void UiMng::setTouchOn(CoordI16 touchPos)
 {
-	CoordI16 diffPos;
-	diffPos.x = screenPos.x - this->drawSetup_.screenPos_.x;
-	diffPos.y = screenPos.y - this->drawSetup_.screenPos_.y;
-	this->drawSetup_.mapPos_.x += diffPos.x;
-	this->drawSetup_.mapPos_.y += diffPos.y;
+	//タッチ座標を保持
+	this->touchPos_ = touchPos;
 
-	this->drawSetup_.screenPos_ = screenPos;
+	//タッチスクロールをONとする
+	this->isTouchOn_ = true;
+	this->isDragOn_ = false;
+}
+
+//タッチOFF
+void UiMng::setTouchOff()
+{
+	if (this->isTouchOn_) {
+		//タッチスクロール
+
+		//差分座標を計算
+		CoordI16 diffPos;
+		diffPos.x = this->screenPos_.x - this->touchPos_.x;
+		diffPos.y = this->screenPos_.y - this->touchPos_.y;
+
+		//地図座標に反映
+		this->mapPos_.x -= diffPos.x;
+		this->mapPos_.y += diffPos.y;
+	}
+	else {
+		//何もしない
+	}
+
+	this->isTouchOn_ = false;
+	this->isDragOn_ = false;
+}
+
+//ドラッグ
+void UiMng::setDrag(CoordI16 dragPos)
+{
+	//ドラッグスクロールをONとする
+	this->isTouchOn_ = false;
+	this->isDragOn_ = true;
+
+	//差分座標を計算
+	CoordI16 diffPos;
+	diffPos.x = this->touchPos_.x - dragPos.x;
+	diffPos.y = this->touchPos_.y - dragPos.y;
+
+	//地図座標に反映
+	this->mapPos_.x += diffPos.x;
+	this->mapPos_.y -= diffPos.y;
+
+	this->touchPos_ = dragPos;
 }
 
 //描画
 void UiMng::draw()
 {
 	this->drawIF_->makeCurrent(true);
-	this->drawIF_->setup(this->drawSetup_);
+	this->drawIF_->setup(this->mapPos_);
 	{
 		Color defColor = { 230, 231, 232, 255 };
 		this->drawIF_->clear(defColor);
@@ -75,7 +119,7 @@ void UiMng::draw()
 		this->bitmap_.getRaw(texture);
 		this->bitmap_.getRawInfo(width, height, bytePerPixel);
 
-		Size texSize = {width, height};
+		Size texSize = { width, height };
 		vector<CoordI32> coord(8);
 		coord[0] = { 0, 0, 0 };
 		coord[1] = { 63230028 - width, 16092608 + height, 0 };

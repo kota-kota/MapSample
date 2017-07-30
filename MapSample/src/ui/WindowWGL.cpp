@@ -193,13 +193,19 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	if (msg == WM_LBUTTONDOWN) {
-		CoordI16 screenPos = { 0, 0, 0 };
-		screenPos.x = static_cast<int16_t>(LOWORD(lParam));
-		screenPos.y = static_cast<int16_t>(HIWORD(lParam));
-		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
+		CoordI16 touchPos = { 0, 0, 0 };
+		touchPos.x = static_cast<int16_t>(LOWORD(lParam));
+		touchPos.y = static_cast<int16_t>(HIWORD(lParam));
+		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
 
-		//画面中心座標の更新
-		uiMng->setScreenPosition(screenPos);
+		//タッチON
+		uiMng->setTouchOn(touchPos);
+
+		return true;
+	}
+	else if (msg == WM_LBUTTONUP) {
+		//タッチOFF
+		uiMng->setTouchOff();
 
 		RECT rect;
 		::GetClientRect(hWnd, &rect);
@@ -209,13 +215,13 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	else if (msg == WM_MOUSEMOVE) {
 		if (wParam & MK_LBUTTON) {
-			CoordI16 screenPos = { 0, 0, 0 };
-			screenPos.x = static_cast<int16_t>(LOWORD(lParam));
-			screenPos.y = static_cast<int16_t>(HIWORD(lParam));
-			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, screenPos.x, screenPos.y);
+			CoordI16 dragPos = { 0, 0, 0 };
+			dragPos.x = static_cast<int16_t>(LOWORD(lParam));
+			dragPos.y = static_cast<int16_t>(HIWORD(lParam));
+			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
 
-			//画面中心座標の更新
-			uiMng->setScreenPosition(screenPos);
+			//ドラッグ
+			uiMng->setDrag(dragPos);
 
 			//描画更新イベント通知
 			RECT rect;

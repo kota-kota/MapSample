@@ -11,7 +11,13 @@ namespace ui
 	class UiMng {
 		//メンバ変数
 		graphics::DrawIF*	drawIF_;
-		graphics::DrawSetup	drawSetup_;
+
+		cmn::CoordI32		mapPos_;
+		cmn::CoordI16		screenPos_;
+		cmn::CoordI16		touchPos_;
+		cmn::CoordI16		dragPos_;
+		bool				isTouchOn_;
+		bool				isDragOn_;
 
 		io::File			file_;
 		graphics::Bitmap	bitmap_;
@@ -19,8 +25,12 @@ namespace ui
 	public:
 		//コンストラクタ
 		UiMng(graphics::DrawIF* drawIF = nullptr);
-		//画面中心位置を設定
-		void setScreenPosition(cmn::CoordI16 screenPos);
+		//タッチON
+		void setTouchOn(cmn::CoordI16 touchPos);
+		//タッチOFF
+		void setTouchOff();
+		//ドラッグ
+		void setDrag(cmn::CoordI16 dragPos);
 		//描画
 		void draw();
 	};

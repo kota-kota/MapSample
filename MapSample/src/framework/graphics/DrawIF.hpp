@@ -6,18 +6,12 @@
 
 namespace graphics
 {
-	class DrawSetup {
-	public:
-		cmn::CoordI16	screenPos_;
-		cmn::CoordI32	mapPos_;
-	};
-
 	class DrawIF {
 	public:
 		//デストラクタ
 		virtual ~DrawIF() {}
 		//セットアップ
-		virtual void setup(DrawSetup& drawSetup) = 0;
+		virtual void setup(cmn::CoordI32 mapPos) = 0;
 		//描画カレント
 		virtual void makeCurrent(const bool current) = 0;
 		//描画更新

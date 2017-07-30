@@ -41,12 +41,6 @@ namespace cmn
 		std::uint8_t	a;
 	};
 
-	class Point {
-	public:
-		std::int16_t	x;
-		std::int16_t	y;
-	};
-
 	class Size {
 	public:
 		std::int16_t	w;
