@@ -2,7 +2,6 @@
 #define INCLUDED_DRAWIF
 
 #include "Common.hpp"
-#include <vector>
 
 namespace graphics
 {
@@ -19,11 +18,11 @@ namespace graphics
 		//クリア
 		virtual void clear(const cmn::Color& color) = 0;
 		//点描画
-		virtual void drawPoint(const cmn::Color& color, const std::vector<cmn::CoordI32>& coord, const float size) = 0;
+		virtual void drawPoint(const cmn::Color& color, const cmn::CoordVec& coord, const float size) = 0;
 		//ライン描画
-		virtual void drawLine(const cmn::Color& color, const std::vector<cmn::CoordI32>& coord, const float width) = 0;
+		virtual void drawLine(const cmn::Color& color, const cmn::CoordVec& coord, const float width) = 0;
 		//テクスチャ描画
-		virtual void drawTextrue(const std::vector<cmn::CoordI32>& coord, const std::vector<std::uint8_t>& tex, const cmn::Size texSize) = 0;
+		virtual void drawTextrue(const cmn::CoordVec& texCoord, const cmn::Image& tex, const cmn::Size texSize) = 0;
 
 		//描画領域取得
 		virtual void getDrawSize(cmn::Size& drawSize) = 0;

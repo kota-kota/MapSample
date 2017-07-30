@@ -1,43 +1,48 @@
 ﻿#include "Bitmap.hpp"
 
-using std::int8_t;
-using std::int16_t;
-using std::int32_t;
-using std::vector;
+using cmn::Int8_t;
+using cmn::Int16_t;
+using cmn::Int32_t;
+using cmn::UInt8_t;
+using cmn::UInt16_t;
+using cmn::UInt32_t;
 using cmn::Color;
+using cmn::ColorVec;
+using cmn::Image;
+using cmn::Binary;
 using graphics::Bitmap;
 using graphics::BitmapType;
 
 //ビットマップファイルヘッダ(Windows,OS/2共通)
-static const int16_t BFH_HEADERSIZE = 14;
-static const int16_t BFH_FILETYPE_OFS = 0;		//ファイルタイプ
-static const int16_t BFH_FILESIZE_OFS = 2;		//ファイルサイズ[byte]
-static const int16_t BFH_RESERVED1_OFS = 6;		//予約領域1
-static const int16_t BFH_RESERVED2_OFS = 8;		//予約領域2
-static const int16_t BFH_IMAGEOFS_OFS = 10;		//ファイル先頭から画像データまでのオフセット[byte]
+static const Int16_t BFH_HEADERSIZE = 14;
+static const Int16_t BFH_FILETYPE_OFS = 0;		//ファイルタイプ
+static const Int16_t BFH_FILESIZE_OFS = 2;		//ファイルサイズ[byte]
+static const Int16_t BFH_RESERVED1_OFS = 6;		//予約領域1
+static const Int16_t BFH_RESERVED2_OFS = 8;		//予約領域2
+static const Int16_t BFH_IMAGEOFS_OFS = 10;		//ファイル先頭から画像データまでのオフセット[byte]
 
 //ビットマップ情報ヘッダ(Windows)
-static const int16_t BIH_HEADERSIZE = 40;
-static const int16_t BIH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
-static const int16_t BIH_WIDTH_OFS = 18;		//画像の幅[pixel]
-static const int16_t BIH_HEIGHT_OFS = 22;		//画像の高さ[pixel]
-static const int16_t BIH_PLANENUM_OFS = 26;		//プレーン数
-static const int16_t BIH_BITCOUNT_OFS = 28;		//色ビット数[bit]
-static const int16_t BIH_COMPRESSION_OFS = 30;	//圧縮形式
-static const int16_t BIH_IMGDATASIZE_OFS = 34;	//画像データサイズ[byte]
-static const int16_t BIH_XDPM_OFS = 38;			//水平解像度[dot/m]
-static const int16_t BIH_YDPM_OFS = 42;			//垂直解像度[dot/m]
-static const int16_t BIH_PALLETENUM_OFS = 46;	//パレット数[使用色数]
-static const int16_t BIH_IMPCOLORNUM_OFS = 50;	//重要色数
-static const int16_t BIH_PALLETE_OFS = 54;		//パレット
+static const Int16_t BIH_HEADERSIZE = 40;
+static const Int16_t BIH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
+static const Int16_t BIH_WIDTH_OFS = 18;		//画像の幅[pixel]
+static const Int16_t BIH_HEIGHT_OFS = 22;		//画像の高さ[pixel]
+static const Int16_t BIH_PLANENUM_OFS = 26;		//プレーン数
+static const Int16_t BIH_BITCOUNT_OFS = 28;		//色ビット数[bit]
+static const Int16_t BIH_COMPRESSION_OFS = 30;	//圧縮形式
+static const Int16_t BIH_IMGDATASIZE_OFS = 34;	//画像データサイズ[byte]
+static const Int16_t BIH_XDPM_OFS = 38;			//水平解像度[dot/m]
+static const Int16_t BIH_YDPM_OFS = 42;			//垂直解像度[dot/m]
+static const Int16_t BIH_PALLETENUM_OFS = 46;	//パレット数[使用色数]
+static const Int16_t BIH_IMPCOLORNUM_OFS = 50;	//重要色数
+static const Int16_t BIH_PALLETE_OFS = 54;		//パレット
 
 //ビットマップコアヘッダ(OS/2)
-static const int16_t BCH_HEADERSIZE = 12;
-static const int16_t BCH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
-static const int16_t BCH_WIDTH_OFS = 18;		//画像の幅[pixel]
-static const int16_t BCH_HEIGHT_OFS = 20;		//画像の高さ[pixel]
-static const int16_t BCH_PLANENUM_OFS = 22;		//プレーン数
-static const int16_t BCH_BITCOUNT_OFS = 24;		//色ビット数[bit]
+static const Int16_t BCH_HEADERSIZE = 12;
+static const Int16_t BCH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
+static const Int16_t BCH_WIDTH_OFS = 18;		//画像の幅[pixel]
+static const Int16_t BCH_HEIGHT_OFS = 20;		//画像の高さ[pixel]
+static const Int16_t BCH_PLANENUM_OFS = 22;		//プレーン数
+static const Int16_t BCH_BITCOUNT_OFS = 24;		//色ビット数[bit]
 
 //コンストラクタ
 Bitmap::Bitmap()
@@ -56,7 +61,7 @@ Bitmap::~Bitmap()
 }
 
 //RAWデータから作成
-bool Bitmap::create(const vector<uint8_t>& raw, const int16_t width, const int16_t height, const int8_t bytePerPixel)
+bool Bitmap::create(const Image& raw, const Int16_t width, const Int16_t height, const Int8_t bytePerPixel)
 {
 	if (!this->raw_.empty()) {
 		//RAWデータ作成済み
@@ -76,7 +81,7 @@ bool Bitmap::create(const vector<uint8_t>& raw, const int16_t width, const int16
 }
 
 //BITMAPデータから作成
-bool Bitmap::create(const vector<uint8_t>& bitmap)
+bool Bitmap::create(const Image& bitmap)
 {
 	if (!this->raw_.empty()) {
 		//RAWデータ作成済み
@@ -88,7 +93,7 @@ bool Bitmap::create(const vector<uint8_t>& bitmap)
 	}
 
 	//BITMAPデータかチェック
-	uint8_t fileType[2];
+	UInt8_t fileType[2];
 	this->read1ByteLe(bitmap, BFH_FILETYPE_OFS, fileType[0]);
 	this->read1ByteLe(bitmap, BFH_FILETYPE_OFS + 1, fileType[1]);
 	if ((fileType[0] != 'B') || (fileType[1] != 'M')) {
@@ -114,9 +119,9 @@ bool Bitmap::encode(const BitmapType bitmapType)
 	}
 
 	//色ビット数、ファイルヘッダサイズ、情報ヘッダサイズ
-	uint16_t bitCount = 0;
-	int16_t fileHeaderSize = 0;
-	int16_t infoHeaderSize = 0;
+	UInt16_t bitCount = 0;
+	Int16_t fileHeaderSize = 0;
+	Int16_t infoHeaderSize = 0;
 
 	switch (bitmapType) {
 	case WIN_32BIT:
@@ -130,23 +135,23 @@ bool Bitmap::encode(const BitmapType bitmapType)
 	};
 
 	//パレットサイズを計算
-	uint32_t palleteSize = 0;
+	UInt32_t palleteSize = 0;
 	if (bitCount <= 8) {
 		palleteSize = (1 << bitCount) * 4;
 	}
 
 	//画像の幅のパディング
 	//ビット数も考慮しないといけない？
-	uint32_t padding = 0;
+	UInt32_t padding = 0;
 	if (this->width_ % 4 != 0) {
 		padding = ((this->width_ / 4 + 1) * 4) - this->width_;
 	}
 
 	//画像サイズを計算
-	uint32_t imageSize = (this->width_ + padding) * this->height_;
+	UInt32_t imageSize = (this->width_ + padding) * this->height_;
 
 	//ビットマップサイズを計算
-	uint32_t bitmapSize = fileHeaderSize + infoHeaderSize + palleteSize + imageSize;
+	UInt32_t bitmapSize = fileHeaderSize + infoHeaderSize + palleteSize + imageSize;
 
 	//ビットマップサイズ分の領域を確保
 	this->bitmap_.resize(bitmapSize);
@@ -165,7 +170,7 @@ bool Bitmap::encode(const BitmapType bitmapType)
 	this->write2ByteLe(this->bitmap_, BFH_RESERVED2_OFS, 0);
 
 	//ファイル先頭から画像データまでのオフセットを設定
-	int32_t imageOffset = fileHeaderSize + infoHeaderSize + palleteSize;
+	Int32_t imageOffset = fileHeaderSize + infoHeaderSize + palleteSize;
 	this->write4ByteLe(this->bitmap_, BFH_IMAGEOFS_OFS, imageOffset);
 
 	//情報ヘッダサイズを設定
@@ -208,17 +213,17 @@ bool Bitmap::encode(const BitmapType bitmapType)
 
 	//画像データを設定
 	/*
-	int32_t writeIndex = fileHeaderSize + infoHeaderSize + palleteSize;
-	for (int32_t h = this->height_ - 1; h >= 0; h--) {
-		int32_t readIndex = h * this->width_ * this->mBitCount;
-		for (int32_t w = 0; w < this->width_; w++) {
-			for (int32_t bc = 0; bc < this->mBitCount; bc++) {
+	Int32_t writeIndex = fileHeaderSize + infoHeaderSize + palleteSize;
+	for (Int32_t h = this->height_ - 1; h >= 0; h--) {
+		Int32_t readIndex = h * this->width_ * this->mBitCount;
+		for (Int32_t w = 0; w < this->width_; w++) {
+			for (Int32_t bc = 0; bc < this->mBitCount; bc++) {
 				this->write1ByteLe(&this->bitmap_, writeIndex, this->raw_[readIndex]);
 				writeIndex++;
 				readIndex++;
 			}
 		}
-		for (uint32_t w = 0; w < padding; w++) {
+		for (UInt32_t w = 0; w < padding; w++) {
 			this->write1ByteLe(&this->bitmap_, writeIndex, 0);
 			writeIndex++;
 		}
@@ -241,7 +246,7 @@ bool Bitmap::decode()
 	}
 
 	//ファイルタイプを取得
-	uint8_t fileType[2];
+	UInt8_t fileType[2];
 	this->read1ByteLe(this->bitmap_, BFH_FILETYPE_OFS, fileType[0]);
 	this->read1ByteLe(this->bitmap_, BFH_FILETYPE_OFS + 1, fileType[1]);
 	if ((fileType[0] != 'B') || (fileType[1] != 'M')) {
@@ -250,27 +255,27 @@ bool Bitmap::decode()
 	}
 
 	//ファイル先頭から画像データまでのオフセットを取得
-	uint32_t imageOffset;
+	UInt32_t imageOffset;
 	this->read4ByteLe(this->bitmap_, BFH_IMAGEOFS_OFS, imageOffset);
 
 	//情報ヘッダサイズを取得
-	uint32_t infoHeaderSize;
+	UInt32_t infoHeaderSize;
 	this->read4ByteLe(this->bitmap_, BIH_HEADERSIZE_OFS, infoHeaderSize);
 
 	if (infoHeaderSize == BIH_HEADERSIZE) {
 		//Windowsフォーマット
 
 		//画像の幅と高さを取得
-		uint32_t width, height;
+		UInt32_t width, height;
 		this->read4ByteLe(this->bitmap_, BIH_WIDTH_OFS, width);
 		this->read4ByteLe(this->bitmap_, BIH_HEIGHT_OFS, height);
 
 		//色ビット数を取得
-		uint16_t bitCount;
+		UInt16_t bitCount;
 		this->read2ByteLe(this->bitmap_, BIH_BITCOUNT_OFS, bitCount);
 
 		//パレット数を取得
-		uint32_t palleteNum;
+		UInt32_t palleteNum;
 		this->read4ByteLe(this->bitmap_, BIH_PALLETENUM_OFS, palleteNum);
 		if ((palleteNum == 0) && (bitCount <= 8)) {
 			//パレット数が0かつビット数が8以下の場合は、ビット数からパレット数を計算
@@ -278,12 +283,12 @@ bool Bitmap::decode()
 		}
 
 		//パレットデータを確保
-		vector<Color> pallete;
+		ColorVec pallete;
 		pallete.resize(palleteNum);
 
 		//パレットデータを取得
-		uint32_t readIndex = BIH_PALLETE_OFS;
-		for (uint32_t i = 0; i < palleteNum; i++) {
+		UInt32_t readIndex = BIH_PALLETE_OFS;
+		for (UInt32_t i = 0; i < palleteNum; i++) {
 			this->read1ByteLe(this->bitmap_, readIndex + 0, pallete[i].b);
 			this->read1ByteLe(this->bitmap_, readIndex + 1, pallete[i].g);
 			this->read1ByteLe(this->bitmap_, readIndex + 2, pallete[i].r);
@@ -294,10 +299,10 @@ bool Bitmap::decode()
 		//ビットマップデータを取得
 		size_t imageSize = width * height * 4;
 		this->raw_.resize(imageSize);
-		for (uint32_t h = 0; h < height; h++) {
-			uint32_t offset = (height - h - 1) * width * 4;
-			for (uint32_t w = 0; w < width; w++) {
-				uint8_t index;
+		for (UInt32_t h = 0; h < height; h++) {
+			UInt32_t offset = (height - h - 1) * width * 4;
+			for (UInt32_t w = 0; w < width; w++) {
+				UInt8_t index;
 				this->read1ByteLe(this->bitmap_, imageOffset, index);
 				imageOffset++;
 
@@ -309,20 +314,20 @@ bool Bitmap::decode()
 			}
 		}
 
-		this->width_ = static_cast<int16_t>(width);
-		this->height_ = static_cast<int16_t>(height);
+		this->width_ = static_cast<Int16_t>(width);
+		this->height_ = static_cast<Int16_t>(height);
 		this->bytePerPixel_ = 4;
 	}
 	else if (infoHeaderSize == BCH_HEADERSIZE) {
 		//OS/2フォーマット
 
 		//画像の幅と高さを取得
-		uint16_t width, height;
+		UInt16_t width, height;
 		this->read2ByteLe(this->bitmap_, BCH_WIDTH_OFS, width);
 		this->read2ByteLe(this->bitmap_, BCH_HEIGHT_OFS, height);
 
 		//色ビット数を取得
-		uint16_t bitCount;
+		UInt16_t bitCount;
 		this->read2ByteLe(this->bitmap_, BCH_BITCOUNT_OFS, bitCount);
 	}
 	else {
@@ -334,7 +339,7 @@ bool Bitmap::decode()
 }
 
 //RAWデータ取得
-bool Bitmap::getRaw(std::vector<std::uint8_t>& raw)
+bool Bitmap::getRaw(Image& raw, Int16_t& width, Int16_t& height, Int8_t& bytePerPixel)
 {
 	if (this->raw_.empty()) {
 		//RAWデータ未作成
@@ -342,12 +347,15 @@ bool Bitmap::getRaw(std::vector<std::uint8_t>& raw)
 	}
 
 	raw = this->raw_;
+	width = this->width_;
+	height = this->height_;
+	bytePerPixel = this->bytePerPixel_;
 
 	return true;
 }
 
 //BITMAPデータ取得
-bool Bitmap::getBitmap(std::vector<std::uint8_t>& bitmap)
+bool Bitmap::getBitmap(Image& bitmap)
 {
 	if (this->bitmap_.empty()) {
 		//BITMAPデータ未作成
@@ -359,30 +367,21 @@ bool Bitmap::getBitmap(std::vector<std::uint8_t>& bitmap)
 	return true;
 }
 
-//RAWデータ情報取得
-void Bitmap::getRawInfo(int16_t& width, int16_t& height, int8_t& bytePerPixel)
-{
-	width = this->width_;
-	height = this->height_;
-	bytePerPixel = this->bytePerPixel_;
-}
-
-
 //1バイトを書き込み(LE)
-void Bitmap::write1ByteLe(vector<uint8_t>& data, const int32_t writeIndex, const uint8_t writeData)
+void Bitmap::write1ByteLe(Binary& data, const Int32_t writeIndex, const UInt8_t writeData)
 {
 	data[writeIndex + 0] = writeData;
 }
 
 //2バイトを書き込み(LE)
-void Bitmap::write2ByteLe(vector<uint8_t>& data, const int32_t writeIndex, const uint16_t writeData)
+void Bitmap::write2ByteLe(Binary& data, const Int32_t writeIndex, const UInt16_t writeData)
 {
 	data[writeIndex + 0] = (writeData >> 0) & 0xFF;
 	data[writeIndex + 1] = (writeData >> 8) & 0xFF;
 }
 
 //4バイトを書き込み(LE)
-void Bitmap::write4ByteLe(vector<uint8_t>& data, const int32_t writeIndex, const uint32_t writeData)
+void Bitmap::write4ByteLe(Binary& data, const Int32_t writeIndex, const UInt32_t writeData)
 {
 	data[writeIndex + 0] = (writeData >> 0) & 0xFF;
 	data[writeIndex + 1] = (writeData >> 8) & 0xFF;
@@ -391,37 +390,37 @@ void Bitmap::write4ByteLe(vector<uint8_t>& data, const int32_t writeIndex, const
 }
 
 //1バイトを読み込み(LE)
-void Bitmap::read1ByteLe(const vector<uint8_t>& data, const int32_t readIndex, uint8_t& readData)
+void Bitmap::read1ByteLe(const Binary& data, const Int32_t readIndex, UInt8_t& readData)
 {
 	readData = data[readIndex + 0];
 }
 
 //2バイトを読み込み(LE)
-void Bitmap::read2ByteLe(const vector<uint8_t>& data, const int32_t readIndex, uint16_t& readData)
+void Bitmap::read2ByteLe(const Binary& data, const Int32_t readIndex, UInt16_t& readData)
 {
 	readData = 0;
 
-	uint16_t value = 0;
+	UInt16_t value = 0;
 
-	value = static_cast<uint16_t>(data[readIndex + 0]);
+	value = static_cast<UInt16_t>(data[readIndex + 0]);
 	readData |= value << 0;
-	value = static_cast<uint16_t>(data[readIndex + 1]);
+	value = static_cast<UInt16_t>(data[readIndex + 1]);
 	readData |= value << 8;
 }
 
 //4バイトを読み込み(LE)
-void Bitmap::read4ByteLe(const vector<uint8_t>& data, const int32_t readIndex, uint32_t& readData)
+void Bitmap::read4ByteLe(const Binary& data, const Int32_t readIndex, UInt32_t& readData)
 {
 	readData = 0;
 
-	uint32_t value = 0;
+	UInt32_t value = 0;
 
-	value = static_cast<uint32_t>(data[readIndex + 0]);
+	value = static_cast<UInt32_t>(data[readIndex + 0]);
 	readData |= value << 0;
-	value = static_cast<uint32_t>(data[readIndex + 1]);
+	value = static_cast<UInt32_t>(data[readIndex + 1]);
 	readData |= value << 8;
-	value = static_cast<uint32_t>(data[readIndex + 2]);
+	value = static_cast<UInt32_t>(data[readIndex + 2]);
 	readData |= value << 16;
-	value = static_cast<uint32_t>(data[readIndex + 3]);
+	value = static_cast<UInt32_t>(data[readIndex + 3]);
 	readData |= value << 24;
 }

@@ -1,5 +1,6 @@
 ﻿#include "WindowWGL.hpp"
 
+using cmn::Int16_t;
 using cmn::CoordI16;
 using graphics::DrawWGL;
 using window::WindowWGL;
@@ -194,8 +195,8 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 	if (msg == WM_LBUTTONDOWN) {
 		CoordI16 touchPos = { 0, 0, 0 };
-		touchPos.x = static_cast<int16_t>(LOWORD(lParam));
-		touchPos.y = static_cast<int16_t>(HIWORD(lParam));
+		touchPos.x = static_cast<Int16_t>(LOWORD(lParam));
+		touchPos.y = static_cast<Int16_t>(HIWORD(lParam));
 		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
 
 		//タッチON
@@ -216,8 +217,8 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	else if (msg == WM_MOUSEMOVE) {
 		if (wParam & MK_LBUTTON) {
 			CoordI16 dragPos = { 0, 0, 0 };
-			dragPos.x = static_cast<int16_t>(LOWORD(lParam));
-			dragPos.y = static_cast<int16_t>(HIWORD(lParam));
+			dragPos.x = static_cast<Int16_t>(LOWORD(lParam));
+			dragPos.y = static_cast<Int16_t>(HIWORD(lParam));
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
 
 			//ドラッグ

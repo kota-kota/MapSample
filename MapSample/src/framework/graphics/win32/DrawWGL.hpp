@@ -27,11 +27,11 @@ namespace graphics
 		//クリア
 		virtual void clear(const cmn::Color& color);
 		//点描画
-		virtual void drawPoint(const cmn::Color& color, const std::vector<cmn::CoordI32>& coord, const float size);
+		virtual void drawPoint(const cmn::Color& color, const cmn::CoordVec& coord, const float size);
 		//ライン描画
-		virtual void drawLine(const cmn::Color& color, const std::vector<cmn::CoordI32>& coord, const float width);
+		virtual void drawLine(const cmn::Color& color, const cmn::CoordVec& coord, const float width);
 		//テクスチャ描画
-		virtual void drawTextrue(const std::vector<cmn::CoordI32>& coord, const std::vector<std::uint8_t>& tex, const cmn::Size texSize);
+		virtual void drawTextrue(const cmn::CoordVec& coord, const cmn::Image& tex, const cmn::Size texSize);
 
 		//描画領域取得
 		virtual void getDrawSize(cmn::Size& drawSize);

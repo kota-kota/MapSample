@@ -2,58 +2,69 @@
 #define INCLUDED_COMMON
 
 #include <cstdint>
-
-namespace std
-{
-	typedef char	char_t;
-	typedef float	float32_t;
-	typedef double	float64_t;
-}
+#include <vector>
 
 namespace cmn
 {
+	typedef char		Char_t;
+	typedef int8_t		Int8_t;
+	typedef int16_t		Int16_t;
+	typedef int32_t		Int32_t;
+	typedef int64_t		Int64_t;
+	typedef uint8_t		UInt8_t;
+	typedef uint16_t	UInt16_t;
+	typedef uint32_t	UInt32_t;
+	typedef uint64_t	UInt64_t;
+	typedef float		Float32_t;
+	typedef double		Float64_t;
+
 	class CoordI16 {
 	public:
-		std::int16_t	x;
-		std::int16_t	y;
-		std::int16_t	z;
+		Int16_t		x;
+		Int16_t		y;
+		Int16_t		z;
 	};
 
 	class CoordI32 {
 	public:
-		std::int32_t	x;
-		std::int32_t	y;
-		std::int32_t	z;
+		Int32_t		x;
+		Int32_t		y;
+		Int32_t		z;
 	};
 
 	class CoordF64 {
 	public:
-		std::float64_t	x;
-		std::float64_t	y;
-		std::float64_t	z;
+		Float64_t	x;
+		Float64_t	y;
+		Float64_t	z;
 	};
 
 	class Color {
 	public:
-		std::uint8_t	r;
-		std::uint8_t	g;
-		std::uint8_t	b;
-		std::uint8_t	a;
+		UInt8_t		r;
+		UInt8_t		g;
+		UInt8_t		b;
+		UInt8_t		a;
 	};
 
 	class Size {
 	public:
-		std::int16_t	w;
-		std::int16_t	h;
+		Int16_t		w;
+		Int16_t		h;
 	};
 
 	class Area {
 	public:
-		std::int32_t	xmin;
-		std::int32_t	ymin;
-		std::int32_t	xmax;
-		std::int32_t	ymax;
+		Int32_t		xmin;
+		Int32_t		ymin;
+		Int32_t		xmax;
+		Int32_t		ymax;
 	};
+
+	typedef std::vector<Color>		ColorVec;
+	typedef std::vector<CoordI32>	CoordVec;
+	typedef std::vector<UInt8_t>	Image;
+	typedef std::vector<UInt8_t>	Binary;
 }
 
 #endif //INCLUDED_COMMON

@@ -1,11 +1,13 @@
 ﻿#include "UiMng.hpp"
 
 using std::string;
-using std::vector;
 using cmn::Color;
 using cmn::CoordI16;
 using cmn::CoordI32;
 using cmn::Size;
+using cmn::CoordVec;
+using cmn::Image;
+using cmn::Binary;
 using graphics::DrawIF;
 using ui::UiMng;
 
@@ -26,10 +28,10 @@ UiMng::UiMng(DrawIF* drawIF)
 		this->file_.create("./data_image/bitmap/win-8.bmp");
 		this->file_.open("rb");
 		size_t fileSize = this->file_.getFileSize();
-		vector<uint8_t> buf(fileSize);
-		this->file_.read(0, fileSize, &buf);
+		Binary data(fileSize);
+		this->file_.read(0, fileSize, data);
 
-		this->bitmap_.create(buf);
+		this->bitmap_.create(data);
 		this->bitmap_.decode();
 	}
 }
@@ -97,30 +99,13 @@ void UiMng::draw()
 		this->drawIF_->clear(defColor);
 	}
 	{
-		Color color = { 255, 0, 0, 255 };
-		vector<CoordI32> coord(1);
-		coord[0] = { 63230028, 16092608, 0 };
-		this->drawIF_->drawPoint(color, coord, 10.0f);
-	}
-	{
-		Color color = { 255, 0, 0, 255 };
-		vector<CoordI32> coord(5);
-		coord[0] = { 63230028 - 100, 16092608 - 100, 0 };
-		coord[1] = { 63230028 - 100, 16092608 + 100, 0 };
-		coord[2] = { 63230028 + 100, 16092608 + 100, 0 };
-		coord[3] = { 63230028 + 100, 16092608 - 100, 0 };
-		coord[4] = { 63230028 - 100, 16092608 - 100, 0 };
-		this->drawIF_->drawLine(color, coord, 2.0f);
-	}
-	{
-		vector<uint8_t> texture;
+		Image texture;
 		int16_t width, height;
 		int8_t bytePerPixel;
-		this->bitmap_.getRaw(texture);
-		this->bitmap_.getRawInfo(width, height, bytePerPixel);
+		this->bitmap_.getRaw(texture, width, height, bytePerPixel);
 
 		Size texSize = { width, height };
-		vector<CoordI32> coord(8);
+		CoordVec coord(8);
 		coord[0] = { 0, 0, 0 };
 		coord[1] = { 63230028 - width, 16092608 + height, 0 };
 		coord[2] = { 1, 0, 0 };
@@ -130,6 +115,22 @@ void UiMng::draw()
 		coord[6] = { 1, 1, 0 };
 		coord[7] = { 63230028 + width, 16092608 - height, 0 };
 		this->drawIF_->drawTextrue(coord, texture, texSize);
+	}
+	{
+		Color color = { 255, 0, 0, 255 };
+		CoordVec coord(1);
+		coord[0] = { 63230028, 16092608, 0 };
+		this->drawIF_->drawPoint(color, coord, 10.0f);
+	}
+	{
+		Color color = { 255, 0, 0, 255 };
+		CoordVec coord(5);
+		coord[0] = { 63230028 - 100, 16092608 - 100, 0 };
+		coord[1] = { 63230028 - 100, 16092608 + 100, 0 };
+		coord[2] = { 63230028 + 100, 16092608 + 100, 0 };
+		coord[3] = { 63230028 + 100, 16092608 - 100, 0 };
+		coord[4] = { 63230028 - 100, 16092608 - 100, 0 };
+		this->drawIF_->drawLine(color, coord, 2.0f);
 	}
 
 	this->drawIF_->swapBuffers();

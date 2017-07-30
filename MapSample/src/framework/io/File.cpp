@@ -1,7 +1,8 @@
 ﻿#include "File.hpp"
 
 using std::string;
-using std::vector;
+using cmn::Int32_t;
+using cmn::Binary;
 using io::File;
 
 //コンストラクタ
@@ -71,7 +72,7 @@ void File::close()
 }
 
 //ファイル読み込み
-bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
+bool File::read(const Int32_t offset, const size_t size, Binary& data)
 {
 	if (this->filePath_.empty()) {
 		//未作成
@@ -85,7 +86,7 @@ bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
 		//読み込み範囲がファイルサイズを超える
 		return false;
 	}
-	if (data->size() < size) {
+	if (data.size() < size) {
 		//格納バッファのサイズが足りない
 		return false;
 	}
@@ -96,7 +97,7 @@ bool File::read(const int32_t offset, const size_t size, vector<uint8_t>* data)
 	(void)fseek(this->fp_, offset, SEEK_SET);
 
 	//ファイル読み込み
-	size_t readSize = fread_s(&(*data)[0], size, 1, size, fp);
+	size_t readSize = fread_s(&data[0], size, 1, size, fp);
 	if (readSize != size) {
 		//読み込み失敗
 		return false;

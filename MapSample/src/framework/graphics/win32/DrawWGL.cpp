@@ -1,18 +1,15 @@
 ﻿#include "DrawWGL.hpp"
 
 //using指定
-using std::int8_t;
-using std::int16_t;
-using std::int32_t;
-using std::int64_t;
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-using std::vector;
+using cmn::Int16_t;
+using cmn::Int32_t;
+using cmn::Float32_t;
+using cmn::Float64_t;
 using cmn::Color;
 using cmn::CoordI32;
 using cmn::Size;
+using cmn::CoordVec;
+using cmn::Image;
 using graphics::DrawWGL;
 
 //コンストラクタ
@@ -54,7 +51,7 @@ DrawWGL::DrawWGL(HWND hWnd)
 		};
 
 		//ピクセルフォーマットを選択
-		std::int32_t format = ::ChoosePixelFormat(this->hDC, &pFormat);
+		Int32_t format = ::ChoosePixelFormat(this->hDC, &pFormat);
 		::SetPixelFormat(this->hDC, format, &pFormat);
 
 		//描画コンテキストハンドルを作成
@@ -73,7 +70,7 @@ DrawWGL::~DrawWGL()
 }
 
 //描画セットアップ
-void DrawWGL::setup(cmn::CoordI32 mapPos)
+void DrawWGL::setup(CoordI32 mapPos)
 {
 	//描画領域取得
 	Size drawSize;
@@ -83,10 +80,10 @@ void DrawWGL::setup(cmn::CoordI32 mapPos)
 	glViewport(0, 0, drawSize.w, drawSize.h);
 
 	//プロジェクション設定
-	GLdouble left = mapPos.x - drawSize.w / 2;
-	GLdouble right = left + drawSize.w;
-	GLdouble top = mapPos.y - drawSize.h / 2;
-	GLdouble bottom = top + drawSize.h;
+	Float64_t left = mapPos.x - drawSize.w / 2;
+	Float64_t right = left + drawSize.w;
+	Float64_t top = mapPos.y - drawSize.h / 2;
+	Float64_t bottom = top + drawSize.h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//glOrtho(left, right, bottom, top, -1, 1);
@@ -119,10 +116,10 @@ void DrawWGL::swapBuffers()
 //クリア
 void DrawWGL::clear(const Color& color)
 {
-	GLclampf r = static_cast<GLclampf>(color.r) / 255.0f;
-	GLclampf g = static_cast<GLclampf>(color.g) / 255.0f;
-	GLclampf b = static_cast<GLclampf>(color.b) / 255.0f;
-	GLclampf a = static_cast<GLclampf>(color.a) / 255.0f;
+	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
+	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
+	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
+	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
 
 	glClearColor(r, g, b, a);
 	glClearDepth(1.0);
@@ -130,12 +127,12 @@ void DrawWGL::clear(const Color& color)
 }
 
 //点描画
-void DrawWGL::drawPoint(const Color& color, const vector<CoordI32>& coord, const float size)
+void DrawWGL::drawPoint(const Color& color, const CoordVec& coord, const float size)
 {
-	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
-	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
-	GLfloat b = static_cast<GLfloat>(color.b) / 255.0f;
-	GLfloat a = static_cast<GLfloat>(color.a) / 255.0f;
+	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
+	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
+	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
+	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
 
 	//点の大きさを設定
 	glPointSize(size);
@@ -155,12 +152,12 @@ void DrawWGL::drawPoint(const Color& color, const vector<CoordI32>& coord, const
 }
 
 //ライン描画
-void DrawWGL::drawLine(const Color& color, const std::vector<CoordI32>& coord, const float width)
+void DrawWGL::drawLine(const Color& color, const CoordVec& coord, const float width)
 {
-	GLfloat r = static_cast<GLfloat>(color.r) / 255.0f;
-	GLfloat g = static_cast<GLfloat>(color.g) / 255.0f;
-	GLfloat b = static_cast<GLfloat>(color.b) / 255.0f;
-	GLfloat a = static_cast<GLfloat>(color.a) / 255.0f;
+	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
+	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
+	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
+	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
 
 	//ラインの太さを設定
 	glLineWidth(width);
@@ -180,7 +177,7 @@ void DrawWGL::drawLine(const Color& color, const std::vector<CoordI32>& coord, c
 }
 
 //テクスチャ描画
-void DrawWGL::drawTextrue(const vector<CoordI32>& coord, const vector<uint8_t>& tex, const Size texSize)
+void DrawWGL::drawTextrue(const CoordVec& coord, const Image& tex, const Size texSize)
 {
 	//テクスチャ作成
 	GLuint texID;
@@ -232,6 +229,6 @@ void DrawWGL::getDrawSize(Size& drawSize)
 {
 	RECT rect;
 	::GetClientRect(this->hWnd, &rect);
-	drawSize.w = static_cast<int16_t>(rect.right - rect.left);
-	drawSize.h = static_cast<int16_t>(rect.bottom - rect.top);
+	drawSize.w = static_cast<Int16_t>(rect.right - rect.left);
+	drawSize.h = static_cast<Int16_t>(rect.bottom - rect.top);
 }

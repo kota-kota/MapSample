@@ -3,7 +3,6 @@
 
 #include "Common.hpp"
 #include <string>
-#include <vector>
 
 namespace io
 {
@@ -25,7 +24,7 @@ namespace io
 		//ファイルクローズ
 		void close();
 		//ファイル読み込み
-		bool read(const std::int32_t offset, const size_t size, std::vector<std::uint8_t>* data);
+		bool read(const cmn::Int32_t offset, const size_t size, cmn::Binary& data);
 		//ファイルサイズ取得
 		size_t getFileSize();
 	};
