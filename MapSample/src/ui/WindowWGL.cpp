@@ -1,13 +1,14 @@
 ﻿#include "WindowWGL.hpp"
 
-using cmn::Int16_t;
-using cmn::CoordI16;
-using graphics::DrawWGL;
-using window::WindowWGL;
-using ui::UiMng;
+
+//----------------------------------------------------------
+//
+// WGLウィンドウクラス
+//
+//----------------------------------------------------------
 
 //コンストラクタ
-WindowWGL::WindowWGL()
+window::WindowWGL::WindowWGL()
 	: hInstance_(nullptr), drawWGL_(), uiMng_()
 {
 	//インスタンスハンドル取得
@@ -15,7 +16,7 @@ WindowWGL::WindowWGL()
 }
 
 //ウィンドウスタート
-void WindowWGL::start()
+void window::WindowWGL::start()
 {
 	bool ret = true;
 
@@ -48,7 +49,7 @@ void WindowWGL::start()
 }
 
 //ウィンドウクラス登録
-bool WindowWGL::registerWindowClass()
+bool window::WindowWGL::registerWindowClass()
 {
 	bool result = true;
 
@@ -77,7 +78,7 @@ bool WindowWGL::registerWindowClass()
 }
 
 //ウィンドウ作成
-bool WindowWGL::createMainWindow()
+bool window::WindowWGL::createMainWindow()
 {
 	bool result = true;
 
@@ -101,10 +102,10 @@ bool WindowWGL::createMainWindow()
 		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL_, &this->uiMng_);
 
 		//描画インターフェース生成
-		new(&this->drawWGL_) DrawWGL(hWnd);
+		new(&this->drawWGL_) fw::DrawWGL(hWnd);
 
 		//UiMng生成
-		new(&this->uiMng_) UiMng(&this->drawWGL_);
+		new(&this->uiMng_) ui::UiMng(&this->drawWGL_);
 
 		// ウィンドウ表示
 		ShowWindow(hWnd, SW_SHOW);
@@ -115,7 +116,7 @@ bool WindowWGL::createMainWindow()
 }
 
 // ウィンドウプロシージャ
-LRESULT CALLBACK WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK window::WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	bool ret = true;
 
@@ -144,7 +145,7 @@ LRESULT CALLBACK WindowWGL::windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 }
 
 //WM_CREATEイベント処理
-bool WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
+bool window::WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
 {
 	//CreateWindowのパラメータからUiMngを取得
 	LPCREATESTRUCT lpCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
@@ -163,7 +164,7 @@ bool WindowWGL::windowProcWMCreate(HWND hWnd, LPARAM lParam)
 }
 
 //WM_DESTROYイベント処理
-bool WindowWGL::windowProcWMDestroy()
+bool window::WindowWGL::windowProcWMDestroy()
 {
 	::PostQuitMessage(0);
 
@@ -171,7 +172,7 @@ bool WindowWGL::windowProcWMDestroy()
 }
 
 //WM_PAINTイベント処理
-bool WindowWGL::windowProcWMPaint(HWND hWnd)
+bool window::WindowWGL::windowProcWMPaint(HWND hWnd)
 {
 	//hWndに関連付けた値からUiMngを取得
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
@@ -188,15 +189,15 @@ bool WindowWGL::windowProcWMPaint(HWND hWnd)
 }
 
 //ユーザ操作イベント処理
-bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+bool window::WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	//hWndに関連付けた値からUiMngを取得
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	if (msg == WM_LBUTTONDOWN) {
-		CoordI16 touchPos = { 0, 0, 0 };
-		touchPos.x = static_cast<Int16_t>(LOWORD(lParam));
-		touchPos.y = static_cast<Int16_t>(HIWORD(lParam));
+		fw::CoordI16 touchPos = { 0, 0, 0 };
+		touchPos.x = std::int16_t(LOWORD(lParam));
+		touchPos.y = std::int16_t(HIWORD(lParam));
 		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
 
 		//タッチON
@@ -216,9 +217,9 @@ bool WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	else if (msg == WM_MOUSEMOVE) {
 		if (wParam & MK_LBUTTON) {
-			CoordI16 dragPos = { 0, 0, 0 };
-			dragPos.x = static_cast<Int16_t>(LOWORD(lParam));
-			dragPos.y = static_cast<Int16_t>(HIWORD(lParam));
+			fw::CoordI16 dragPos = { 0, 0, 0 };
+			dragPos.x = std::int16_t(LOWORD(lParam));
+			dragPos.y = std::int16_t(HIWORD(lParam));
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
 
 			//ドラッグ

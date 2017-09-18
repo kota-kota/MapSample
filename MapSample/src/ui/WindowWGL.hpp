@@ -1,7 +1,7 @@
-﻿#ifndef INCLUDED_WINDOWWGL
-#define INCLUDED_WINDOWWGL
+﻿#ifndef INCLUDED_WINDOWWGL_HPP
+#define INCLUDED_WINDOWWGL_HPP
 
-#include "Common.hpp"
+#include "FwStd.hpp"
 #include "graphics/win32/DrawWGL.hpp"
 #include "UiMng.hpp"
 #include <Windows.h>
@@ -9,11 +9,17 @@
 
 namespace window
 {
+	//----------------------------------------------------------
+	//
+	// WGLウィンドウクラス
+	//
+	//----------------------------------------------------------
+
 	class WindowWGL {
 		//メンバ変数
-		HINSTANCE			hInstance_;
-		graphics::DrawWGL	drawWGL_;
-		ui::UiMng			uiMng_;
+		HINSTANCE		hInstance_;
+		fw::DrawWGL		drawWGL_;
+		ui::UiMng		uiMng_;
 
 	public:
 		//コンストラクタ
@@ -39,4 +45,4 @@ namespace window
 	};
 }
 
-#endif //INCLUDED_WINDOWWGL
+#endif //INCLUDED_WINDOWWGL_HPP

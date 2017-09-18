@@ -1,36 +1,42 @@
-﻿#ifndef INCLUDED_UIMNG
-#define INCLUDED_UIMNG
+﻿#ifndef INCLUDED_UIMNG_HPP
+#define INCLUDED_UIMNG_HPP
 
-#include "Common.hpp"
+#include "FwStd.hpp"
 #include "graphics/DrawIF.hpp"
 #include "graphics/Bitmap.hpp"
 #include "io/File.hpp"
 
 namespace ui
 {
+	//----------------------------------------------------------
+	//
+	// UI管理クラス
+	//
+	//----------------------------------------------------------
+
 	class UiMng {
 		//メンバ変数
-		graphics::DrawIF*	drawIF_;
+		fw::DrawIF*	drawIF_;
 
-		cmn::CoordI32		mapPos_;
-		cmn::CoordI16		screenPos_;
-		cmn::CoordI16		touchPos_;
-		cmn::CoordI16		dragPos_;
-		bool				isTouchOn_;
-		bool				isDragOn_;
+		fw::CoordI32	mapPos_;
+		fw::CoordI16	screenPos_;
+		fw::CoordI16	touchPos_;
+		fw::CoordI16	dragPos_;
+		bool			isTouchOn_;
+		bool			isDragOn_;
 
-		io::File			file_;
-		graphics::Bitmap	bitmap_;
+		fw::File		file_;
+		std::uint32_t	texId_;
 
 	public:
 		//コンストラクタ
-		UiMng(graphics::DrawIF* drawIF = nullptr);
+		UiMng(fw::DrawIF* drawIF = nullptr);
 		//タッチON
-		void setTouchOn(cmn::CoordI16 touchPos);
+		void setTouchOn(fw::CoordI16 touchPos);
 		//タッチOFF
 		void setTouchOff();
 		//ドラッグ
-		void setDrag(cmn::CoordI16 dragPos);
+		void setDrag(fw::CoordI16 dragPos);
 		//描画
 		void draw();
 	};

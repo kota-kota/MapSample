@@ -1,17 +1,22 @@
-﻿#ifndef INCLUDED_DRAWWGL
-#define INCLUDED_DRAWWGL
+﻿#ifndef INCLUDED_DRAWWGL_HPP
+#define INCLUDED_DRAWWGL_HPP
 
-#include "Common.hpp"
+#include "FwStd.hpp"
 #include "../DrawIF.hpp"
 #include <Windows.h>
-#include <gl/GL.h>
 
-namespace graphics
+namespace fw
 {
+	//----------------------------------------------------------
+	//
+	// WGL描画クラス
+	//
+	//----------------------------------------------------------
+
 	class DrawWGL : public DrawIF {
-		HWND	hWnd;
-		HDC		hDC;
-		HGLRC	hGLRC;
+		HWND	hWnd_;
+		HDC		hDC_;
+		HGLRC	hGLRC_;
 
 	public:
 		//コンストラクタ
@@ -19,23 +24,27 @@ namespace graphics
 		//デストラクタ
 		virtual ~DrawWGL();
 		//セットアップ
-		virtual void setup(cmn::CoordI32 mapPos);
+		virtual void setup(CoordI32 mapPos);
 		//描画カレント
 		virtual void makeCurrent(const bool current);
 		//描画更新
 		virtual void swapBuffers();
 		//クリア
-		virtual void clear(const cmn::Color& color);
+		virtual void clear(const Color color);
 		//点描画
-		virtual void drawPoint(const cmn::Color& color, const cmn::CoordVec& coord, const float size);
+		virtual void drawPoint(const ACoordI32& coords, const AColor& colors, const std::float32_t size);
 		//ライン描画
-		virtual void drawLine(const cmn::Color& color, const cmn::CoordVec& coord, const float width);
+		virtual void drawLine(const ACoordI32& coords, const AColor& colors, const std::float32_t width);
+		//テクスチャ作成
+		virtual void createTexture(const AImage& tex, const Size texSize, std::uint32_t& texId);
+		//テクスチャ削除
+		virtual void deleteTexture(const std::uint32_t texId);
 		//テクスチャ描画
-		virtual void drawTextrue(const cmn::CoordVec& coord, const cmn::Image& tex, const cmn::Size texSize);
+		virtual void drawTextrue(const ACoordI32& coords, const std::uint32_t texId);
 
 		//描画領域取得
-		virtual void getDrawSize(cmn::Size& drawSize);
+		virtual void getDrawSize(Size& drawSize);
 	};
 }
 
-#endif //INCLUDED_DRAWWGL
+#endif //INCLUDED_DRAWWGL_HPP

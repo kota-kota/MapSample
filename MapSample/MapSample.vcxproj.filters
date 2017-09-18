@@ -48,6 +48,9 @@
     <ClCompile Include="src\ui\UiMng.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\framework\FwStd.cpp">
+      <Filter>ソース ファイル\framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\framework\graphics\Bitmap.hpp">
@@ -65,11 +68,11 @@
     <ClInclude Include="src\ui\UiMng.hpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
-    <ClInclude Include="src\framework\Common.hpp">
-      <Filter>ソース ファイル\framework</Filter>
-    </ClInclude>
     <ClInclude Include="src\ui\WindowWGL.hpp">
       <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\FwStd.hpp">
+      <Filter>ソース ファイル\framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

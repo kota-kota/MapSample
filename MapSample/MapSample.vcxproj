@@ -115,6 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\framework\FwStd.cpp" />
     <ClCompile Include="src\framework\graphics\Bitmap.cpp" />
     <ClCompile Include="src\framework\graphics\win32\DrawWGL.cpp" />
     <ClCompile Include="src\framework\io\File.cpp" />
@@ -123,7 +124,7 @@
     <ClCompile Include="src\ui\WindowWGL.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\framework\Common.hpp" />
+    <ClInclude Include="src\framework\FwStd.hpp" />
     <ClInclude Include="src\framework\graphics\Bitmap.hpp" />
     <ClInclude Include="src\framework\graphics\DrawIF.hpp" />
     <ClInclude Include="src\framework\graphics\win32\DrawWGL.hpp" />

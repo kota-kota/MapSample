@@ -1,11 +1,17 @@
-﻿#ifndef INCLUDED_FILE
-#define INCLUDED_FILE
+﻿#ifndef INCLUDED_FILE_HPP
+#define INCLUDED_FILE_HPP
 
-#include "Common.hpp"
+#include "FwStd.hpp"
 #include <string>
 
-namespace io
+namespace fw
 {
+	//----------------------------------------------------------
+	//
+	// ファイルクラス
+	//
+	//----------------------------------------------------------
+
 	class File {
 		//メンバ変数
 		std::string		filePath_;
@@ -24,10 +30,10 @@ namespace io
 		//ファイルクローズ
 		void close();
 		//ファイル読み込み
-		bool read(const cmn::Int32_t offset, const size_t size, cmn::Binary& data);
+		bool read(const std::int32_t offset, const size_t size, ABinary& data);
 		//ファイルサイズ取得
 		size_t getFileSize();
 	};
 }
 
-#endif //INCLUDED_FILE
+#endif //INCLUDED_FILE_HPP

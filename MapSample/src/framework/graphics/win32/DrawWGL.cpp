@@ -1,24 +1,20 @@
 ﻿#include "DrawWGL.hpp"
+#include <gl/GL.h>
 
-//using指定
-using cmn::Int16_t;
-using cmn::Int32_t;
-using cmn::Float32_t;
-using cmn::Float64_t;
-using cmn::Color;
-using cmn::CoordI32;
-using cmn::Size;
-using cmn::CoordVec;
-using cmn::Image;
-using graphics::DrawWGL;
+
+//----------------------------------------------------------
+//
+// WGL描画クラス
+//
+//----------------------------------------------------------
 
 //コンストラクタ
-DrawWGL::DrawWGL(HWND hWnd)
-	: hWnd(hWnd), hDC(nullptr), hGLRC(nullptr)
+fw::DrawWGL::DrawWGL(HWND hWnd)
+	: hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr)
 {
-	if (this->hWnd != nullptr) {
+	if (this->hWnd_ != nullptr) {
 		//デバイスコンテキストハンドルを取得
-		this->hDC = ::GetDC(this->hWnd);
+		this->hDC_ = ::GetDC(this->hWnd_);
 
 		//ピクセルフォーマット
 		const PIXELFORMATDESCRIPTOR pFormat = {
@@ -51,26 +47,26 @@ DrawWGL::DrawWGL(HWND hWnd)
 		};
 
 		//ピクセルフォーマットを選択
-		Int32_t format = ::ChoosePixelFormat(this->hDC, &pFormat);
-		::SetPixelFormat(this->hDC, format, &pFormat);
+		std::int32_t format = ::ChoosePixelFormat(this->hDC_, &pFormat);
+		::SetPixelFormat(this->hDC_, format, &pFormat);
 
 		//描画コンテキストハンドルを作成
-		this->hGLRC = ::wglCreateContext(this->hDC);
+		this->hGLRC_ = ::wglCreateContext(this->hDC_);
 	}
 }
 
 //デストラクタ
-DrawWGL::~DrawWGL()
+fw::DrawWGL::~DrawWGL()
 {
 	//描画コンテキストハンドルを破棄
-	::wglDeleteContext(this->hGLRC);
+	::wglDeleteContext(this->hGLRC_);
 
 	//デバイスコンテキストを破棄
-	::ReleaseDC(this->hWnd, this->hDC);
+	::ReleaseDC(this->hWnd_, this->hDC_);
 }
 
 //描画セットアップ
-void DrawWGL::setup(CoordI32 mapPos)
+void fw::DrawWGL::setup(CoordI32 mapPos)
 {
 	//描画領域取得
 	Size drawSize;
@@ -80,10 +76,10 @@ void DrawWGL::setup(CoordI32 mapPos)
 	glViewport(0, 0, drawSize.w, drawSize.h);
 
 	//プロジェクション設定
-	Float64_t left = mapPos.x - drawSize.w / 2;
-	Float64_t right = left + drawSize.w;
-	Float64_t top = mapPos.y - drawSize.h / 2;
-	Float64_t bottom = top + drawSize.h;
+	std::float64_t left = mapPos.x - drawSize.w / 2;
+	std::float64_t right = left + drawSize.w;
+	std::float64_t top = mapPos.y - drawSize.h / 2;
+	std::float64_t bottom = top + drawSize.h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//glOrtho(left, right, bottom, top, -1, 1);
@@ -95,31 +91,31 @@ void DrawWGL::setup(CoordI32 mapPos)
 }
 
 //描画カレント
-void DrawWGL::makeCurrent(const bool current)
+void fw::DrawWGL::makeCurrent(const bool current)
 {
 	if (current) {
 		//カレント設定
-		::wglMakeCurrent(this->hDC, this->hGLRC);
+		::wglMakeCurrent(this->hDC_, this->hGLRC_);
 	}
 	else {
 		//カレント解除
-		::wglMakeCurrent(this->hDC, nullptr);
+		::wglMakeCurrent(this->hDC_, nullptr);
 	}
 }
 
 //描画更新
-void DrawWGL::swapBuffers()
+void fw::DrawWGL::swapBuffers()
 {
-	::SwapBuffers(this->hDC);
+	::SwapBuffers(this->hDC_);
 }
 
 //クリア
-void DrawWGL::clear(const Color& color)
+void fw::DrawWGL::clear(const Color color)
 {
-	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
-	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
-	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
-	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
+	std::float32_t r = std::float32_t(color.r) / 255.0f;
+	std::float32_t g = std::float32_t(color.g) / 255.0f;
+	std::float32_t b = std::float32_t(color.b) / 255.0f;
+	std::float32_t a = std::float32_t(color.a) / 255.0f;
 
 	glClearColor(r, g, b, a);
 	glClearDepth(1.0);
@@ -127,13 +123,8 @@ void DrawWGL::clear(const Color& color)
 }
 
 //点描画
-void DrawWGL::drawPoint(const Color& color, const CoordVec& coord, const float size)
+void fw::DrawWGL::drawPoint(const ACoordI32& coords, const AColor& colors, const std::float32_t size)
 {
-	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
-	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
-	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
-	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
-
 	//点の大きさを設定
 	glPointSize(size);
 
@@ -141,24 +132,27 @@ void DrawWGL::drawPoint(const Color& color, const CoordVec& coord, const float s
 	glBegin(GL_POINTS);
 	{
 		//色
-		glColor4f(r, g, b, a);
+		std::int32_t colorNum = colors.getNum();
+		for (std::int32_t i = 0; i < colorNum; i++) {
+			std::float32_t r = std::float32_t(colors[i].r) / 255.0f;
+			std::float32_t g = std::float32_t(colors[i].g) / 255.0f;
+			std::float32_t b = std::float32_t(colors[i].b) / 255.0f;
+			std::float32_t a = std::float32_t(colors[i].a) / 255.0f;
+			glColor4f(r, g, b, a);
+		}
 
 		//座標
-		for (auto itr = coord.begin(); itr != coord.end(); itr++) {
-			glVertex3i(itr->x, itr->y, itr->z);
+		std::int32_t coordNum = coords.getNum();
+		for (std::int32_t i = 0; i < coordNum; i++) {
+			glVertex3i(coords[i].x, coords[i].y, coords[i].z);
 		}
 	}
 	glEnd();
 }
 
 //ライン描画
-void DrawWGL::drawLine(const Color& color, const CoordVec& coord, const float width)
+void fw::DrawWGL::drawLine(const ACoordI32& coords, const AColor& colors, const std::float32_t width)
 {
-	Float32_t r = static_cast<Float32_t>(color.r) / 255.0f;
-	Float32_t g = static_cast<Float32_t>(color.g) / 255.0f;
-	Float32_t b = static_cast<Float32_t>(color.b) / 255.0f;
-	Float32_t a = static_cast<Float32_t>(color.a) / 255.0f;
-
 	//ラインの太さを設定
 	glLineWidth(width);
 
@@ -166,26 +160,52 @@ void DrawWGL::drawLine(const Color& color, const CoordVec& coord, const float wi
 	glBegin(GL_LINE_LOOP);
 	{
 		//色
-		glColor4f(r, g, b, a);
+		std::int32_t colorNum = colors.getNum();
+		for (std::int32_t i = 0; i < colorNum; i++) {
+			std::float32_t r = std::float32_t(colors[i].r) / 255.0f;
+			std::float32_t g = std::float32_t(colors[i].g) / 255.0f;
+			std::float32_t b = std::float32_t(colors[i].b) / 255.0f;
+			std::float32_t a = std::float32_t(colors[i].a) / 255.0f;
+			glColor4f(r, g, b, a);
+		}
 
 		//座標
-		for (auto itr = coord.begin(); itr != coord.end(); itr++) {
-			glVertex3i(itr->x, itr->y, itr->z);
+		std::int32_t coordNum = coords.getNum();
+		for (std::int32_t i = 0; i < coordNum; i++) {
+			glVertex3i(coords[i].x, coords[i].y, coords[i].z);
 		}
 	}
 	glEnd();
 }
 
-//テクスチャ描画
-void DrawWGL::drawTextrue(const CoordVec& coord, const Image& tex, const Size texSize)
+//テクスチャ作成
+void fw::DrawWGL::createTexture(const AImage& tex, const Size texSize, std::uint32_t& texId)
 {
 	//テクスチャ作成
-	GLuint texID;
-	glGenTextures(1, &texID);
+	GLuint textureId;
+	glGenTextures(1, &textureId);
 
 	//テクスチャ割り当て
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSize.w, texSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex[0]);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSize.w, texSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//テクスチャIDを出力
+	texId = textureId;
+}
+
+//テクスチャ削除
+void fw::DrawWGL::deleteTexture(const std::uint32_t texId)
+{
+	//テクスチャ削除
+	glDeleteTextures(1, &texId);
+}
+
+//テクスチャ描画
+void fw::DrawWGL::drawTextrue(const ACoordI32& coords, const std::uint32_t texId)
+{
+	//テクスチャ割り当て
+	glBindTexture(GL_TEXTURE_2D, texId);
 
 	//テクスチャ画像は1バイト単位
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -209,26 +229,27 @@ void DrawWGL::drawTextrue(const CoordVec& coord, const Image& tex, const Size te
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 		//座標
-		auto itr = coord.begin();
-		while (itr != coord.end()) {
-			glTexCoord2i(itr->x, itr->y);
-			itr++;
-			glVertex3i(itr->x, itr->y, itr->z);
-			itr++;
+		std::int32_t coordNum = coords.getNum();
+		std::int32_t i = 0;
+		while (i != coordNum) {
+			glTexCoord2i(coords[i].x, coords[i].y);
+			i++;
+			glVertex3i(coords[i].x, coords[i].y, coords[i].z);
+			i++;
 		}
 	}
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 
+	//テクスチャ割り当て解除
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteTextures(1, &texID);
 }
 
 //描画領域取得
-void DrawWGL::getDrawSize(Size& drawSize)
+void fw::DrawWGL::getDrawSize(Size& drawSize)
 {
 	RECT rect;
-	::GetClientRect(this->hWnd, &rect);
-	drawSize.w = static_cast<Int16_t>(rect.right - rect.left);
-	drawSize.h = static_cast<Int16_t>(rect.bottom - rect.top);
+	::GetClientRect(this->hWnd_, &rect);
+	drawSize.w = std::int16_t(rect.right - rect.left);
+	drawSize.h = std::int16_t(rect.bottom - rect.top);
 }

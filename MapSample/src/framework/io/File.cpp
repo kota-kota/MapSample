@@ -1,25 +1,27 @@
 ﻿#include "File.hpp"
 
-using std::string;
-using cmn::Int32_t;
-using cmn::Binary;
-using io::File;
+
+//----------------------------------------------------------
+//
+// ファイルクラス
+//
+//----------------------------------------------------------
 
 //コンストラクタ
-File::File()
+fw::File::File()
 	: filePath_(), fileSize_(0), fp_(nullptr)
 {
 }
 
 //デストラクタ
-File::~File()
+fw::File::~File()
 {
 	this->close();
 	this->filePath_.clear();
 }
 
 //作成
-bool File::create(const string& filePath)
+bool fw::File::create(const std::string& filePath)
 {
 	if (!this->filePath_.empty()) {
 		//作成済み
@@ -32,7 +34,7 @@ bool File::create(const string& filePath)
 }
 
 //ファイルオープン
-bool File::open(const string& mode)
+bool fw::File::open(const std::string& mode)
 {
 	if (this->filePath_.empty()) {
 		//未作成
@@ -61,7 +63,7 @@ bool File::open(const string& mode)
 }
 
 //ファイルクローズ
-void File::close()
+void fw::File::close()
 {
 	if (this->fp_ != nullptr) {
 		//ファイルクローズ
@@ -72,7 +74,7 @@ void File::close()
 }
 
 //ファイル読み込み
-bool File::read(const Int32_t offset, const size_t size, Binary& data)
+bool fw::File::read(const std::int32_t offset, const size_t size, ABinary& data)
 {
 	if (this->filePath_.empty()) {
 		//未作成
@@ -86,7 +88,7 @@ bool File::read(const Int32_t offset, const size_t size, Binary& data)
 		//読み込み範囲がファイルサイズを超える
 		return false;
 	}
-	if (data.size() < size) {
+	if (data.getSize() < size) {
 		//格納バッファのサイズが足りない
 		return false;
 	}
@@ -107,7 +109,7 @@ bool File::read(const Int32_t offset, const size_t size, Binary& data)
 }
 
 //ファイルサイズ取得
-size_t File::getFileSize()
+size_t fw::File::getFileSize()
 {
 	return this->fileSize_;
 }
