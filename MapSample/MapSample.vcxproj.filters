@@ -51,6 +51,9 @@
     <ClCompile Include="src\framework\FwStd.cpp">
       <Filter>ソース ファイル\framework</Filter>
     </ClCompile>
+    <ClCompile Include="src\framework\graphics\Image.cpp">
+      <Filter>ソース ファイル\framework\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\framework\graphics\Bitmap.hpp">
@@ -73,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="src\framework\FwStd.hpp">
       <Filter>ソース ファイル\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\graphics\Image.hpp">
+      <Filter>ソース ファイル\framework\graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 ﻿#include "UiMng.hpp"
+#include "graphics/Image.hpp"
 
 
 //----------------------------------------------------------
@@ -93,6 +94,13 @@ void ui::UiMng::draw()
 			std::int32_t num = std::int32_t(fileSize);
 			fw::ABinary data(num);
 			this->file_.read(0, fileSize, data);
+
+			fw::AImage aImage = data;
+			fw::Image image(aImage);
+			fw::ImageDecorder imageDecorder(&image);
+
+			fw::Image rgba2;
+			imageDecorder.decodeRgbaImage(&rgba2);
 
 			fw::AImage rgba;
 			fw::Size imageSize;
