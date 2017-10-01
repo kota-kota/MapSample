@@ -2,10 +2,15 @@
 #include "image/Image.hpp"
 
 
-static const std::int32_t IMAGE_FIES_NUM = 2;
+static const std::int32_t IMAGE_FIES_NUM = 7;
 static std::string imageFiles[IMAGE_FIES_NUM] = {
-	"./data_image/bitmap/win-8.bmp",
 	"./data_image/bitmap/dog2.bmp",
+	"./data_image/bitmap/os-1.bmp",
+	"./data_image/bitmap/os-4.bmp",
+	"./data_image/bitmap/os-8.bmp",
+	"./data_image/bitmap/os-24.bmp",
+	"./data_image/bitmap/win-8.bmp",
+	"./data_image/bitmap/win-24.bmp",
 };
 
 
@@ -97,11 +102,13 @@ void ui::UiMng::draw()
 		this->drawIF_->clear(defColor);
 	}
 	{
-		std::vector<std::CoordTex> coords(4);
-		coords[0] = { 0.0, 0.0, 63230028 - 16, 16092608 + 16, 0 };
-		coords[1] = { 1.0, 0.0, 63230028 + 16, 16092608 + 16, 0 };
-		coords[2] = { 0.0, 1.0, 63230028 - 16, 16092608 - 16, 0 };
-		coords[3] = { 1.0, 1.0, 63230028 + 16, 16092608 - 16, 0 };
+		std::int32_t xBase = 63229700;
+		std::int32_t yBase = 16092750;
+		std::vector<std::CoordTex> coordsBase(4);
+		coordsBase[0] = { 0.0, 0.0, xBase - 32, yBase + 32, 0 };
+		coordsBase[1] = { 1.0, 0.0, xBase + 32, yBase + 32, 0 };
+		coordsBase[2] = { 0.0, 1.0, xBase - 32, yBase - 32, 0 };
+		coordsBase[3] = { 1.0, 1.0, xBase + 32, yBase - 32, 0 };
 		for (std::int32_t i = 0; i < this->texId_.size(); i++) {
 			if (this->texId_[i] == 0) {
 				//BMPファイルから画像オブジェクト作成
@@ -116,7 +123,8 @@ void ui::UiMng::draw()
 				this->drawIF_->createTextures(&rgba, &this->texId_[i]);
 			}
 
-			std::int32_t ofs = i * 32;
+			std::vector<std::CoordTex> coords = coordsBase;
+			std::int32_t ofs = i * 64;
 			coords[0].x += ofs;
 			coords[1].x += ofs;
 			coords[2].x += ofs;
