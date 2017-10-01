@@ -1,7 +1,7 @@
 ﻿#ifndef INCLUDED_FILE_HPP
 #define INCLUDED_FILE_HPP
 
-#include "FwStd.hpp"
+#include "Std.hpp"
 #include <string>
 
 namespace fw
@@ -30,7 +30,7 @@ namespace fw
 		//ファイルクローズ
 		void close();
 		//ファイル読み込み
-		bool read(const std::int32_t offset, const size_t size, ABinary& data);
+		bool read(std::byte_t* const data, const std::int32_t offset, const size_t size);
 		//ファイルサイズ取得
 		size_t getFileSize();
 	};

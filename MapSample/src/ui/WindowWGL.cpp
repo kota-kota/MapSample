@@ -102,7 +102,7 @@ bool window::WindowWGL::createMainWindow()
 		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL_, &this->uiMng_);
 
 		//描画インターフェース生成
-		new(&this->drawWGL_) fw::DrawWGL(hWnd);
+		this->drawWGL_.create(hWnd);
 
 		//UiMng生成
 		new(&this->uiMng_) ui::UiMng(&this->drawWGL_);
@@ -195,7 +195,7 @@ bool window::WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wPar
 	ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	if (msg == WM_LBUTTONDOWN) {
-		fw::CoordI16 touchPos = { 0, 0, 0 };
+		std::CoordI touchPos = { 0, 0, 0 };
 		touchPos.x = std::int16_t(LOWORD(lParam));
 		touchPos.y = std::int16_t(HIWORD(lParam));
 		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
@@ -217,7 +217,7 @@ bool window::WindowWGL::windowProcUserOperation(HWND hWnd, UINT msg, WPARAM wPar
 	}
 	else if (msg == WM_MOUSEMOVE) {
 		if (wParam & MK_LBUTTON) {
-			fw::CoordI16 dragPos = { 0, 0, 0 };
+			std::CoordI dragPos = { 0, 0, 0 };
 			dragPos.x = std::int16_t(LOWORD(lParam));
 			dragPos.y = std::int16_t(HIWORD(lParam));
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);

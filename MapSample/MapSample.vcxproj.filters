@@ -19,25 +19,19 @@
     <Filter Include="ソース ファイル\framework">
       <UniqueIdentifier>{a85332ec-fbbb-4691-97df-2df56ba1ca4c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\framework\graphics">
-      <UniqueIdentifier>{4ad55521-ae26-42bc-83ef-dfe59a590e62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\framework\graphics\win32">
-      <UniqueIdentifier>{44cfa1b0-ae18-4672-8006-09469cdb802e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\framework\io">
       <UniqueIdentifier>{0247f668-fbdb-4da1-bb17-051b03ff4e06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\framework\draw">
+      <UniqueIdentifier>{4ad55521-ae26-42bc-83ef-dfe59a590e62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\framework\image">
+      <UniqueIdentifier>{4278a51a-c3dd-4de3-979a-e86d68e545c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\framework\graphics\Bitmap.cpp">
-      <Filter>ソース ファイル\framework\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\framework\graphics\win32\DrawWGL.cpp">
-      <Filter>ソース ファイル\framework\graphics\win32</Filter>
     </ClCompile>
     <ClCompile Include="src\framework\io\File.cpp">
       <Filter>ソース ファイル\framework\io</Filter>
@@ -48,23 +42,20 @@
     <ClCompile Include="src\ui\UiMng.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
-    <ClCompile Include="src\framework\FwStd.cpp">
+    <ClCompile Include="src\framework\draw\DrawWGL.cpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\image\Image.cpp">
+      <Filter>ソース ファイル\framework\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\Std.cpp">
       <Filter>ソース ファイル\framework</Filter>
     </ClCompile>
-    <ClCompile Include="src\framework\graphics\Image.cpp">
-      <Filter>ソース ファイル\framework\graphics</Filter>
+    <ClCompile Include="src\framework\image\ImageBitmap.cpp">
+      <Filter>ソース ファイル\framework\image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\framework\graphics\Bitmap.hpp">
-      <Filter>ソース ファイル\framework\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\framework\graphics\DrawIF.hpp">
-      <Filter>ソース ファイル\framework\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\framework\graphics\win32\DrawWGL.hpp">
-      <Filter>ソース ファイル\framework\graphics\win32</Filter>
-    </ClInclude>
     <ClInclude Include="src\framework\io\File.hpp">
       <Filter>ソース ファイル\framework\io</Filter>
     </ClInclude>
@@ -74,11 +65,17 @@
     <ClInclude Include="src\ui\WindowWGL.hpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
-    <ClInclude Include="src\framework\FwStd.hpp">
-      <Filter>ソース ファイル\framework</Filter>
+    <ClInclude Include="src\framework\draw\DrawIF.hpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
     </ClInclude>
-    <ClInclude Include="src\framework\graphics\Image.hpp">
-      <Filter>ソース ファイル\framework\graphics</Filter>
+    <ClInclude Include="src\framework\draw\DrawWGL.hpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\image\Image.hpp">
+      <Filter>ソース ファイル\framework\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\Std.hpp">
+      <Filter>ソース ファイル\framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

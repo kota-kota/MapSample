@@ -1,8 +1,8 @@
 ﻿#ifndef INCLUDED_WINDOWWGL_HPP
 #define INCLUDED_WINDOWWGL_HPP
 
-#include "FwStd.hpp"
-#include "graphics/win32/DrawWGL.hpp"
+#include "Std.hpp"
+#include "draw/DrawWGL.hpp"
 #include "UiMng.hpp"
 #include <Windows.h>
 #include <new>

@@ -1,9 +1,9 @@
 ﻿#ifndef INCLUDED_UIMNG_HPP
 #define INCLUDED_UIMNG_HPP
 
-#include "FwStd.hpp"
-#include "graphics/DrawIF.hpp"
-#include "graphics/Bitmap.hpp"
+#include "Std.hpp"
+#include "draw/DrawIF.hpp"
+#include "image/Image.hpp"
 #include "io/File.hpp"
 
 namespace ui
@@ -16,27 +16,26 @@ namespace ui
 
 	class UiMng {
 		//メンバ変数
-		fw::DrawIF*	drawIF_;
+		fw::DrawIF*		drawIF_;
 
-		fw::CoordI32	mapPos_;
-		fw::CoordI16	screenPos_;
-		fw::CoordI16	touchPos_;
-		fw::CoordI16	dragPos_;
+		std::CoordI		mapPos_;
+		std::CoordI		screenPos_;
+		std::CoordI		touchPos_;
+		std::CoordI		dragPos_;
 		bool			isTouchOn_;
 		bool			isDragOn_;
 
-		fw::File		file_;
-		std::uint32_t	texId_;
+		std::vector<std::uint32_t>	texId_;
 
 	public:
 		//コンストラクタ
 		UiMng(fw::DrawIF* drawIF = nullptr);
 		//タッチON
-		void setTouchOn(fw::CoordI16 touchPos);
+		void setTouchOn(std::CoordI touchPos);
 		//タッチOFF
 		void setTouchOff();
 		//ドラッグ
-		void setDrag(fw::CoordI16 dragPos);
+		void setDrag(std::CoordI dragPos);
 		//描画
 		void draw();
 	};
