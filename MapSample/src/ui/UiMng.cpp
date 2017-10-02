@@ -2,15 +2,18 @@
 #include "image/Image.hpp"
 
 
-static const std::int32_t IMAGE_FIES_NUM = 7;
+static const std::int32_t IMAGE_FIES_NUM = 10;
 static std::string imageFiles[IMAGE_FIES_NUM] = {
-	"./data_image/bitmap/dog2.bmp",
 	"./data_image/bitmap/os-1.bmp",
 	"./data_image/bitmap/os-4.bmp",
 	"./data_image/bitmap/os-8.bmp",
 	"./data_image/bitmap/os-24.bmp",
+	"./data_image/bitmap/dog2.bmp",
+	"./data_image/bitmap/win-1.bmp",
+	"./data_image/bitmap/win-4.bmp",
 	"./data_image/bitmap/win-8.bmp",
 	"./data_image/bitmap/win-24.bmp",
+	"./data_image/bitmap/win-32.bmp",
 };
 
 

@@ -7,18 +7,13 @@
 //
 //----------------------------------------------------------
 
-namespace bitmap
+namespace
 {
 	//----------------------------------------------------------
 	//
 	// Bitmap画像処理用定義
 	//
 	//----------------------------------------------------------
-
-	//共通
-	static const std::uint32_t BYTE_PER_PIXEL_RGB888 = 3;	//RGB888画像の1ピクセルあたりのバイト数
-	static const std::uint32_t BYTE_PER_PIXEL_RGBA8888 = 4;	//RGBA8888画像の1ピクセルあたりのバイト数
-	static const std::uint32_t PALLETE_MAXSIZE = 256 * 4;	//パレット最大サイズ(256色*4バイト)
 
 	//Bitmapファイルヘッダ(Windows,OS/2共通)
 	static const std::int16_t BFH_HEADERSIZE = 14;
@@ -184,7 +179,7 @@ namespace bitmap
 
 		//色ビット数を取得
 		std::uint16_t bitCount;
-		std::ByteReader::read2ByteLe(bmpData + BIH_BITCOUNT_OFS, &bitCount);
+		std::ByteReader::read2ByteLe(bmpData + BCH_BITCOUNT_OFS, &bitCount);
 
 		//パレット数を取得
 		std::uint32_t palleteNum = 0;
@@ -210,8 +205,8 @@ namespace bitmap
 	{
 		//Bitmapファイルヘッダ読み込み
 		//情報ヘッダ読み込みに必要であるため、出力有無に関わらず読み込む
-		bitmap::FileHeader fh;
-		bitmap::ReadFileHeader(bmpData, &fh);
+		FileHeader fh;
+		ReadFileHeader(bmpData, &fh);
 
 		if (fileHeader != nullptr) {
 			//ファイルヘッダ出力ありなので、出力へコピー
@@ -221,17 +216,14 @@ namespace bitmap
 		//Bitmap情報ヘッダ読み込み
 		//出力なしの場合は必要ないので読み込まない
 		if (infoHeader != nullptr) {
-			bitmap::InfoHeader ih;
-			if (fh.format_ == bitmap::BitmapFormat::WINDOWS) {
+			InfoHeader ih;
+			if (fh.format_ == BitmapFormat::WINDOWS) {
 				//Bitmap情報ヘッダ(Windows)読み込み
-				bitmap::ReadInfoHeaderWindows(bmpData, &ih);
-			}
-			else if (fh.format_ == bitmap::BitmapFormat::OS2) {
-				//Bitmap情報ヘッダ(OS/2)読み込み
-				bitmap::ReadInfoHeaderOS2(bmpData, &ih);
+				ReadInfoHeaderWindows(bmpData, &ih);
 			}
 			else {
-				//Bitmap画像ではない
+				//Bitmap情報ヘッダ(OS/2)読み込み
+				ReadInfoHeaderOS2(bmpData, &ih);
 			}
 
 			//情報ヘッダ出力ありなので、出力へコピー
@@ -248,9 +240,13 @@ namespace bitmap
 			imageSize = fileHeader.fileSize_ - fileHeader.imageOffset_;
 		}
 
-		const std::uint32_t padding = ((imageSize * 8) / infoHeader.height_) - (infoHeader.width_ * infoHeader.bitCount_);
+		return ((imageSize * 8) / infoHeader.height_) - (infoHeader.width_ * infoHeader.bitCount_);
+	}
 
-		return padding;
+	//パディングバイト数を取得
+	static std::uint32_t GetPaddingByte(const FileHeader& fileHeader, const InfoHeader& infoHeader)
+	{
+		return GetPaddingBit(fileHeader, infoHeader) / 8;
 	}
 
 	//パレットデータを取得
@@ -271,20 +267,98 @@ namespace bitmap
 		}
 	}
 
-	//8BitBitmap画像からからRGBA8888画像へデコード
-	static void DecodeRgba8888From8BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
+	//1BitBitmap画像からからRGBA8888画像へデコード
+	static void DecodeRgba8888From1BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
 	{
 		//パレットデータを取得
-		std::byte_t pallete[PALLETE_MAXSIZE] = { 0 };
-		bitmap::GetPalleteData(pallete, bmpData, infoHeader);
+		std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
+		GetPalleteData(pallete, bmpData, infoHeader);
 
-		//パディングビット数を取得
-		std::uint32_t paddingBit = bitmap::GetPaddingBit(fileHeader, infoHeader);
+		//パディングバイト数を取得
+		std::uint32_t paddingByte = GetPaddingByte(fileHeader, infoHeader);
 
 		//出力データを取得
 		std::uint32_t imageOffset = fileHeader.imageOffset_;
 		for (std::uint32_t h = 0; h < infoHeader.height_; h++) {
-			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * BYTE_PER_PIXEL_RGBA8888;
+			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+			std::uint8_t index = 0;
+			std::uint8_t readBit = 7;
+			for (std::uint32_t w = 0; w < infoHeader.width_; w++) {
+				//画像データ取得
+
+				//画像データはパレットのインデックス
+				if ((w % 8) == 0) {
+					std::ByteReader::read1ByteLe(bmpData + imageOffset, &index);
+					readBit = 7;
+					imageOffset++;
+				}
+
+				int32_t palleteIndex = ((index >> readBit) & 0x01) * infoHeader.palleteByte_;
+				*((*outData) + writeIndex + 0) = *(pallete + palleteIndex + 2);		//赤
+				*((*outData) + writeIndex + 1) = *(pallete + palleteIndex + 1);		//緑
+				*((*outData) + writeIndex + 2) = *(pallete + palleteIndex + 0);		//青
+				*((*outData) + writeIndex + 3) = 255;
+
+				readBit--;
+				writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
+			}
+			imageOffset += paddingByte;
+		}
+	}
+
+	//4BitBitmap画像からからRGBA8888画像へデコード
+	static void DecodeRgba8888From4BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
+	{
+		//パレットデータを取得
+		std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
+		GetPalleteData(pallete, bmpData, infoHeader);
+
+		//パディングバイト数を取得
+		std::uint32_t paddingByte = GetPaddingByte(fileHeader, infoHeader);
+
+		//出力データを取得
+		std::uint32_t imageOffset = fileHeader.imageOffset_;
+		for (std::uint32_t h = 0; h < infoHeader.height_; h++) {
+			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+			std::uint8_t index = 0;
+			std::uint8_t readBit = 4;
+			for (std::uint32_t w = 0; w < infoHeader.width_; w++) {
+				//画像データ取得
+
+				//画像データはパレットのインデックス
+				if ((w % 2) == 0) {
+					std::ByteReader::read1ByteLe(bmpData + imageOffset, &index);
+					readBit = 4;
+					imageOffset++;
+				}
+
+				int32_t palleteIndex = ((index >> readBit) & 0x0F) * infoHeader.palleteByte_;
+				*((*outData) + writeIndex + 0) = *(pallete + palleteIndex + 2);		//赤
+				*((*outData) + writeIndex + 1) = *(pallete + palleteIndex + 1);		//緑
+				*((*outData) + writeIndex + 2) = *(pallete + palleteIndex + 0);		//青
+				*((*outData) + writeIndex + 3) = 255;
+
+				readBit -= 4;
+				writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
+			}
+			imageOffset += paddingByte;
+		}
+	}
+
+	//8BitBitmap画像からからRGBA8888画像へデコード
+	static void DecodeRgba8888From8BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
+	{
+		//パレットデータを取得
+		std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
+		GetPalleteData(pallete, bmpData, infoHeader);
+
+		//パディングバイト数を取得
+		std::uint32_t paddingByte = GetPaddingByte(fileHeader, infoHeader);
+
+		//出力データを取得
+		std::uint32_t imageOffset = fileHeader.imageOffset_;
+		for (std::uint32_t h = 0; h < infoHeader.height_; h++) {
+			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * fw::BYTE_PER_PIXEL_RGBA8888;
 			for (std::uint32_t w = 0; w < infoHeader.width_; w++) {
 				//画像データ取得
 
@@ -299,8 +373,9 @@ namespace bitmap
 				*((*outData) + writeIndex + 3) = 255;
 
 				imageOffset++;
-				writeIndex += BYTE_PER_PIXEL_RGBA8888;
+				writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
 			}
+			imageOffset += paddingByte;
 		}
 	}
 
@@ -308,12 +383,12 @@ namespace bitmap
 	static void DecodeRgba8888From24BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
 	{
 		//パディングバイト数を取得
-		std::uint32_t paddingByte = bitmap::GetPaddingBit(fileHeader, infoHeader) / 8;
+		std::uint32_t paddingByte = GetPaddingByte(fileHeader, infoHeader);
 
 		//出力データを取得
 		std::uint32_t imageOffset = fileHeader.imageOffset_;
 		for (std::uint32_t h = 0; h < infoHeader.height_; h++) {
-			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * BYTE_PER_PIXEL_RGBA8888;
+			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * fw::BYTE_PER_PIXEL_RGBA8888;
 			for (std::uint32_t w = 0; w < infoHeader.width_; w++) {
 				//画像データ取得
 
@@ -328,7 +403,38 @@ namespace bitmap
 				*((*outData) + writeIndex + 3) = 255;
 
 				imageOffset += 3;
-				writeIndex += BYTE_PER_PIXEL_RGBA8888;
+				writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
+			}
+			imageOffset += paddingByte;
+		}
+	}
+
+	//32BitBitmap画像からからRGBA8888画像へデコード
+	static void DecodeRgba8888From32BitBitmap(std::byte_t** const outData, const std::byte_t* const bmpData, const FileHeader& fileHeader, const InfoHeader& infoHeader)
+	{
+		//パディングバイト数を取得
+		std::uint32_t paddingByte = GetPaddingByte(fileHeader, infoHeader);
+
+		//出力データを取得
+		std::uint32_t imageOffset = fileHeader.imageOffset_;
+		for (std::uint32_t h = 0; h < infoHeader.height_; h++) {
+			std::uint32_t writeIndex = (infoHeader.height_ - h - 1) * infoHeader.width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+			for (std::uint32_t w = 0; w < infoHeader.width_; w++) {
+				//画像データ取得
+
+				std::uint8_t b, g, r, a;
+				std::ByteReader::read1ByteLe(bmpData + imageOffset + 0, &b);
+				std::ByteReader::read1ByteLe(bmpData + imageOffset + 1, &g);
+				std::ByteReader::read1ByteLe(bmpData + imageOffset + 2, &r);
+				std::ByteReader::read1ByteLe(bmpData + imageOffset + 3, &a);
+
+				*((*outData) + writeIndex + 0) = r;		//赤
+				*((*outData) + writeIndex + 1) = g;		//緑
+				*((*outData) + writeIndex + 2) = b;		//青
+				*((*outData) + writeIndex + 3) = 255;
+
+				imageOffset += 4;
+				writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
 			}
 			imageOffset += paddingByte;
 		}
@@ -347,11 +453,11 @@ namespace bitmap
 bool fw::ImageLib::Bitmap::IsBitmap(const std::byte_t* const bmpData)
 {
 	//Bitmapファイルヘッダ読み込み
-	bitmap::FileHeader fileHeader;
-	bitmap::ReadFileHeader(bmpData, &fileHeader);
+	FileHeader fileHeader;
+	ReadFileHeader(bmpData, &fileHeader);
 
 	bool isBitmap = false;
-	if (fileHeader.format_ != bitmap::BitmapFormat::INVALID) {
+	if (fileHeader.format_ != BitmapFormat::INVALID) {
 		//フォーマットタイプが無効でなければBitmap画像
 		isBitmap = true;
 	}
@@ -362,8 +468,8 @@ bool fw::ImageLib::Bitmap::IsBitmap(const std::byte_t* const bmpData)
 void fw::ImageLib::Bitmap::GetWH(const std::byte_t* const bmpData, std::uint32_t* const width, std::uint32_t* const height)
 {
 	//Bitmapヘッダ読み込み
-	bitmap::InfoHeader infoHeader;
-	bitmap::ReadHeader(bmpData, nullptr, &infoHeader);
+	InfoHeader infoHeader;
+	ReadHeader(bmpData, nullptr, &infoHeader);
 
 	//幅高さを出力
 	*width = infoHeader.width_;
@@ -374,22 +480,25 @@ void fw::ImageLib::Bitmap::GetWH(const std::byte_t* const bmpData, std::uint32_t
 void fw::ImageLib::Bitmap::DecodeRgba8888(std::byte_t** const outData, const std::byte_t* const bmpData)
 {
 	//Bitmapヘッダ読み込み
-	bitmap::FileHeader fileHeader;
-	bitmap::InfoHeader infoHeader;
-	bitmap::ReadHeader(bmpData, &fileHeader, &infoHeader);
+	FileHeader fileHeader;
+	InfoHeader infoHeader;
+	ReadHeader(bmpData, &fileHeader, &infoHeader);
 
 	switch (infoHeader.bitCount_) {
-	case 1:
+	case 1:		//1bit
+		DecodeRgba8888From1BitBitmap(outData, bmpData, fileHeader, infoHeader);
 		break;
-	case 4:
+	case 4:		//4bit
+		DecodeRgba8888From4BitBitmap(outData, bmpData, fileHeader, infoHeader);
 		break;
 	case 8:		//8bit
-		bitmap::DecodeRgba8888From8BitBitmap(outData, bmpData, fileHeader, infoHeader);
+		DecodeRgba8888From8BitBitmap(outData, bmpData, fileHeader, infoHeader);
 		break;
 	case 24:	//24bit
-		bitmap::DecodeRgba8888From24BitBitmap(outData, bmpData, fileHeader, infoHeader);
+		DecodeRgba8888From24BitBitmap(outData, bmpData, fileHeader, infoHeader);
 		break;
-	case 32:
+	case 32:	//32bit
+		DecodeRgba8888From32BitBitmap(outData, bmpData, fileHeader, infoHeader);
 		break;
 	default:
 		break;
