@@ -2,19 +2,26 @@
 #include "image/Image.hpp"
 
 
-static const std::int32_t IMAGE_FIES_NUM = 10;
-static std::string imageFiles[IMAGE_FIES_NUM] = {
-	"./data/bitmap/os-1.bmp",
-	"./data/bitmap/os-4.bmp",
-	"./data/bitmap/os-8.bmp",
-	"./data/bitmap/os-24.bmp",
-	"./data/bitmap/dog2.bmp",
-	"./data/bitmap/win-1.bmp",
-	"./data/bitmap/win-4.bmp",
-	"./data/bitmap/win-8.bmp",
-	"./data/bitmap/win-24.bmp",
-	"./data/bitmap/win-32.bmp",
-};
+namespace {
+	struct ImageFile {
+		std::string		bodyFile;
+		std::string		blendFile;
+		fw::ImageType	type;
+	};
+	static ImageFile imageFiles[] = {
+		{ "./data/bitmap/os-1.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/os-4.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/os-8.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/os-24.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/dog2.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/win-1.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/win-4.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/win-8.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/win-24.bmp", "", fw::ImageType::BMP, },
+		{ "./data/bitmap/win-32.bmp", "", fw::ImageType::BMP, },
+	};
+	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);
+}
 
 
 //----------------------------------------------------------
@@ -24,8 +31,9 @@ static std::string imageFiles[IMAGE_FIES_NUM] = {
 //----------------------------------------------------------
 
 //コンストラクタ
-ui::UiMng::UiMng(fw::DrawIF* drawIF)
-	: drawIF_(drawIF), mapPos_(), screenPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false), texId_()
+ui::UiMng::UiMng(fw::DrawIF* drawIF) :
+	drawIF_(drawIF), mapPos_(), screenPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false),
+	texBasePos_(), texImageList_()
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 	if (this->drawIF_ != nullptr) {
@@ -37,9 +45,18 @@ ui::UiMng::UiMng(fw::DrawIF* drawIF)
 		this->drawIF_->getScreenSize(&screenSize);
 		this->screenPos_ = { screenSize.width / 2, screenSize.height / 2, 0 };
 
-		//テクスチャ
-		this->texId_.resize(IMAGE_FIES_NUM, 0);
+		//テクスチャ基準座標(画面左上になるように)
+		this->texBasePos_ = { this->mapPos_.x - this->screenPos_.x, this->mapPos_.y + this->screenPos_.y, 0 };
+
+		//テクスチャイメージリスト
+		this->texImageList_ = new TexImage[imageFilesNum];
 	}
+}
+
+//デストラクタ
+ui::UiMng::~UiMng()
+{
+	delete[] this->texImageList_;
 }
 
 //タッチON
@@ -105,34 +122,33 @@ void ui::UiMng::draw()
 		this->drawIF_->clear(defColor);
 	}
 	{
-		std::int32_t xBase = 63229700;
-		std::int32_t yBase = 16092750;
-		std::vector<std::CoordTex> coordsBase(4);
-		coordsBase[0] = { 0.0, 0.0, xBase - 32, yBase + 32, 0 };
-		coordsBase[1] = { 1.0, 0.0, xBase + 32, yBase + 32, 0 };
-		coordsBase[2] = { 0.0, 1.0, xBase - 32, yBase - 32, 0 };
-		coordsBase[3] = { 1.0, 1.0, xBase + 32, yBase - 32, 0 };
-		for (std::int32_t i = 0; i < this->texId_.size(); i++) {
-			if (this->texId_[i] == 0) {
+		std::CoordI texBasePos = this->texBasePos_;
+		for (std::int32_t i = 0; i < imageFilesNum; i++) {
+			std::uint32_t* texId = &this->texImageList_[i].texId_;
+			fw::Image* image = &this->texImageList_[i].image_;
+			if (*texId == 0) {
 				//BMPファイルから画像オブジェクト作成
-				fw::Image bmpImage;
-				fw::ImageLib::CreateImage(&bmpImage, imageFiles[i], fw::ImageType::BMP);
+				fw::ImageLib::CreateImage(image, imageFiles[i].bodyFile, imageFiles[i].type);
 
 				//デコード
 				fw::Image rgba;
-				fw::ImageLib::DecodeRgba8888FromBitmap(&rgba, bmpImage);
+				fw::ImageLib::DecodeRgba8888FromBitmap(&rgba, *image);
 
 				//テクスチャ作成
-				this->drawIF_->createTextures(&rgba, &this->texId_[i]);
+				this->drawIF_->createTextures(&rgba, texId);
 			}
 
-			std::vector<std::CoordTex> coords = coordsBase;
-			std::int32_t ofs = i * 64;
-			coords[0].x += ofs;
-			coords[1].x += ofs;
-			coords[2].x += ofs;
-			coords[3].x += ofs;
-			this->drawIF_->drawTextrue(coords, this->texId_[i]);
+			std::CoordI ofs = { image->Width(), image->Height(), 0 };
+
+			std::vector<std::CoordTex> coords(4);
+			coords[0] = { 0.0, 0.0, texBasePos.x, texBasePos.y, texBasePos.z };
+			coords[1] = { 1.0, 0.0, texBasePos.x + ofs.x, texBasePos.y, texBasePos.z };
+			coords[2] = { 0.0, 1.0, texBasePos.x, texBasePos.y - ofs.y, texBasePos.z };
+			coords[3] = { 1.0, 1.0, texBasePos.x + ofs.x, texBasePos.y - ofs.y, texBasePos.z };
+
+			this->drawIF_->drawTextrue(coords, *texId);
+
+			texBasePos.x += ofs.x;
 		}
 	}
 	{

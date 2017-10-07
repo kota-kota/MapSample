@@ -15,6 +15,13 @@ namespace ui
 	//----------------------------------------------------------
 
 	class UiMng {
+		struct TexImage {
+			std::uint32_t	texId_;
+			fw::Image		image_;
+
+			TexImage() : texId_(0), image_() {}
+		};
+
 		//メンバ変数
 		fw::DrawIF*		drawIF_;
 
@@ -25,11 +32,14 @@ namespace ui
 		bool			isTouchOn_;
 		bool			isDragOn_;
 
-		std::vector<std::uint32_t>	texId_;
+		std::CoordI		texBasePos_;
+		TexImage*		texImageList_;
 
 	public:
 		//コンストラクタ
 		UiMng(fw::DrawIF* drawIF = nullptr);
+		//デストラクタ
+		~UiMng();
 		//タッチON
 		void setTouchOn(std::CoordI touchPos);
 		//タッチOFF
