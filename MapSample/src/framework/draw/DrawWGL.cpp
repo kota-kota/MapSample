@@ -137,12 +137,11 @@ void fw::DrawWGL::Impl::setup(const std::CoordI mapPos)
 	//プロジェクション設定
 	std::double_t left = mapPos.x - screenSize.width / 2;
 	std::double_t right = left + screenSize.width;
-	std::double_t top = mapPos.y - screenSize.height / 2;
-	std::double_t bottom = top + screenSize.height;
+	std::double_t top = mapPos.y + screenSize.height / 2;
+	std::double_t bottom = top - screenSize.height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//glOrtho(left, right, bottom, top, -1, 1);
-	glOrtho(left, right, top, bottom, -1, 1);
+	glOrtho(left, right, bottom, top, -1, 1);
 
 	//モデルビュー設定
 	glMatrixMode(GL_MODELVIEW);
