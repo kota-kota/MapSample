@@ -146,7 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\framework\draw\DrawWGL.cpp" />
-    <ClCompile Include="src\framework\image\ImageBitmap.cpp" />
     <ClCompile Include="src\framework\Std.cpp" />
     <ClCompile Include="src\framework\image\Image.cpp" />
     <ClCompile Include="src\framework\io\File.cpp" />

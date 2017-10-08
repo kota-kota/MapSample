@@ -4,21 +4,22 @@
 
 namespace {
 	struct ImageFile {
-		std::string		bodyFile;
-		std::string		blendFile;
-		fw::ImageType	type;
+		std::uint32_t	id_;
+		fw::ImageFormat	format_;
+		std::string		bodyFile_;
+		std::string		blendFile_;
 	};
 	static ImageFile imageFiles[] = {
-		{ "./data/bitmap/os-1.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/os-4.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/os-8.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/os-24.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/dog2.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/win-1.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/win-4.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/win-8.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/win-24.bmp", "", fw::ImageType::BMP, },
-		{ "./data/bitmap/win-32.bmp", "", fw::ImageType::BMP, },
+		{ 0x01, fw::ImageFormat::BMP, "./data/bitmap/os-1.bmp", "", },
+		{ 0x02, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
+		{ 0x03, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
+		{ 0x04, fw::ImageFormat::BMP, "./data/bitmap/os-24.bmp", "", },
+		{ 0x05, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
+		{ 0x06, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
+		{ 0x07, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
+		{ 0x08, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
+		{ 0x09, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
+		{ 0x0a, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
 	};
 	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);
 }
@@ -127,12 +128,13 @@ void ui::UiMng::draw()
 			std::uint32_t* texId = &this->texImageList_[i].texId_;
 			fw::Image* image = &this->texImageList_[i].image_;
 			if (*texId == 0) {
-				//BMPファイルから画像オブジェクト作成
-				fw::ImageLib::CreateImage(image, imageFiles[i].bodyFile, imageFiles[i].type);
+				//画像ファイルから画像オブジェクト作成
+				new(image) fw::Image(imageFiles[i].id_, fw::ImageType::SOFT, imageFiles[i].format_);
+				image->Create(imageFiles[i].bodyFile_, 0, 0);
 
 				//デコード
 				fw::Image rgba;
-				fw::ImageLib::DecodeRgba8888FromBitmap(&rgba, *image);
+				image->DecodeRgba8888(&rgba);
 
 				//テクスチャ作成
 				this->drawIF_->createTextures(&rgba, texId);

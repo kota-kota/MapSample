@@ -51,9 +51,6 @@
     <ClCompile Include="src\framework\Std.cpp">
       <Filter>ソース ファイル\framework</Filter>
     </ClCompile>
-    <ClCompile Include="src\framework\image\ImageBitmap.cpp">
-      <Filter>ソース ファイル\framework\image</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\framework\io\File.hpp">
