@@ -23,7 +23,7 @@ namespace {
 		//{ 0x06, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
 		//{ 0x07, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
 		//{ 0x08, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
-		//{ 0x09, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
+		{ 0x09, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
 		//{ 0x0a, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
 	};
 	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);

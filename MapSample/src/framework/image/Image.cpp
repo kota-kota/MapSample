@@ -149,7 +149,7 @@ namespace {
 		png_bytepp CreateDecodeImage()
 		{
 			//デコード後の画像データを格納するメモリを確保
-			png_uint_32 pngSize = this->height_ * sizeof(png_bytep) + this->height_ * this->rowByte_;
+			png_size_t pngSize = this->height_ * sizeof(png_bytep) + this->height_ * this->rowByte_;
 			png_byte* tmp = new png_byte[pngSize];
 			png_bytepp png = (png_bytepp)tmp;
 
