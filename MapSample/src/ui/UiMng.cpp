@@ -10,16 +10,21 @@ namespace {
 		std::string		blendFile_;
 	};
 	static ImageFile imageFiles[] = {
-		{ 0x01, fw::ImageFormat::BMP, "./data/bitmap/os-1.bmp", "", },
-		{ 0x02, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
-		{ 0x03, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
-		{ 0x04, fw::ImageFormat::BMP, "./data/bitmap/os-24.bmp", "", },
-		{ 0x05, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
-		{ 0x06, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
-		{ 0x07, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
-		{ 0x08, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
-		{ 0x09, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
-		{ 0x0a, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
+		//{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType3_depth1.png", "", },
+		//{ 0x12, fw::ImageFormat::PNG, "./data/png/colorType3_depth2.png", "", },
+		//{ 0x13, fw::ImageFormat::PNG, "./data/png/colorType3_depth4.png", "", },
+		//{ 0x14, fw::ImageFormat::PNG, "./data/png/colorType3_depth8.png", "", },
+		{ 0x15, fw::ImageFormat::PNG, "./data/png/colorType2_depth8.png", "", },
+		//{ 0x01, fw::ImageFormat::BMP, "./data/bitmap/os-1.bmp", "", },
+		//{ 0x02, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
+		//{ 0x03, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
+		//{ 0x04, fw::ImageFormat::BMP, "./data/bitmap/os-24.bmp", "", },
+		//{ 0x05, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
+		//{ 0x06, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
+		//{ 0x07, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
+		//{ 0x08, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
+		//{ 0x09, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
+		//{ 0x0a, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
 	};
 	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);
 }
