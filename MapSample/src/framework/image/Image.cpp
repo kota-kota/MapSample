@@ -50,14 +50,30 @@ namespace {
 		//RGBA8888画像へデコード
 		void DecodeRgba8888(std::byte_t** const outData)
 		{
+			//デコード後の画像データを格納するメモリを確保(本関数の最後に解放)
+			png_size_t pngSize = this->height_ * sizeof(png_bytep) + this->height_ * this->rowByte_;
+			png_byte* tmp = new png_byte[pngSize];
+			png_bytepp png = (png_bytepp)tmp;
+
+			//png_read_imageには各行へのポインタを渡すため、2次元配列化
+			png_bytep wp = (png_bytep)&png[this->height_];
+			for (png_uint_32 h = 0; h < this->height_; h++) {
+				png[h] = wp;
+				wp += this->rowByte_;
+			}
+
+			//PNGイメージ読み込み
+			png_read_image(this->pngStr_, png);
+
 			switch (this->colorType_) {
 			case PNG_COLOR_TYPE_GRAY:		//0:グレー
+				DecodeRgba8888FromGrayScalePng(outData, png);
 				break;
 			case PNG_COLOR_TYPE_RGB:		//2:トゥルーカラー
-				DecodeRgba8888FromTrueColorPng(outData);
+				DecodeRgba8888FromTrueColorPng(outData, png);
 				break;
 			case PNG_COLOR_TYPE_PALETTE:	//3:パレット
-				DecodeRgba8888FromPalletePng(outData);
+				DecodeRgba8888FromPalletePng(outData, png);
 				break;
 			case PNG_COLOR_TYPE_GRAY_ALPHA:	//4:グレー+アルファ
 				break;
@@ -66,6 +82,9 @@ namespace {
 			default:
 				break;
 			};
+
+			//デコード後の画像データを格納するメモリを解放
+			delete[] png;
 		}
 
 	private:
@@ -102,8 +121,12 @@ namespace {
 				//PNG読み込み
 				png_read_info(this->pngStr_, this->pngInfo_);
 
-				//IHDRチャンク読み込み
-				ReadIHDRChunk();
+				//IHDRチャンクの各種情報取得
+				this->height_ = png_get_image_height(this->pngStr_, this->pngInfo_);
+				this->width_ = png_get_image_width(this->pngStr_, this->pngInfo_);
+				this->rowByte_ = png_get_rowbytes(this->pngStr_, this->pngInfo_);
+				this->bitDepth_ = png_get_bit_depth(this->pngStr_, this->pngInfo_);
+				this->colorType_ = png_get_color_type(this->pngStr_, this->pngInfo_);
 			}
 			else {
 				//PNG画像でない
@@ -121,65 +144,67 @@ namespace {
 			}
 		}
 
-		//IHDRチャンク読み込み
-		void ReadIHDRChunk()
+		//グレーPNG画像からRGBA8888画像へデコード
+		void DecodeRgba8888FromGrayScalePng(std::byte_t** const outData, const png_bytepp png)
 		{
-			//IHDRチャンクの各種情報取得
-			this->height_ = png_get_image_height(this->pngStr_, this->pngInfo_);
-			this->width_ = png_get_image_width(this->pngStr_, this->pngInfo_);
-			this->rowByte_ = png_get_rowbytes(this->pngStr_, this->pngInfo_);
-			this->bitDepth_ = png_get_bit_depth(this->pngStr_, this->pngInfo_);
-			this->colorType_ = png_get_color_type(this->pngStr_, this->pngInfo_);
-		}
+			if (this->bitDepth_ <= 8) {
+				//ビット深度が1bit,2bit,4bit,8bitの場合
 
-		//PLTEチャンク読み込み
-		png_colorp ReadPLTEChunk(std::int32_t* palleteNum)
-		{
-			png_colorp pallete = nullptr;
-			std::int32_t palNum = 0;
-			png_get_PLTE(this->pngStr_, this->pngInfo_, &pallete, &palNum);
+				//ビット深度で表現できる最大値
+				png_byte bitMaxValue = (0x01 << this->bitDepth_) - 1;
 
-			if (palleteNum != nullptr) {
-				*palleteNum = palNum;
+				//グレーサンプル値(輝度に応じたグレーカラー取得に必要)
+				png_byte graySample = 255 / bitMaxValue;
+
+				//出力データへデコード後の画像データを設定
+				for (png_uint_32 h = 0; h < this->height_; h++) {
+					//一行ずつ処理
+					png_bytep wp = png[h];
+
+					//書き込み位置と読み込み位置を初期化
+					png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+					png_uint_32 readOffset = 0;
+
+					//ビット深度に応じたビットオフセット
+					png_int_16 bitOfs = 8 - this->bitDepth_;
+
+					for (png_uint_32 w = 0; w < this->width_; w++) {
+						//輝度を取得
+						png_byte brightness = (wp[readOffset] >> bitOfs) & bitMaxValue;
+
+						//輝度に応じたグレーカラーを取得
+						png_byte grayColor = graySample * brightness;
+
+						//出力データへRGBA値を設定
+						*((*outData) + writeOffset + 0) = grayColor;
+						*((*outData) + writeOffset + 1) = grayColor;
+						*((*outData) + writeOffset + 2) = grayColor;
+						*((*outData) + writeOffset + 3) = 255;
+
+						//ビットオフセットを更新
+						bitOfs -= this->bitDepth_;
+						if (bitOfs < 0) {
+							//次の読み込み位置に更新
+							bitOfs = 8 - this->bitDepth_;
+							readOffset++;
+						}
+						//書き込み位置を更新
+						writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
+					}
+				}
 			}
-			return pallete;
-		}
-
-		//デコード後の画像データ作成
-		png_bytepp CreateDecodeImage()
-		{
-			//デコード後の画像データを格納するメモリを確保
-			png_size_t pngSize = this->height_ * sizeof(png_bytep) + this->height_ * this->rowByte_;
-			png_byte* tmp = new png_byte[pngSize];
-			png_bytepp png = (png_bytepp)tmp;
-
-			//png_read_imageには各行へのポインタを渡すため、2次元配列化
-			png_bytep wp = (png_bytep)&png[this->height_];
-			for (png_uint_32 h = 0; h < this->height_; h++) {
-				png[h] = wp;
-				wp += this->rowByte_;
+			else {
+				//ビット深度が1bit,2bit,4bit,8bit以外の場合
+				//ビット深度が16bitの可能性があるが、現状48bitカラーは表現できないので実装しない
+				//16bit以外でここに来た場合は異常
 			}
-
-			//PNGイメージ読み込み
-			png_read_image(this->pngStr_, png);
-
-			return png;
-		}
-
-		//デコード後の画像データ解放
-		void DestroyDecodeImage(png_bytepp png)
-		{
-			delete[] png;
 		}
 
 		//トゥルーカラーPNG画像からRGBA8888画像へデコード
-		void DecodeRgba8888FromTrueColorPng(std::byte_t** const outData)
+		void DecodeRgba8888FromTrueColorPng(std::byte_t** const outData, const png_bytepp png)
 		{
-			//デコード後の画像データ作成
-			png_bytepp png = CreateDecodeImage();
-
 			if (this->bitDepth_ == 8) {
-				//8bit
+				//ビット深度が8bitの場合
 
 				//出力データへデコード後の画像データを設定
 				for (png_uint_32 h = 0; h < this->height_; h++) {
@@ -204,59 +229,61 @@ namespace {
 				}
 			}
 			else {
-				//16bitは未対応
+				//ビット深度が8bit以外は何もしない
+				//ビット深度が16bitの可能性があるが、現状48bitカラーは表現できないので実装しない
+				//16bit以外でここに来た場合は異常
 			}
-
-			//デコード後の画像データ解放
-			DestroyDecodeImage(png);
 		}
 
 		//パレットPNG画像からRGBA8888画像へデコード
-		void DecodeRgba8888FromPalletePng(std::byte_t** const outData)
+		void DecodeRgba8888FromPalletePng(std::byte_t** const outData, const png_bytepp png)
 		{
-			//デコード後の画像データ作成
-			png_bytepp png = CreateDecodeImage();
-
 			//PLTEチャンク読み込み
-			png_colorp pallete = ReadPLTEChunk(nullptr);
+			png_colorp pallete = nullptr;
+			std::int32_t palleteNum = 0;
+			png_get_PLTE(this->pngStr_, this->pngInfo_, &pallete, &palleteNum);
 
-			//出力データへデコード後の画像データを設定
-			for (png_uint_32 h = 0; h < this->height_; h++) {
-				//一行ずつ処理
-				png_bytep wp = png[h];
+			if ((pallete != nullptr) && (palleteNum > 0)) {
+				//パレットデータ取得成功
 
-				//書き込み位置と読み込み位置を初期化
-				png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
-				png_uint_32 readOffset = 0;
+				//出力データへデコード後の画像データを設定
+				for (png_uint_32 h = 0; h < this->height_; h++) {
+					//一行ずつ処理
+					png_bytep wp = png[h];
 
-				//ビット深度に応じたビットオフセットとビットマスク
-				png_int_16 bitOfs = 8 - this->bitDepth_;
-				png_byte bitMask = (0x01 << this->bitDepth_) - 1;
+					//書き込み位置と読み込み位置を初期化
+					png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+					png_uint_32 readOffset = 0;
 
-				for (png_uint_32 w = 0; w < this->width_; w++) {
-					//画像データはパレットインデックス
-					png_byte palleteIndex = (wp[readOffset] >> bitOfs) & bitMask;
+					//ビット深度に応じたビットオフセットとビットマスク
+					png_int_16 bitOfs = 8 - this->bitDepth_;
+					png_byte bitMask = (0x01 << this->bitDepth_) - 1;
 
-					//出力データへRGBA値を設定
-					*((*outData) + writeOffset + 0) = pallete[palleteIndex].red;
-					*((*outData) + writeOffset + 1) = pallete[palleteIndex].green;
-					*((*outData) + writeOffset + 2) = pallete[palleteIndex].blue;
-					*((*outData) + writeOffset + 3) = 255;
+					for (png_uint_32 w = 0; w < this->width_; w++) {
+						//画像データはパレットインデックス
+						png_byte palleteIndex = (wp[readOffset] >> bitOfs) & bitMask;
 
-					//ビットオフセットを更新
-					bitOfs -= this->bitDepth_;
-					if (bitOfs < 0) {
-						//次の読み込み位置に更新
-						bitOfs = 8 - this->bitDepth_;
-						readOffset++;
+						//出力データへRGBA値を設定
+						*((*outData) + writeOffset + 0) = pallete[palleteIndex].red;
+						*((*outData) + writeOffset + 1) = pallete[palleteIndex].green;
+						*((*outData) + writeOffset + 2) = pallete[palleteIndex].blue;
+						*((*outData) + writeOffset + 3) = 255;
+
+						//ビットオフセットを更新
+						bitOfs -= this->bitDepth_;
+						if (bitOfs < 0) {
+							//次の読み込み位置に更新
+							bitOfs = 8 - this->bitDepth_;
+							readOffset++;
+						}
+						//書き込み位置を更新
+						writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
 					}
-					//書き込み位置を更新
-					writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
 				}
 			}
-
-			//デコード後の画像データ解放
-			DestroyDecodeImage(png);
+			else {
+				//パレットデータ取得失敗
+			}
 		}
 	};
 
