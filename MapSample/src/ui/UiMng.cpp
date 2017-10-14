@@ -10,7 +10,7 @@ namespace {
 		std::string		blendFile_;
 	};
 	static ImageFile imageFiles[] = {
-		//{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType0_depth1.png", "", },
+		{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType0_depth1.png", "", },
 		//{ 0x12, fw::ImageFormat::PNG, "./data/png/colorType0_depth2.png", "", },
 		//{ 0x13, fw::ImageFormat::PNG, "./data/png/colorType0_depth4.png", "", },
 		//{ 0x14, fw::ImageFormat::PNG, "./data/png/colorType0_depth8.png", "", },
@@ -23,10 +23,10 @@ namespace {
 		//{ 0x82, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
 		//{ 0x83, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
 		//{ 0x84, fw::ImageFormat::BMP, "./data/bitmap/os-24.bmp", "", },
-		//{ 0x00, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
-		{ 0x91, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
-		{ 0x92, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
-		{ 0x93, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
+		//{ 0x85, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
+		//{ 0x91, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
+		//{ 0x92, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
+		//{ 0x93, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
 		//{ 0x94, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
 		//{ 0x95, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
 	};

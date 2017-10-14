@@ -34,9 +34,6 @@ namespace fw
 	}
 	using ImageFormat = NImageFormat::EFormat;
 
-	static const std::uint32_t BYTE_PER_PIXEL_RGBA8888 = 4;	//RGBA8888画像の1ピクセルあたりのバイト数
-	static const std::uint32_t PALLETE_MAXSIZE = 256 * 4;	//パレット最大サイズ(256色*4バイト)
-
 
 	//----------------------------------------------------------
 	//
@@ -71,8 +68,6 @@ namespace fw
 		bool Create(const std::string bodyFile, const std::uint32_t width, const std::uint32_t height);
 		//解放
 		void Free();
-		//デコード(RGBA8888)
-		void DecodeRgba8888(Image* const outImage);
 		//ブレンド画像設定(バイナリデータから)
 		bool SetBlend(const std::byte_t* const blend, const size_t blendSize);
 		//ブレンド画像設定(ファイルから)
@@ -81,6 +76,9 @@ namespace fw
 		bool SetTransColor(const std::Color transColor);
 		//拡張パレット設定
 		bool SetExtPallete(const std::Color* const pallete, const std::uint32_t palleteNum);
+		//デコード(RGBA8888)
+		void DecodeRgba8888(Image* const outImage);
+
 		//画像ID取得
 		inline std::uint32_t Id() const { return this->id_; }
 		//画像タイプ取得

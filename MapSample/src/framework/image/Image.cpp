@@ -7,6 +7,22 @@ namespace {
 
 	//----------------------------------------------------------
 	//
+	// 共通定義
+	//
+	//----------------------------------------------------------
+	static const std::uint32_t BYTE_PER_PIXEL_RGBA8888 = 4;	//RGBA8888画像の1ピクセルあたりのバイト数
+
+	//カラー構造体
+	struct Color {
+		std::uint8_t	r;
+		std::uint8_t	g;
+		std::uint8_t	b;
+	};
+
+
+
+	//----------------------------------------------------------
+	//
 	// PNG画像処理クラス
 	//
 	//----------------------------------------------------------
@@ -48,6 +64,7 @@ namespace {
 		}
 
 		//RGBA8888画像へデコード
+		//***Pngオブジェクト生成毎に1度しか実施できない(2度目以降は必ず失敗する)
 		void DecodeRgba8888(std::byte_t** const outData)
 		{
 			//デコード後の画像データを格納するメモリを確保(本関数の最後に解放)
@@ -162,7 +179,7 @@ namespace {
 					png_bytep wp = png[h];
 
 					//書き込み位置と読み込み位置を初期化
-					png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+					png_uint_32 writeOffset = h * this->width_ * BYTE_PER_PIXEL_RGBA8888;
 					png_uint_32 readOffset = 0;
 
 					//ビット深度に応じたビットオフセット
@@ -189,7 +206,7 @@ namespace {
 							readOffset++;
 						}
 						//書き込み位置を更新
-						writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
+						writeOffset += BYTE_PER_PIXEL_RGBA8888;
 					}
 				}
 			}
@@ -212,7 +229,7 @@ namespace {
 					png_bytep wp = png[h];
 
 					//書き込み位置と読み込み位置を初期化
-					png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+					png_uint_32 writeOffset = h * this->width_ * BYTE_PER_PIXEL_RGBA8888;
 					png_uint_32 readOffset = 0;
 
 					for (png_uint_32 w = 0; w < this->width_; w++) {
@@ -223,7 +240,7 @@ namespace {
 						*((*outData) + writeOffset + 3) = 255;
 
 						//書き込み位置を更新
-						writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
+						writeOffset += BYTE_PER_PIXEL_RGBA8888;
 						readOffset += 3;
 					}
 				}
@@ -252,7 +269,7 @@ namespace {
 					png_bytep wp = png[h];
 
 					//書き込み位置と読み込み位置を初期化
-					png_uint_32 writeOffset = h * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+					png_uint_32 writeOffset = h * this->width_ * BYTE_PER_PIXEL_RGBA8888;
 					png_uint_32 readOffset = 0;
 
 					//ビット深度に応じたビットオフセットとビットマスク
@@ -277,7 +294,7 @@ namespace {
 							readOffset++;
 						}
 						//書き込み位置を更新
-						writeOffset += fw::BYTE_PER_PIXEL_RGBA8888;
+						writeOffset += BYTE_PER_PIXEL_RGBA8888;
 					}
 				}
 			}
@@ -285,7 +302,9 @@ namespace {
 				//パレットデータ取得失敗
 			}
 		}
-	};
+	};	//Png
+
+
 
 	//----------------------------------------------------------
 	//
@@ -293,6 +312,8 @@ namespace {
 	//
 	//----------------------------------------------------------
 	class Bitmap {
+
+		static const std::uint32_t PALLETE_MAXNUM = 256;	//パレット最大数(256色)
 
 		//Bitmapファイルヘッダ(Windows,OS/2共通)
 		static const std::int16_t BFH_HEADERSIZE = 14;
@@ -346,7 +367,7 @@ namespace {
 		std::uint32_t	imageOffset_;	//画像データまでのオフセット
 		std::uint32_t	width_;			//幅
 		std::uint32_t	height_;		//高さ
-		std::uint32_t	bitCount_;		//ビット数
+		std::int32_t	bitCount_;		//ビット数
 		std::uint32_t	compression_;	//圧縮形式
 		std::uint32_t	imageSize_;		//画像データサイズ
 		std::uint32_t	palleteNum_;	//パレット数
@@ -375,19 +396,13 @@ namespace {
 		{
 			switch (this->bitCount_) {
 			case 1:		//1bit
-				DecodeRgba8888From1BitBitmap(outData);
-				break;
 			case 4:		//4bit
-				DecodeRgba8888From4BitBitmap(outData);
-				break;
 			case 8:		//8bit
-				DecodeRgba8888From8BitBitmap(outData);
+				DecodeRgba8888FromPalleteBitmap(outData);
 				break;
 			case 24:	//24bit
-				DecodeRgba8888From24BitBitmap(outData);
-				break;
 			case 32:	//32bit
-				DecodeRgba8888From32BitBitmap(outData);
+				DecodeRgba8888FromTrueColorBitmap(outData);
 				break;
 			default:
 				break;
@@ -468,7 +483,7 @@ namespace {
 			//メンバ変数に設定
 			this->width_ = width;
 			this->height_ = height;
-			this->bitCount_ = uint32_t(bitCount);
+			this->bitCount_ = int32_t(bitCount);
 			this->compression_ = compression;
 			this->imageSize_ = imageSize;
 			this->palleteNum_ = palleteNum;
@@ -498,7 +513,7 @@ namespace {
 			//メンバ変数に設定
 			this->width_ = uint32_t(width);
 			this->height_ = uint32_t(height);
-			this->bitCount_ = uint32_t(bitCount);
+			this->bitCount_ = int32_t(bitCount);
 			this->compression_ = uint32_t(0);
 			this->imageSize_ = uint32_t(0);
 			this->palleteNum_ = palleteNum;
@@ -506,216 +521,136 @@ namespace {
 			this->palleteOffset_ = uint32_t(BCH_PALLETE_OFS);
 		}
 
-		//パディングビット数を取得
+		//パディングバイト数を取得
 		//画像データサイズ = ((((色ビット数 * 画像の幅) + パティング) × 画像の高さ) / 8)から計算
-		std::uint32_t GetPaddingBit()
+		std::uint32_t GetPaddingByte()
 		{
+			//画像データサイズを取得
 			std::uint32_t imageSize = this->imageSize_;
 			if (imageSize == 0) {
 				imageSize = this->fileSize_ - this->imageOffset_;
 			}
 
-			return ((imageSize * 8) / this->height_) - (this->width_ * this->bitCount_);
-		}
+			//パディングビット数を計算
+			std::uint32_t paddingBit = ((imageSize * 8) / this->height_) - (this->width_ * this->bitCount_);
 
-		//パディングバイト数を取得
-		std::uint32_t GetPaddingByte()
-		{
-			return GetPaddingBit() / 8;
+			return paddingBit / 8;
 		}
 
 		//パレットデータを取得
-		void GetPalleteData(std::byte_t* const pallete)
+		void GetPalleteData(Color* const pallete)
 		{
 			//パレットデータを取得
-			std::uint32_t readIndex = this->palleteOffset_;
-			std::uint32_t writeIndex = 0;
-			for (std::uint16_t i = 0; i < this->palleteNum_; i++) {
-				for (std::uint32_t j = 0; j < this->palleteByte_; j++) {
-					//palleteByte_が3の場合、青→緑→赤
-					//palleteByte_が4の場合、青→緑→赤→予約領域
-					std::ByteReader::read1ByteLe(this->bmpData_ + readIndex, pallete + writeIndex);
+			std::uint32_t readOffset = this->palleteOffset_;
+			std::uint32_t writeOffset = 0;
+			for (std::uint16_t p = 0; p < this->palleteNum_; p++) {
+				//青→緑→赤
+				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &(pallete[writeOffset].b));
+				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &(pallete[writeOffset].g));
+				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &(pallete[writeOffset].r));
 
-					readIndex++;
-					writeIndex++;
+				writeOffset++;
+				readOffset += 3;
+				if (this->palleteByte_ == 4) {
+					//palleteByte_が4の場合、予約領域分を読み飛ばし
+					readOffset++;
 				}
 			}
 		}
 
-		//1BitBitmap画像からRGBA8888画像へデコード
-		void DecodeRgba8888From1BitBitmap(std::byte_t** const outData)
+		//パレットBitmap画像からRGBA8888画像へデコード
+		void DecodeRgba8888FromPalleteBitmap(std::byte_t** const outData)
 		{
 			//パレットデータを取得
-			std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
+			Color pallete[PALLETE_MAXNUM] = { 0 };
 			this->GetPalleteData(pallete);
 
 			//パディングバイト数を取得
 			std::uint32_t paddingByte = this->GetPaddingByte();
 
-			//出力データを取得
-			std::uint32_t imageOffset = this->imageOffset_;
+			//出力データへデコード後の画像データを設定
+			std::uint32_t readOffset = this->imageOffset_;
 			for (std::uint32_t h = 0; h < this->height_; h++) {
-				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
-				std::uint8_t index = 0;
-				std::uint8_t readBit = 7;
-				for (std::uint32_t w = 0; w < this->width_; w++) {
-					//画像データ取得
+				//一行ずつ処理
+				std::uint32_t writeOffset = (this->height_ - h - 1) * this->width_ * BYTE_PER_PIXEL_RGBA8888;
 
-					//画像データはパレットのインデックス
-					if ((w % 8) == 0) {
-						std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset, &index);
-						readBit = 7;
-						imageOffset++;
+				//ビット数に応じたビットオフセットとビットマスク
+				std::int32_t bitOfs = 8 - this->bitCount_;
+				std::uint8_t bitMask = (0x01 << this->bitCount_) - 1;
+
+				for (std::uint32_t w = 0; w < this->width_; w++) {
+					//画像データはパレットインデックス
+					std::uint8_t index = 0;
+					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset, &index);
+					std::int32_t palleteOffset = (index >> bitOfs) & bitMask;
+
+					//出力データへRGBA値を設定
+					*((*outData) + writeOffset + 0) = pallete[palleteOffset].r;		//赤
+					*((*outData) + writeOffset + 1) = pallete[palleteOffset].g;		//緑
+					*((*outData) + writeOffset + 2) = pallete[palleteOffset].b;		//青
+					*((*outData) + writeOffset + 3) = 255;
+
+					//ビットオフセットを更新
+					bitOfs -= this->bitCount_;
+					if (bitOfs < 0) {
+						//次の読み込み位置に更新
+						bitOfs = 8 - this->bitCount_;
+						readOffset++;
 					}
-
-					int32_t palleteIndex = ((index >> readBit) & 0x01) * this->palleteByte_;
-					*((*outData) + writeIndex + 0) = *(pallete + palleteIndex + 2);		//赤
-					*((*outData) + writeIndex + 1) = *(pallete + palleteIndex + 1);		//緑
-					*((*outData) + writeIndex + 2) = *(pallete + palleteIndex + 0);		//青
-					*((*outData) + writeIndex + 3) = 255;
-
-					readBit--;
-					writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
+					//書き込み位置を更新
+					writeOffset += BYTE_PER_PIXEL_RGBA8888;
 				}
-				imageOffset += paddingByte;
+				readOffset += paddingByte;
 			}
 		}
 
-		//4BitBitmap画像からRGBA8888画像へデコード
-		void DecodeRgba8888From4BitBitmap(std::byte_t** const outData)
-		{
-			//パレットデータを取得
-			std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
-			this->GetPalleteData(pallete);
-
-			//パディングバイト数を取得
-			std::uint32_t paddingByte = this->GetPaddingByte();
-
-			//出力データを取得
-			std::uint32_t imageOffset = this->imageOffset_;
-			for (std::uint32_t h = 0; h < this->height_; h++) {
-				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
-				std::uint8_t index = 0;
-				std::uint8_t readBit = 4;
-				for (std::uint32_t w = 0; w < this->width_; w++) {
-					//画像データ取得
-
-					//画像データはパレットのインデックス
-					if ((w % 2) == 0) {
-						std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset, &index);
-						readBit = 4;
-						imageOffset++;
-					}
-
-					int32_t palleteIndex = ((index >> readBit) & 0x0F) * this->palleteByte_;
-					*((*outData) + writeIndex + 0) = *(pallete + palleteIndex + 2);		//赤
-					*((*outData) + writeIndex + 1) = *(pallete + palleteIndex + 1);		//緑
-					*((*outData) + writeIndex + 2) = *(pallete + palleteIndex + 0);		//青
-					*((*outData) + writeIndex + 3) = 255;
-
-					readBit -= 4;
-					writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
-				}
-				imageOffset += paddingByte;
-			}
-		}
-
-		//8BitBitmap画像からRGBA8888画像へデコード
-		void DecodeRgba8888From8BitBitmap(std::byte_t** const outData)
-		{
-			//パレットデータを取得
-			std::byte_t pallete[fw::PALLETE_MAXSIZE] = { 0 };
-			this->GetPalleteData(pallete);
-
-			//パディングバイト数を取得
-			std::uint32_t paddingByte = this->GetPaddingByte();
-
-			//出力データを取得
-			std::uint32_t imageOffset = this->imageOffset_;
-			for (std::uint32_t h = 0; h < this->height_; h++) {
-				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
-				for (std::uint32_t w = 0; w < this->width_; w++) {
-					//画像データ取得
-
-					//画像データはパレットのインデックス
-					std::uint8_t index;
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset, &index);
-
-					int32_t palleteIndex = int32_t(index) * this->palleteByte_;
-					*((*outData) + writeIndex + 0) = *(pallete + palleteIndex + 2);		//赤
-					*((*outData) + writeIndex + 1) = *(pallete + palleteIndex + 1);		//緑
-					*((*outData) + writeIndex + 2) = *(pallete + palleteIndex + 0);		//青
-					*((*outData) + writeIndex + 3) = 255;
-
-					imageOffset++;
-					writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
-				}
-				imageOffset += paddingByte;
-			}
-		}
-
-		//24BitBitmap画像からRGBA8888画像へデコード
-		void DecodeRgba8888From24BitBitmap(std::byte_t** const outData)
+		//トゥルーカラーBitmap画像からRGBA8888画像へデコード
+		void DecodeRgba8888FromTrueColorBitmap(std::byte_t** const outData)
 		{
 			//パディングバイト数を取得
 			std::uint32_t paddingByte = GetPaddingByte();
 
-			//出力データを取得
-			std::uint32_t imageOffset = this->imageOffset_;
+			//出力データへデコード後の画像データを設定
+			std::uint32_t readOffset = this->imageOffset_;
 			for (std::uint32_t h = 0; h < this->height_; h++) {
-				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
+				//一行ずつ処理
+				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * BYTE_PER_PIXEL_RGBA8888;
+
 				for (std::uint32_t w = 0; w < this->width_; w++) {
-					//画像データ取得
+					//画像データはBGR値
+					std::uint8_t b = 255;
+					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &b);
+					std::uint8_t g = 255;
+					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &g);
+					std::uint8_t r = 255;
+					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &r);
+					std::uint8_t a = 255;
+					if (this->bitCount_ == 32) {
+						//ビット数が32bitの場合、A値を読み込み
+						std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 3, &a);
 
-					std::uint8_t b, g, r;
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 0, &b);
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 1, &g);
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 2, &r);
+						//読み込み位置を更新
+						readOffset++;
+					}
 
+					//出力データへRGBA値を設定
 					*((*outData) + writeIndex + 0) = r;		//赤
 					*((*outData) + writeIndex + 1) = g;		//緑
 					*((*outData) + writeIndex + 2) = b;		//青
-					*((*outData) + writeIndex + 3) = 255;
+					*((*outData) + writeIndex + 3) = a;		//アルファ
 
-					imageOffset += 3;
-					writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
+					//読み込み位置を更新
+					readOffset += 3;
+
+					//書き込み位置を更新
+					writeIndex += BYTE_PER_PIXEL_RGBA8888;
 				}
-				imageOffset += paddingByte;
-			}
-		}
-
-		//32BitBitmap画像からRGBA8888画像へデコード
-		void DecodeRgba8888From32BitBitmap(std::byte_t** const outData)
-		{
-			//パディングバイト数を取得
-			std::uint32_t paddingByte = this->GetPaddingByte();
-
-			//出力データを取得
-			std::uint32_t imageOffset = this->imageOffset_;
-			for (std::uint32_t h = 0; h < this->height_; h++) {
-				std::uint32_t writeIndex = (this->height_ - h - 1) * this->width_ * fw::BYTE_PER_PIXEL_RGBA8888;
-				for (std::uint32_t w = 0; w < this->width_; w++) {
-					//画像データ取得
-
-					std::uint8_t b, g, r, a;
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 0, &b);
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 1, &g);
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 2, &r);
-					std::ByteReader::read1ByteLe(this->bmpData_ + imageOffset + 3, &a);
-
-					*((*outData) + writeIndex + 0) = r;		//赤
-					*((*outData) + writeIndex + 1) = g;		//緑
-					*((*outData) + writeIndex + 2) = b;		//青
-					*((*outData) + writeIndex + 3) = 255;
-
-					imageOffset += 4;
-					writeIndex += fw::BYTE_PER_PIXEL_RGBA8888;
-				}
-				imageOffset += paddingByte;
+				readOffset += paddingByte;
 			}
 		}
 	};	//Bitmap
 }	//namespace
+
 
 
 //----------------------------------------------------------
@@ -944,14 +879,87 @@ bool fw::Image::SetExtPallete(const std::Color* const pallete, const std::uint32
 	return success;
 }
 
+//デコード(RGBA8888)
+//outImageが作成済みの場合は何もしない
+void fw::Image::DecodeRgba8888(Image* const outImage)
+{
+	if (!outImage->IsCreate()) {
+		//出力イメージが未作成
+
+		//デコード後のデータサイズ
+		std::uint32_t dataSize = this->width_ * this->height_ * BYTE_PER_PIXEL_RGBA8888;
+
+		//本体画像デコード
+		std::byte_t* bodyData = nullptr;
+		if (this->body_ != nullptr) {
+			//デコード後のRGBA8888画像のメモリ確保
+			bodyData = new std::byte_t[dataSize];
+
+			//画像フォーマットに応じたデコード処理
+			if (this->format_ == ImageFormat::BMP) {
+				//Bitmap
+				Bitmap bitmap(this->body_);
+				bitmap.DecodeRgba8888(&bodyData);
+			}
+			else if (this->format_ == ImageFormat::PNG) {
+				//PNG
+				Png png(this->body_);
+				png.DecodeRgba8888(&bodyData);
+			}
+			else {
+				//ここには来ないはず
+			}
+		}
+
+		//ブレンド画像デコード
+		std::byte_t* blendData = nullptr;
+		if (this->blend_ != nullptr) {
+			//デコード後のRGBA8888画像のメモリ確保
+			blendData = new std::byte_t[dataSize];
+
+			//画像フォーマットに応じたデコード処理
+			if (this->format_ == ImageFormat::BMP) {
+				//Bitmap
+				Bitmap bitmap(this->blend_);
+				bitmap.DecodeRgba8888(&blendData);
+			}
+			else if (this->format_ == ImageFormat::PNG) {
+				//PNG
+				Png png(this->blend_);
+				png.DecodeRgba8888(&bodyData);
+			}
+			else {
+				//ここには来ないはず
+			}
+		}
+
+		//本体画像とブレンド画像が両方あればブレンド処理
+		if ((bodyData != nullptr) && (blendData != nullptr)) {
+		}
+
+		//出力するRGBA8888画像オブジェクトを作成
+		new(outImage) Image(this->id_, this->type_, ImageFormat::RGBA8888);
+		outImage->Create(bodyData, dataSize, this->width_, this->height_);
+
+		//確保したメモリを解放
+		if (bodyData != nullptr) {
+			delete[] bodyData;
+		}
+		if (blendData != nullptr) {
+			delete[] blendData;
+		}
+	}
+	else {
+		//出力イメージが作成済みの場合は何もしない
+	}
+}
+
 //初期化済み判定
 bool fw::Image::IsInit()
 {
 	bool isInit = true;
-	if ((this->id_ == 0) ||
-		(this->type_ == ImageType::UNKNOWN) ||
-		(this->format_ == ImageFormat::UNKNOWN)) {
-		isInit = false; 
+	if ((this->id_ == 0) || (this->type_ == ImageType::UNKNOWN) || (this->format_ == ImageFormat::UNKNOWN)) {
+		isInit = false;
 	}
 	return isInit;
 }
@@ -960,8 +968,7 @@ bool fw::Image::IsInit()
 bool fw::Image::IsCreate()
 {
 	bool isCreate = true;
-	if ((this->bodySize_ <= 0) ||
-		(this->body_ == nullptr)) {
+	if ((this->bodySize_ <= 0) || (this->body_ == nullptr)) {
 		isCreate = false;
 	}
 	return isCreate;
@@ -982,71 +989,5 @@ void fw::Image::GetWH(std::uint32_t* const width, std::uint32_t* const height)
 	}
 	else {
 		//上記フォーマット以外は未サポート
-	}
-}
-
-//デコード(RGBA8888)
-void fw::Image::DecodeRgba8888(Image* const outImage)
-{
-	//RGBA8888画像の1ピクセルあたりのバイト数
-	const uint32_t BYTE_PER_PIXEL = 4;
-
-	//デコード後のデータサイズ
-	std::uint32_t dataSize = this->width_ * this->height_ * BYTE_PER_PIXEL;
-
-	//本体画像デコード
-	std::byte_t* bodyData = nullptr;
-	if (this->body_ != nullptr) {
-		//デコード後のRGBA8888画像のメモリ確保
-		bodyData = new std::byte_t[dataSize];
-
-		//画像フォーマットに応じたデコード処理
-		if (this->format_ == ImageFormat::BMP) {
-			Bitmap bitmap(this->body_);
-			bitmap.DecodeRgba8888(&bodyData);
-		}
-		else if (this->format_ == ImageFormat::PNG) {
-			Png png(this->body_);
-			png.DecodeRgba8888(&bodyData);
-		}
-		else {
-			//ここには来ないはず
-		}
-	}
-
-	//ブレンド画像デコード
-	std::byte_t* blendData = nullptr;
-	if (this->blend_ != nullptr) {
-		//デコード後のRGBA8888画像のメモリ確保
-		blendData = new std::byte_t[dataSize];
-
-		//画像フォーマットに応じたデコード処理
-		if (this->format_ == ImageFormat::BMP) {
-			Bitmap bitmap(this->blend_);
-			bitmap.DecodeRgba8888(&blendData);
-		}
-		else if (this->format_ == ImageFormat::PNG) {
-			Png png(this->blend_);
-			png.DecodeRgba8888(&bodyData);
-		}
-		else {
-			//ここには来ないはず
-		}
-	}
-
-	//本体画像とブレンド画像が両方あればブレンド処理
-	if ((bodyData != nullptr) && (blendData != nullptr)) {
-	}
-
-	//出力するRGBA8888画像オブジェクトを作成
-	new(outImage) Image(this->id_, this->type_, ImageFormat::RGBA8888);
-	outImage->Create(bodyData, dataSize, this->width_, this->height_);
-
-	//確保したメモリを解放
-	if (bodyData != nullptr) {
-		delete[] bodyData;
-	}
-	if (blendData != nullptr) {
-		delete[] blendData;
 	}
 }
