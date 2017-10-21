@@ -30,6 +30,7 @@ namespace fw
 			RGBA8888,		//RGBA8888画像
 			BMP,			//BITMAP画像
 			PNG,			//PNG画像
+			JPEG,			//JPEG画像
 		};
 	}
 	using ImageFormat = NImageFormat::EFormat;

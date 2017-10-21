@@ -10,7 +10,7 @@ namespace {
 		std::string		blendFile_;
 	};
 	static ImageFile imageFiles[] = {
-		{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType0_depth1.png", "", },
+		//{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType0_depth1.png", "", },
 		//{ 0x12, fw::ImageFormat::PNG, "./data/png/colorType0_depth2.png", "", },
 		//{ 0x13, fw::ImageFormat::PNG, "./data/png/colorType0_depth4.png", "", },
 		//{ 0x14, fw::ImageFormat::PNG, "./data/png/colorType0_depth8.png", "", },
@@ -19,6 +19,8 @@ namespace {
 		//{ 0x32, fw::ImageFormat::PNG, "./data/png/colorType3_depth2.png", "", },
 		//{ 0x33, fw::ImageFormat::PNG, "./data/png/colorType3_depth4.png", "", },
 		//{ 0x34, fw::ImageFormat::PNG, "./data/png/colorType3_depth8.png", "", },
+		{ 0x61, fw::ImageFormat::JPEG, "./data/jpeg/testorig.jpg", "", },
+		{ 0x62, fw::ImageFormat::JPEG, "./data/jpeg/testimgint.jpg", "", },
 		//{ 0x81, fw::ImageFormat::BMP, "./data/bitmap/os-1.bmp", "", },
 		//{ 0x82, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
 		//{ 0x83, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
