@@ -4,33 +4,33 @@
 
 namespace {
 	struct ImageFile {
-		std::uint32_t	id_;
-		fw::ImageFormat	format_;
-		std::string		bodyFile_;
-		std::string		blendFile_;
+		std::uint32_t		id_;
+		fw::EN_ImageFormat	format_;
+		std::string			bodyFile_;
+		std::string			blendFile_;
 	};
 	static ImageFile imageFiles[] = {
-		//{ 0x11, fw::ImageFormat::PNG, "./data/png/colorType0_depth1.png", "", },
-		//{ 0x12, fw::ImageFormat::PNG, "./data/png/colorType0_depth2.png", "", },
-		//{ 0x13, fw::ImageFormat::PNG, "./data/png/colorType0_depth4.png", "", },
-		//{ 0x14, fw::ImageFormat::PNG, "./data/png/colorType0_depth8.png", "", },
-		//{ 0x21, fw::ImageFormat::PNG, "./data/png/colorType2_depth8.png", "", },
-		//{ 0x31, fw::ImageFormat::PNG, "./data/png/colorType3_depth1.png", "", },
-		//{ 0x32, fw::ImageFormat::PNG, "./data/png/colorType3_depth2.png", "", },
-		//{ 0x33, fw::ImageFormat::PNG, "./data/png/colorType3_depth4.png", "", },
-		//{ 0x34, fw::ImageFormat::PNG, "./data/png/colorType3_depth8.png", "", },
-		{ 0x61, fw::ImageFormat::JPEG, "./data/jpeg/testorig.jpg", "", },
-		{ 0x62, fw::ImageFormat::JPEG, "./data/jpeg/testimgint.jpg", "", },
-		//{ 0x81, fw::ImageFormat::BMP, "./data/bitmap/os-1.bmp", "", },
-		//{ 0x82, fw::ImageFormat::BMP, "./data/bitmap/os-4.bmp", "", },
-		//{ 0x83, fw::ImageFormat::BMP, "./data/bitmap/os-8.bmp", "", },
-		//{ 0x84, fw::ImageFormat::BMP, "./data/bitmap/os-24.bmp", "", },
-		//{ 0x85, fw::ImageFormat::BMP, "./data/bitmap/dog2.bmp", "", },
-		//{ 0x91, fw::ImageFormat::BMP, "./data/bitmap/win-1.bmp", "", },
-		//{ 0x92, fw::ImageFormat::BMP, "./data/bitmap/win-4.bmp", "", },
-		//{ 0x93, fw::ImageFormat::BMP, "./data/bitmap/win-8.bmp", "", },
-		//{ 0x94, fw::ImageFormat::BMP, "./data/bitmap/win-24.bmp", "", },
-		//{ 0x95, fw::ImageFormat::BMP, "./data/bitmap/win-32.bmp", "", },
+		//{ 0x11, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth1.png", "", },
+		//{ 0x12, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth2.png", "", },
+		//{ 0x13, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth4.png", "", },
+		//{ 0x14, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth8.png", "", },
+		//{ 0x21, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType2_depth8.png", "", },
+		//{ 0x31, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth1.png", "", },
+		//{ 0x32, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth2.png", "", },
+		//{ 0x33, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth4.png", "", },
+		//{ 0x34, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth8.png", "", },
+		{ 0x61, fw::EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testorig.jpg", "", },
+		{ 0x62, fw::EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testimgint.jpg", "", },
+		//{ 0x81, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-1.bmp", "", },
+		//{ 0x82, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-4.bmp", "", },
+		//{ 0x83, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-8.bmp", "", },
+		//{ 0x84, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-24.bmp", "", },
+		//{ 0x85, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/dog2.bmp", "", },
+		//{ 0x91, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-1.bmp", "", },
+		//{ 0x92, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-4.bmp", "", },
+		//{ 0x93, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-8.bmp", "", },
+		//{ 0x94, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-24.bmp", "", },
+		//{ 0x95, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-32.bmp", "", },
 	};
 	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);
 }
@@ -133,6 +133,7 @@ void ui::UiMng::draw()
 		std::Color defColor = { 230, 231, 232, 255 };
 		this->drawIF_->clear(defColor);
 	}
+#if 0
 	{
 		std::CoordI texBasePos = this->texBasePos_;
 		for (std::int32_t i = 0; i < imageFilesNum; i++) {
@@ -164,6 +165,7 @@ void ui::UiMng::draw()
 			texBasePos.x += ofs.x;
 		}
 	}
+#endif
 	{
 		std::vector<std::Color> colors(1);
 		colors[0] = { 255, 0, 0, 255 };
