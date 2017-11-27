@@ -51,6 +51,9 @@
     <ClCompile Include="src\framework\Std.cpp">
       <Filter>ソース ファイル\framework</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\LocalImage.cpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\framework\io\File.hpp">
@@ -73,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="src\framework\Std.hpp">
       <Filter>ソース ファイル\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\LocalImage.hpp">
+      <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

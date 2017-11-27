@@ -9,10 +9,22 @@
 
 //コンストラクタ
 window::WindowWGL::WindowWGL()
-	: hInstance_(nullptr), drawWGL_(), uiMng_()
+	: hInstance_(nullptr), drawIF_(nullptr), uiMng_()
 {
 	//インスタンスハンドル取得
 	this->hInstance_ = ::GetModuleHandle(nullptr);
+
+	//描画インターフェース領域確保
+	this->drawIF_ = new fw::DrawWGL();
+}
+
+//デストラクタ
+window::WindowWGL::~WindowWGL()
+{
+	//描画インターフェース領域解放
+	if (this->drawIF_ != nullptr) {
+		delete this->drawIF_;
+	}
 }
 
 //ウィンドウスタート
@@ -80,7 +92,7 @@ bool window::WindowWGL::registerWindowClass()
 //ウィンドウ作成
 bool window::WindowWGL::createMainWindow()
 {
-	bool result = true;
+	bool result = false;
 
 	HWND hWnd = ::CreateWindow(
 		TEXT("MapSample"),
@@ -95,21 +107,21 @@ bool window::WindowWGL::createMainWindow()
 		this->hInstance_,
 		static_cast<LPVOID>(&this->uiMng_)
 	);
-	if (hWnd == nullptr) {
-		result = false;
-	}
-	else {
-		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, &this->drawWGL_, &this->uiMng_);
+	if (hWnd != nullptr) {
+		printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, this->drawIF_, &this->uiMng_);
 
 		//描画インターフェース生成
-		this->drawWGL_.create(hWnd);
+		new(this->drawIF_) fw::DrawWGL(hWnd);
+		this->drawIF_->create();
 
 		//UiMng生成
-		new(&this->uiMng_) ui::UiMng(&this->drawWGL_);
+		new(&this->uiMng_) ui::UiMng(this->drawIF_);
 
 		// ウィンドウ表示
 		ShowWindow(hWnd, SW_SHOW);
 		UpdateWindow(hWnd);
+
+		result = true;
 	}
 
 	return result;

@@ -18,12 +18,14 @@ namespace window
 	class WindowWGL {
 		//メンバ変数
 		HINSTANCE		hInstance_;
-		fw::DrawWGL		drawWGL_;
+		fw::DrawIF*		drawIF_;
 		ui::UiMng		uiMng_;
 
 	public:
 		//コンストラクタ
 		WindowWGL();
+		//デストラクタ
+		~WindowWGL();
 		//ウィンドウスタート
 		void start();
 

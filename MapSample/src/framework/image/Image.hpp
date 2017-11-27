@@ -42,6 +42,17 @@ namespace fw
 		ImageData		blend_;			//ブレンド画像データ(isBlend_==1の場合のみ)
 	};
 
+	// 画像処理I/Fクラス(内部でのみ使用)
+	class ImageIF {
+	public:
+		//デストラクタ
+		virtual ~ImageIF() {}
+		//幅高さを取得
+		virtual void getWH(std::int32_t* const width, std::int32_t* const height) = 0;
+		//RGBA8888画像へデコード
+		virtual void decodeRgba8888(std::uint8_t** const outData) = 0;
+	};
+
 	//画像デコードクラス
 	class ImageDecorder {
 		std::uint8_t*	decode_;		//デコードデータ
@@ -67,12 +78,14 @@ namespace fw
 	private:
 		//初期化
 		void init();
+		//デコード処理実施
+		std::int32_t procDecode(ImageIF* const bodyIF, ImageIF* const blendIF);
 		//Bitmap画像デコード
-		std::int32_t decodeBitmap(const Image& image);
+		//std::int32_t decodeBitmap(const Image& image);
 		//PNG画像デコード
-		std::int32_t decodePng(const Image& image);
+		//std::int32_t decodePng(const Image& image);
 		//JPEG画像デコード
-		std::int32_t decodeJpeg(const Image& image);
+		//std::int32_t decodeJpeg(const Image& image);
 	};
 }
 

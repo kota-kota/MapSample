@@ -1,39 +1,10 @@
 ﻿#include "UiMng.hpp"
+
+#include "LocalImage.hpp"
+#include "draw/DrawIF.hpp"
 #include "image/Image.hpp"
+#include "io/File.hpp"
 
-
-namespace {
-	struct ImageFile {
-		std::uint32_t		id_;
-		fw::EN_ImageFormat	format_;
-		std::string			bodyFile_;
-		std::string			blendFile_;
-	};
-	static ImageFile imageFiles[] = {
-		//{ 0x11, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth1.png", "", },
-		//{ 0x12, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth2.png", "", },
-		//{ 0x13, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth4.png", "", },
-		//{ 0x14, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth8.png", "", },
-		//{ 0x21, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType2_depth8.png", "", },
-		//{ 0x31, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth1.png", "", },
-		//{ 0x32, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth2.png", "", },
-		//{ 0x33, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth4.png", "", },
-		//{ 0x34, fw::EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth8.png", "", },
-		{ 0x61, fw::EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testorig.jpg", "", },
-		{ 0x62, fw::EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testimgint.jpg", "", },
-		//{ 0x81, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-1.bmp", "", },
-		//{ 0x82, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-4.bmp", "", },
-		//{ 0x83, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-8.bmp", "", },
-		//{ 0x84, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-24.bmp", "", },
-		//{ 0x85, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/dog2.bmp", "", },
-		//{ 0x91, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-1.bmp", "", },
-		//{ 0x92, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-4.bmp", "", },
-		//{ 0x93, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-8.bmp", "", },
-		//{ 0x94, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-24.bmp", "", },
-		//{ 0x95, fw::EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-32.bmp", "", },
-	};
-	static const std::int32_t imageFilesNum = sizeof(imageFiles) / sizeof(ImageFile);
-}
 
 
 //----------------------------------------------------------
@@ -45,7 +16,7 @@ namespace {
 //コンストラクタ
 ui::UiMng::UiMng(fw::DrawIF* drawIF) :
 	drawIF_(drawIF), mapPos_(), screenPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false),
-	texBasePos_(), texImageList_()
+	texBasePos_(), localImage(nullptr)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 	if (this->drawIF_ != nullptr) {
@@ -53,22 +24,24 @@ ui::UiMng::UiMng(fw::DrawIF* drawIF) :
 		this->mapPos_ = { 63230028, 16092608, 0 };
 
 		//画面中心座標
-		std::Size screenSize;
-		this->drawIF_->getScreenSize(&screenSize);
-		this->screenPos_ = { screenSize.width / 2, screenSize.height / 2, 0 };
+		std::WH screenwh = this->drawIF_->getScreenWH();
+		this->screenPos_ = { screenwh.width / 2, screenwh.height / 2, 0 };
 
 		//テクスチャ基準座標(画面左上になるように)
 		this->texBasePos_ = { this->mapPos_.x - this->screenPos_.x, this->mapPos_.y + this->screenPos_.y, 0 };
 
-		//テクスチャイメージリスト
-		this->texImageList_ = new TexImage[imageFilesNum];
+		//ソフト持ち画像作成
+		this->localImage = new LocalImage();
+		this->localImage->create();
 	}
 }
 
 //デストラクタ
 ui::UiMng::~UiMng()
 {
-	delete[] this->texImageList_;
+	if (this->localImage != nullptr) {
+		delete this->localImage;
+	}
 }
 
 //タッチON
@@ -133,39 +106,39 @@ void ui::UiMng::draw()
 		std::Color defColor = { 230, 231, 232, 255 };
 		this->drawIF_->clear(defColor);
 	}
-#if 0
 	{
 		std::CoordI texBasePos = this->texBasePos_;
-		for (std::int32_t i = 0; i < imageFilesNum; i++) {
-			std::uint32_t* texId = &this->texImageList_[i].texId_;
-			fw::Image* image = &this->texImageList_[i].image_;
-			if (*texId == 0) {
-				//画像ファイルから画像オブジェクト作成
-				new(image) fw::Image(imageFiles[i].id_, fw::ImageType::SOFT, imageFiles[i].format_);
-				image->Create(imageFiles[i].bodyFile_, 0, 0);
+		//std::int32_t xOffset = 200;
+		//for (EN_LocalImageID id = EN_LocalImageID::BMP01; id <= EN_LocalImageID::BMP10; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		//std::int32_t xOffset = 512;
+		//for (EN_LocalImageID id = EN_LocalImageID::PNG01; id <= EN_LocalImageID::PNG09; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		std::int32_t xOffset = 227;
+		for (EN_LocalImageID id = EN_LocalImageID::JPEG01; id <= EN_LocalImageID::JPEG02; id = EN_LocalImageID(std::int32_t(id) + 1)) {
 
-				//デコード
-				fw::Image rgba;
-				image->DecodeRgba8888(&rgba);
+			//画像データを取得
+			LocalImageData imageData;
+			this->localImage->getImage(id, &imageData);
 
-				//テクスチャ作成
-				this->drawIF_->createTextures(&rgba, texId);
-			}
+			fw::Image image;
+			image.id_ = imageData.id_;
+			image.format_ = imageData.format_;
+			image.type_ = fw::EN_ImageType::D_IMAGETYPE_LOCAL;
+			image.isFlip_ = 0;
+			image.body_.data_ = imageData.body_;
+			image.body_.dataSize_ = imageData.bodySize_;
+			image.body_.width_ = 0;
+			image.body_.height_ = 0;
+			image.body_.isPixelFlip_ = 0;
+			image.body_.isChgPallete_ = 0;
+			image.body_.palleteNum_ = 0;
+			image.body_.pallete_ = nullptr;
+			image.isBlend_ = 0;
 
-			std::CoordI ofs = { image->Width(), image->Height(), 0 };
+			this->drawIF_->drawImage(texBasePos, image);
 
-			std::vector<std::CoordTex> coords(4);
-			coords[0] = { 0.0, 0.0, texBasePos.x, texBasePos.y, texBasePos.z };
-			coords[1] = { 1.0, 0.0, texBasePos.x + ofs.x, texBasePos.y, texBasePos.z };
-			coords[2] = { 0.0, 1.0, texBasePos.x, texBasePos.y - ofs.y, texBasePos.z };
-			coords[3] = { 1.0, 1.0, texBasePos.x + ofs.x, texBasePos.y - ofs.y, texBasePos.z };
-
-			this->drawIF_->drawTextrue(coords, *texId);
-
-			texBasePos.x += ofs.x;
+			texBasePos.x += xOffset;
 		}
 	}
-#endif
 	{
 		std::vector<std::Color> colors(1);
 		colors[0] = { 255, 0, 0, 255 };

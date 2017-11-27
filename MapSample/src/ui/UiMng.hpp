@@ -2,12 +2,15 @@
 #define INCLUDED_UIMNG_HPP
 
 #include "Std.hpp"
-#include "draw/DrawIF.hpp"
-#include "image/Image.hpp"
-#include "io/File.hpp"
 
-namespace ui
-{
+namespace fw {
+	class DrawIF;
+}
+
+namespace ui {
+	//前方宣言
+	class LocalImage;
+
 	//----------------------------------------------------------
 	//
 	// UI管理クラス
@@ -15,13 +18,6 @@ namespace ui
 	//----------------------------------------------------------
 
 	class UiMng {
-		struct TexImage {
-			std::uint32_t	texId_;
-			fw::Image		image_;
-
-			TexImage() : texId_(0), image_() {}
-		};
-
 		//メンバ変数
 		fw::DrawIF*		drawIF_;
 
@@ -33,7 +29,7 @@ namespace ui
 		bool			isDragOn_;
 
 		std::CoordI		texBasePos_;
-		TexImage*		texImageList_;
+		LocalImage*		localImage;
 
 	public:
 		//コンストラクタ

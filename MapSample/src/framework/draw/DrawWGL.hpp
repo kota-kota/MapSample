@@ -2,6 +2,7 @@
 #define INCLUDED_DRAWWGL_HPP
 
 #include "DrawIF.hpp"
+#include <Windows.h>
 
 namespace fw
 {
@@ -12,16 +13,17 @@ namespace fw
 	//----------------------------------------------------------
 
 	class DrawWGL : public DrawIF {
-		class Impl;
-		Impl*	impl_;
+		HWND	hWnd_;
+		HDC		hDC_;
+		HGLRC	hGLRC_;
 
 	public:
 		//コンストラクタ
-		DrawWGL();
+		DrawWGL(const HWND hWnd = nullptr);
 		//デストラクタ
 		virtual ~DrawWGL();
 		//作成
-		virtual void create(void* const hWnd);
+		virtual void create();
 		//セットアップ
 		virtual void setup(const std::CoordI mapPos);
 		//描画カレント
@@ -34,15 +36,11 @@ namespace fw
 		virtual void drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size);
 		//ライン描画
 		virtual void drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width);
-		//テクスチャ作成
-		virtual void createTextures(const fw::Image* const tex, std::uint32_t* const texId);
-		//テクスチャ削除
-		virtual void deleteTextures(const std::uint32_t texId);
-		//テクスチャ描画
-		virtual void drawTextrue(const std::vector<std::CoordTex>& coords, const std::uint32_t texId);
+		//イメージ描画
+		virtual void drawImage(const std::CoordI coord, const fw::Image& image);
 
-		//画面サイズ取得
-		virtual void getScreenSize(std::Size* const screenSize);
+		//画面幅高さを取得
+		virtual std::WH getScreenWH();
 	};
 }
 

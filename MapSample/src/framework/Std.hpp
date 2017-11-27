@@ -145,9 +145,6 @@ namespace std
 	struct CoordTex {
 		double_t	u;
 		double_t	v;
-		int32_t		x;
-		int32_t		y;
-		int32_t		z;
 	};
 
 	struct Color {
@@ -157,19 +154,12 @@ namespace std
 		uint8_t		a;
 	};
 
-	struct Size {
+	struct WH {
 		int32_t		width;
 		int32_t		height;
 	};
 
-	struct ScreenArea {
-		int32_t		left;
-		int32_t		top;
-		int32_t		right;
-		int32_t		bottom;
-	};
-
-	struct MapArea {
+	struct Area {
 		int32_t		xmin;
 		int32_t		ymin;
 		int32_t		xmax;

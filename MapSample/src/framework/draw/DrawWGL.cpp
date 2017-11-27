@@ -2,69 +2,23 @@
 #include "image/Image.hpp"
 
 #include <new>
-#include <Windows.h>
 #include <gl/GL.h>
-
-
-namespace fw
-{
-	//----------------------------------------------------------
-	//
-	// WGL描画実装クラス
-	//
-	//----------------------------------------------------------
-
-	class DrawWGL::Impl {
-		HWND	hWnd_;
-		HDC		hDC_;
-		HGLRC	hGLRC_;
-
-	public:
-		//コンストラクタ
-		Impl();
-		//デストラクタ
-		~Impl();
-		//作成
-		void create(const HWND hWnd);
-		//セットアップ
-		void setup(const std::CoordI mapPos);
-		//描画カレント
-		void makeCurrent(const bool current);
-		//描画更新
-		void swapBuffers();
-		//クリア
-		void clear(const std::Color color);
-		//点描画
-		void drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size);
-		//ライン描画
-		void drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width);
-		//テクスチャ作成
-		void createTextures(const fw::Image* const tex, std::uint32_t* const texId);
-		//テクスチャ削除
-		void deleteTextures(const std::uint32_t texId);
-		//テクスチャ描画
-		void drawTextrue(const std::vector<std::CoordTex>& coords, const std::uint32_t texId);
-
-		//画面サイズ取得
-		void getScreenSize(std::Size* const screenSize);
-	};
-};
 
 
 //----------------------------------------------------------
 //
-// WGL描画実装クラス
+// WGL描画クラス
 //
 //----------------------------------------------------------
 
 //コンストラクタ
-fw::DrawWGL::Impl::Impl()
-	: hWnd_(nullptr), hDC_(nullptr), hGLRC_(nullptr)
+fw::DrawWGL::DrawWGL(const HWND hWnd)
+	: hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr)
 {
 }
 
 //デストラクタ
-fw::DrawWGL::Impl::~Impl()
+fw::DrawWGL::~DrawWGL()
 {
 	if (this->hGLRC_ != nullptr) {
 		//描画コンテキストハンドルを破棄
@@ -78,11 +32,8 @@ fw::DrawWGL::Impl::~Impl()
 }
 
 //作成
-void fw::DrawWGL::Impl::create(const HWND hWnd)
+void fw::DrawWGL::create()
 {
-	//ウィンドウハンドルを設定
-	this->hWnd_ = hWnd;
-
 	//デバイスコンテキストハンドルを取得
 	this->hDC_ = ::GetDC(this->hWnd_);
 
@@ -125,20 +76,19 @@ void fw::DrawWGL::Impl::create(const HWND hWnd)
 }
 
 //描画セットアップ
-void fw::DrawWGL::Impl::setup(const std::CoordI mapPos)
+void fw::DrawWGL::setup(const std::CoordI mapPos)
 {
-	//画面サイズ取得
-	std::Size screenSize;
-	this->getScreenSize(&screenSize);
+	//画面幅高さを取得
+	std::WH screenwh = this->getScreenWH();
 
 	//ビューポート設定
-	glViewport(0, 0, screenSize.width, screenSize.height);
+	glViewport(0, 0, screenwh.width, screenwh.height);
 
 	//プロジェクション設定
-	std::double_t left = mapPos.x - screenSize.width / 2;
-	std::double_t right = left + screenSize.width;
-	std::double_t top = mapPos.y + screenSize.height / 2;
-	std::double_t bottom = top - screenSize.height;
+	std::double_t left = mapPos.x - screenwh.width / 2;
+	std::double_t right = left + screenwh.width;
+	std::double_t top = mapPos.y + screenwh.height / 2;
+	std::double_t bottom = top - screenwh.height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(left, right, bottom, top, -1, 1);
@@ -149,7 +99,7 @@ void fw::DrawWGL::Impl::setup(const std::CoordI mapPos)
 }
 
 //描画カレント
-void fw::DrawWGL::Impl::makeCurrent(const bool current)
+void fw::DrawWGL::makeCurrent(const bool current)
 {
 	if (current) {
 		//カレント設定
@@ -162,13 +112,13 @@ void fw::DrawWGL::Impl::makeCurrent(const bool current)
 }
 
 //描画更新
-void fw::DrawWGL::Impl::swapBuffers()
+void fw::DrawWGL::swapBuffers()
 {
 	::SwapBuffers(this->hDC_);
 }
 
 //クリア
-void fw::DrawWGL::Impl::clear(const std::Color color)
+void fw::DrawWGL::clear(const std::Color color)
 {
 	std::float_t r = static_cast<std::float_t>(color.r) / 255.0f;
 	std::float_t g = static_cast<std::float_t>(color.g) / 255.0f;
@@ -181,7 +131,7 @@ void fw::DrawWGL::Impl::clear(const std::Color color)
 }
 
 //点描画
-void fw::DrawWGL::Impl::drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size)
+void fw::DrawWGL::drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size)
 {
 	//点の大きさを設定
 	glPointSize(size);
@@ -209,7 +159,7 @@ void fw::DrawWGL::Impl::drawPoints(const std::vector<std::CoordI>& coords, const
 }
 
 //ライン描画
-void fw::DrawWGL::Impl::drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width)
+void fw::DrawWGL::drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width)
 {
 	//ラインの太さを設定
 	glLineWidth(width);
@@ -236,32 +186,28 @@ void fw::DrawWGL::Impl::drawLines(const std::vector<std::CoordI>& coords, const 
 	glEnd();
 }
 
-//テクスチャ作成
-void fw::DrawWGL::Impl::createTextures(const fw::Image* const tex, std::uint32_t* const texId)
+//イメージ描画
+void fw::DrawWGL::drawImage(const std::CoordI coord, const fw::Image& image)
 {
+	//イメージをデコード
+	ImageDecorder decorder;
+	(void)decorder.decode(image);
+
+	//デコード画像を取得
+	std::int32_t decodeSize = 0;
+	std::int32_t width = 0;
+	std::int32_t height = 0;
+	std::uint8_t* decode = decorder.getDecodeData(&decodeSize, &width, &height);
+
 	//テクスチャ作成
-	GLuint textureId;
-	glGenTextures(1, &textureId);
+	GLuint texId;
+	glGenTextures(1, &texId);
 
 	//テクスチャ割り当て
-	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->Width(), tex->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->Body());
+	glBindTexture(GL_TEXTURE_2D, texId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, decode);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//テクスチャIDを出力
-	*texId = textureId;
-}
-
-//テクスチャ削除
-void fw::DrawWGL::Impl::deleteTextures(const std::uint32_t texId)
-{
-	//テクスチャ削除
-	glDeleteTextures(1, &texId);
-}
-
-//テクスチャ描画
-void fw::DrawWGL::Impl::drawTextrue(const std::vector<std::CoordTex>& coords, const std::uint32_t texId)
-{
 	//テクスチャ割り当て
 	glBindTexture(GL_TEXTURE_2D, texId);
 
@@ -286,120 +232,41 @@ void fw::DrawWGL::Impl::drawTextrue(const std::vector<std::CoordTex>& coords, co
 		//念のためフラグメントカラーを1.0fで初期化する
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
+		std::Area area;
+		area.xmin = coord.x;
+		area.ymin = coord.y - height;
+		area.xmax = coord.x + width;
+		area.ymax = coord.y;
+
 		//座標
-		size_t coordNum = coords.size();
-		for (size_t i = 0; i < coordNum; i++) {
-			glTexCoord2d(coords[i].u, coords[i].v);
-			glVertex3i(coords[i].x, coords[i].y, coords[i].z);
-		}
+		glTexCoord2d(0.0, 0.0);
+		glVertex3i(area.xmin, area.ymax, 0);
+		glTexCoord2d(1.0, 0.0);
+		glVertex3i(area.xmax, area.ymax, 0);
+		glTexCoord2d(0.0, 1.0);
+		glVertex3i(area.xmin, area.ymin, 0);
+		glTexCoord2d(1.0, 1.0);
+		glVertex3i(area.xmax, area.ymin, 0);
 	}
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 
 	//テクスチャ割り当て解除
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//テクスチャ削除
+	glDeleteTextures(1, &texId);
 }
 
-//描画領域取得
-void fw::DrawWGL::Impl::getScreenSize(std::Size* const screenSize)
+//画面幅高さを取得
+std::WH fw::DrawWGL::getScreenWH()
 {
-	RECT rect;
-	::GetClientRect(this->hWnd_, &rect);
-	screenSize->width = std::int16_t(rect.right - rect.left);
-	screenSize->height = std::int16_t(rect.bottom - rect.top);
-}
+	RECT rect = { 0 };
+	(void)::GetClientRect(this->hWnd_, &rect);
 
+	std::WH wh = { 0 };
+	wh.width = std::int32_t(rect.right - rect.left);
+	wh.height = std::int32_t(rect.bottom - rect.top);
 
-
-//----------------------------------------------------------
-//
-// WGL描画クラス
-//
-//----------------------------------------------------------
-
-//コンストラクタ
-fw::DrawWGL::DrawWGL() :
-	impl_(nullptr)
-{
-}
-
-//デストラクタ
-fw::DrawWGL::~DrawWGL()
-{
-	if (this->impl_ != nullptr) {
-		delete this->impl_;
-	}
-}
-
-//作成
-void fw::DrawWGL::create(void* const hWnd)
-{
-	if (this->impl_ == nullptr) {
-		//実装クラス未作成
-		if (hWnd != nullptr) {
-			//ウィンドウハンドル指定あり
-			this->impl_ = new Impl();
-			this->impl_->create(reinterpret_cast<HWND>(hWnd));
-		}
-	}
-}
-
-//描画セットアップ
-void fw::DrawWGL::setup(const std::CoordI mapPos)
-{
-	this->impl_->setup(mapPos);
-}
-
-//描画カレント
-void fw::DrawWGL::makeCurrent(const bool current)
-{
-	this->impl_->makeCurrent(current);
-}
-
-//描画更新
-void fw::DrawWGL::swapBuffers()
-{
-	this->impl_->swapBuffers();
-}
-
-//クリア
-void fw::DrawWGL::clear(const std::Color color)
-{
-	this->impl_->clear(color);
-}
-
-//点描画
-void fw::DrawWGL::drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size)
-{
-	this->impl_->drawPoints(coords, colors, size);
-}
-
-//ライン描画
-void fw::DrawWGL::drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width)
-{
-	this->impl_->drawLines(coords, colors, width);
-}
-
-//テクスチャ作成
-void fw::DrawWGL::createTextures(const fw::Image* const tex, std::uint32_t* const texId)
-{
-	this->impl_->createTextures(tex, texId);
-}
-
-//テクスチャ削除
-void fw::DrawWGL::deleteTextures(const std::uint32_t texId)
-{
-	this->impl_->deleteTextures(texId);
-}
-
-//テクスチャ描画
-void fw::DrawWGL::drawTextrue(const std::vector<std::CoordTex>& coords, const std::uint32_t texId)
-{
-	this->impl_->drawTextrue(coords, texId);
-}
-
-//画面サイズ取得
-void fw::DrawWGL::getScreenSize(std::Size* const screenSize)
-{
-	this->impl_->getScreenSize(screenSize);
+	return wh;
 }

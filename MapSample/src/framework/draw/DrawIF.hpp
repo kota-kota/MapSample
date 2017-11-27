@@ -11,7 +11,7 @@ namespace fw
 	// 前方宣言
 	//
 	//----------------------------------------------------------
-	class Image;
+	struct Image;
 
 	//----------------------------------------------------------
 	//
@@ -23,6 +23,8 @@ namespace fw
 	public:
 		//デストラクタ
 		virtual ~DrawIF() {}
+		//作成
+		virtual void create() = 0;
 		//セットアップ
 		virtual void setup(const std::CoordI mapPos) = 0;
 		//描画カレント
@@ -35,15 +37,11 @@ namespace fw
 		virtual void drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size) = 0;
 		//ライン描画
 		virtual void drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width) = 0;
-		//テクスチャ作成
-		virtual void createTextures(const fw::Image* const tex, std::uint32_t* const texId) = 0;
-		//テクスチャ削除
-		virtual void deleteTextures(const std::uint32_t texId) = 0;
-		//テクスチャ描画
-		virtual void drawTextrue(const std::vector<std::CoordTex>& coords, const std::uint32_t texId) = 0;
+		//イメージ描画
+		virtual void drawImage(const std::CoordI coord, const fw::Image& image) = 0;
 
-		//画面サイズ取得
-		virtual void getScreenSize(std::Size* const screenSize) = 0;
+		//画面幅高さを取得
+		virtual std::WH getScreenWH() = 0;
 	};
 }
 

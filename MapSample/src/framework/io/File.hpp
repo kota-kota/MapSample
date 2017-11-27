@@ -30,7 +30,7 @@ namespace fw
 		//ファイルクローズ
 		void close();
 		//ファイル読み込み
-		bool read(std::byte_t* const data, const std::int32_t offset, const size_t size);
+		bool read(std::byte_t** const data, const std::int32_t offset, const size_t size);
 		//ファイルサイズ取得
 		size_t getFileSize();
 	};

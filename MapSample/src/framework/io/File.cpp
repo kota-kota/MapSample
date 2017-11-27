@@ -74,7 +74,7 @@ void fw::File::close()
 }
 
 //ファイル読み込み
-bool fw::File::read(std::byte_t* const data, const std::int32_t offset, const size_t size)
+bool fw::File::read(std::byte_t** const data, const std::int32_t offset, const size_t size)
 {
 	if (this->filePath_.empty()) {
 		//未作成
@@ -95,7 +95,7 @@ bool fw::File::read(std::byte_t* const data, const std::int32_t offset, const si
 	(void)fseek(this->fp_, offset, SEEK_SET);
 
 	//ファイル読み込み
-	size_t readSize = fread_s(data, size, 1, size, fp);
+	size_t readSize = fread_s(*data, size, 1, size, fp);
 	if (readSize != size) {
 		//読み込み失敗
 		return false;
