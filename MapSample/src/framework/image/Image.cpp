@@ -31,6 +31,7 @@ namespace {
 	//----------------------------------------------------------
 
 	class ByteReader {
+	public:
 		//1バイトを読み込み(LE)
 		static void read1ByteLe(const std::uint8_t* const data, uint8_t* const readData)
 		{
@@ -602,24 +603,24 @@ namespace {
 
 			//ファイルタイプを取得
 			std::uint8_t fileType[2];
-			std::ByteReader::read1ByteLe(this->bmpData_ + BFH_FILETYPE_OFS, &fileType[0]);
-			std::ByteReader::read1ByteLe(this->bmpData_ + BFH_FILETYPE_OFS + 1, &fileType[1]);
+			ByteReader::read1ByteLe(this->bmpData_ + BFH_FILETYPE_OFS, &fileType[0]);
+			ByteReader::read1ByteLe(this->bmpData_ + BFH_FILETYPE_OFS + 1, &fileType[1]);
 			if ((fileType[0] == 'B') && (fileType[1] == 'M')) {
 				//Bitmap画像
 
 				//ファイルサイズを取得
 				std::uint32_t fileSize = 0;
-				std::ByteReader::read4ByteLe(this->bmpData_ + BFH_FILESIZE_OFS, &fileSize);
+				ByteReader::read4ByteLe(this->bmpData_ + BFH_FILESIZE_OFS, &fileSize);
 				this->fileSize_ = fileSize;
 
 				//ファイル先頭から画像データまでのオフセットを取得
 				std::uint32_t imageOffset = 0;
-				std::ByteReader::read4ByteLe(this->bmpData_ + BFH_IMAGEOFS_OFS, &imageOffset);
+				ByteReader::read4ByteLe(this->bmpData_ + BFH_IMAGEOFS_OFS, &imageOffset);
 				this->imageOffset_ = imageOffset;
 
 				//情報ヘッダサイズを取得
 				std::uint32_t infoHeaderSize = 0;
-				std::ByteReader::read4ByteLe(this->bmpData_ + BIH_HEADERSIZE_OFS, &infoHeaderSize);
+				ByteReader::read4ByteLe(this->bmpData_ + BIH_HEADERSIZE_OFS, &infoHeaderSize);
 
 				//情報ヘッダサイズに応じてフォーマットタイプを選択
 				if (infoHeaderSize == BIH_HEADERSIZE) {
@@ -650,24 +651,24 @@ namespace {
 			//画像の幅と高さを取得
 			std::uint32_t width = 0;
 			std::uint32_t height = 0;
-			std::ByteReader::read4ByteLe(this->bmpData_ + BIH_WIDTH_OFS, &width);
-			std::ByteReader::read4ByteLe(this->bmpData_ + BIH_HEIGHT_OFS, &height);
+			ByteReader::read4ByteLe(this->bmpData_ + BIH_WIDTH_OFS, &width);
+			ByteReader::read4ByteLe(this->bmpData_ + BIH_HEIGHT_OFS, &height);
 
 			//色ビット数を取得
 			std::uint16_t bitCount = 0;
-			std::ByteReader::read2ByteLe(this->bmpData_ + BIH_BITCOUNT_OFS, &bitCount);
+			ByteReader::read2ByteLe(this->bmpData_ + BIH_BITCOUNT_OFS, &bitCount);
 
 			//圧縮形式を取得
 			std::uint32_t compression = 0;
-			std::ByteReader::read4ByteLe(this->bmpData_ + BIH_COMPRESSION_OFS, &compression);
+			ByteReader::read4ByteLe(this->bmpData_ + BIH_COMPRESSION_OFS, &compression);
 
 			//画像データサイズを取得
 			std::uint32_t imageSize = 0;
-			std::ByteReader::read4ByteLe(this->bmpData_ + BIH_IMGDATASIZE_OFS, &imageSize);
+			ByteReader::read4ByteLe(this->bmpData_ + BIH_IMGDATASIZE_OFS, &imageSize);
 
 			//パレット数を取得
 			std::uint32_t palleteNum = 0;
-			std::ByteReader::read4ByteLe(this->bmpData_ + BIH_PALLETENUM_OFS, &palleteNum);
+			ByteReader::read4ByteLe(this->bmpData_ + BIH_PALLETENUM_OFS, &palleteNum);
 			if ((palleteNum == 0) && (bitCount <= 8)) {
 				//パレット数が0かつビット数が8以下の場合は、ビット数からパレット数を計算
 				palleteNum = (1 << bitCount);
@@ -690,12 +691,12 @@ namespace {
 			//画像の幅と高さを取得
 			std::uint16_t width = 0;
 			std::uint16_t height = 0;
-			std::ByteReader::read2ByteLe(this->bmpData_ + BCH_WIDTH_OFS, &width);
-			std::ByteReader::read2ByteLe(this->bmpData_ + BCH_HEIGHT_OFS, &height);
+			ByteReader::read2ByteLe(this->bmpData_ + BCH_WIDTH_OFS, &width);
+			ByteReader::read2ByteLe(this->bmpData_ + BCH_HEIGHT_OFS, &height);
 
 			//色ビット数を取得
 			std::uint16_t bitCount = 0;
-			std::ByteReader::read2ByteLe(this->bmpData_ + BCH_BITCOUNT_OFS, &bitCount);
+			ByteReader::read2ByteLe(this->bmpData_ + BCH_BITCOUNT_OFS, &bitCount);
 
 			//パレット数を取得
 			std::uint32_t palleteNum = 0;
@@ -739,9 +740,9 @@ namespace {
 			std::uint32_t writeOffset = 0;
 			for (std::uint16_t p = 0; p < this->palleteNum_; p++) {
 				//青→緑→赤
-				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &(pallete[writeOffset].b));
-				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &(pallete[writeOffset].g));
-				std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &(pallete[writeOffset].r));
+				ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &(pallete[writeOffset].b));
+				ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &(pallete[writeOffset].g));
+				ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &(pallete[writeOffset].r));
 
 				writeOffset++;
 				readOffset += 3;
@@ -775,7 +776,7 @@ namespace {
 				for (std::int32_t w = 0; w < this->width_; w++) {
 					//画像データはパレットインデックス
 					std::uint8_t index = 0;
-					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset, &index);
+					ByteReader::read1ByteLe(this->bmpData_ + readOffset, &index);
 					std::int32_t palleteOffset = (index >> bitOfs) & bitMask;
 
 					//出力データへRGBA値を設定
@@ -813,15 +814,15 @@ namespace {
 				for (std::int32_t w = 0; w < this->width_; w++) {
 					//画像データはBGR値
 					std::uint8_t b = 255;
-					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &b);
+					ByteReader::read1ByteLe(this->bmpData_ + readOffset + 0, &b);
 					std::uint8_t g = 255;
-					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &g);
+					ByteReader::read1ByteLe(this->bmpData_ + readOffset + 1, &g);
 					std::uint8_t r = 255;
-					std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &r);
+					ByteReader::read1ByteLe(this->bmpData_ + readOffset + 2, &r);
 					std::uint8_t a = 255;
 					if (this->bitCount_ == 32) {
 						//ビット数が32bitの場合、A値を読み込み
-						std::ByteReader::read1ByteLe(this->bmpData_ + readOffset + 3, &a);
+						ByteReader::read1ByteLe(this->bmpData_ + readOffset + 3, &a);
 
 						//読み込み位置を更新
 						readOffset++;

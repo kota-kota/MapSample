@@ -40,35 +40,6 @@ namespace {
 		{ EN_LocalImageID::JPEG01, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testorig.jpg", "", },
 		{ EN_LocalImageID::JPEG02, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testimgint.jpg", "", },
 	};
-
-	/*
-	//画像ファイルテーブル
-	static const ImageFile tblImageFiles[] = {
-		{ EN_LocalImageID::BMP01, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-1.bmp", "", },
-		{ EN_LocalImageID::BMP02, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-4.bmp", "", },
-		{ EN_LocalImageID::BMP03, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-8.bmp", "", },
-		{ EN_LocalImageID::BMP04, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-24.bmp", "", },
-		{ EN_LocalImageID::BMP05, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/dog2.bmp", "", },
-		{ EN_LocalImageID::BMP06, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-1.bmp", "", },
-		{ EN_LocalImageID::BMP07, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-4.bmp", "", },
-		{ EN_LocalImageID::BMP08, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-8.bmp", "", },
-		{ EN_LocalImageID::BMP09, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-24.bmp", "", },
-		{ EN_LocalImageID::BMP10, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-32.bmp", "", },
-		{ EN_LocalImageID::PNG01, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth1.png", "", },
-		{ EN_LocalImageID::PNG02, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth2.png", "", },
-		{ EN_LocalImageID::PNG03, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth4.png", "", },
-		{ EN_LocalImageID::PNG04, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth8.png", "", },
-		{ EN_LocalImageID::PNG05, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType2_depth8.png", "", },
-		{ EN_LocalImageID::PNG06, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth1.png", "", },
-		{ EN_LocalImageID::PNG07, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth2.png", "", },
-		{ EN_LocalImageID::PNG08, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth4.png", "", },
-		{ EN_LocalImageID::PNG09, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth8.png", "", },
-		{ EN_LocalImageID::JPEG01, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testorig.jpg", "", },
-		{ EN_LocalImageID::JPEG02, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testimgint.jpg", "", },
-	};
-	//画像ファイルテーブル数
-	static const std::int32_t tblImageFilesNum = sizeof(tblImageFiles) / sizeof(ImageFile);
-	*/
 }
 
 

@@ -15,20 +15,23 @@
 
 //コンストラクタ
 ui::UiMng::UiMng(fw::DrawIF* drawIF) :
-	drawIF_(drawIF), mapPos_(), screenPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false),
-	texBasePos_(), localImage(nullptr)
+	drawIF_(drawIF), mapCenterPos_(), mapArea_(), screenCenterPos_(), touchPos_(), dragPos_(),
+	isTouchOn_(false), isDragOn_(false), localImage(nullptr)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 	if (this->drawIF_ != nullptr) {
 		//地図中心座標
-		this->mapPos_ = { 63230028, 16092608, 0 };
+		this->mapCenterPos_ = { 63230028, 16092608, 0 };
 
 		//画面中心座標
 		std::WH screenwh = this->drawIF_->getScreenWH();
-		this->screenPos_ = { screenwh.width / 2, screenwh.height / 2, 0 };
+		this->screenCenterPos_ = { screenwh.width / 2, screenwh.height / 2, 0 };
 
-		//テクスチャ基準座標(画面左上になるように)
-		this->texBasePos_ = { this->mapPos_.x - this->screenPos_.x, this->mapPos_.y + this->screenPos_.y, 0 };
+		//地図エリア
+		this->mapArea_.xmin = this->mapCenterPos_.x - this->screenCenterPos_.x;
+		this->mapArea_.ymin = this->mapCenterPos_.y - this->screenCenterPos_.y;
+		this->mapArea_.xmax = this->mapCenterPos_.x + this->screenCenterPos_.x;
+		this->mapArea_.ymax = this->mapCenterPos_.y + this->screenCenterPos_.y;
 
 		//ソフト持ち画像作成
 		this->localImage = new LocalImage();
@@ -63,12 +66,12 @@ void ui::UiMng::setTouchOff()
 
 		//差分座標を計算
 		std::CoordI diffPos;
-		diffPos.x = this->screenPos_.x - this->touchPos_.x;
-		diffPos.y = this->screenPos_.y - this->touchPos_.y;
+		diffPos.x = this->screenCenterPos_.x - this->touchPos_.x;
+		diffPos.y = this->screenCenterPos_.y - this->touchPos_.y;
 
 		//地図座標に反映
-		this->mapPos_.x -= diffPos.x;
-		this->mapPos_.y += diffPos.y;
+		this->mapCenterPos_.x -= diffPos.x;
+		this->mapCenterPos_.y += diffPos.y;
 	}
 	else {
 		//何もしない
@@ -91,8 +94,8 @@ void ui::UiMng::setDrag(std::CoordI dragPos)
 	diffPos.y = this->touchPos_.y - dragPos.y;
 
 	//地図座標に反映
-	this->mapPos_.x += diffPos.x;
-	this->mapPos_.y -= diffPos.y;
+	this->mapCenterPos_.x += diffPos.x;
+	this->mapCenterPos_.y -= diffPos.y;
 
 	this->touchPos_ = dragPos;
 }
@@ -101,19 +104,19 @@ void ui::UiMng::setDrag(std::CoordI dragPos)
 void ui::UiMng::draw()
 {
 	this->drawIF_->makeCurrent(true);
-	this->drawIF_->setup(this->mapPos_);
+	this->drawIF_->setup(this->mapCenterPos_);
 	{
 		std::Color defColor = { 230, 231, 232, 255 };
 		this->drawIF_->clear(defColor);
 	}
 	{
-		std::CoordI texBasePos = this->texBasePos_;
-		//std::int32_t xOffset = 200;
-		//for (EN_LocalImageID id = EN_LocalImageID::BMP01; id <= EN_LocalImageID::BMP10; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		std::CoordI texBasePos = { this->mapArea_.xmin, this->mapArea_.ymax };
+		std::int32_t xOffset = 200;
+		for (EN_LocalImageID id = EN_LocalImageID::BMP01; id <= EN_LocalImageID::BMP10; id = EN_LocalImageID(std::int32_t(id) + 1)) {
 		//std::int32_t xOffset = 512;
 		//for (EN_LocalImageID id = EN_LocalImageID::PNG01; id <= EN_LocalImageID::PNG09; id = EN_LocalImageID(std::int32_t(id) + 1)) {
-		std::int32_t xOffset = 227;
-		for (EN_LocalImageID id = EN_LocalImageID::JPEG01; id <= EN_LocalImageID::JPEG02; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		//std::int32_t xOffset = 227;
+		//for (EN_LocalImageID id = EN_LocalImageID::JPEG01; id <= EN_LocalImageID::JPEG02; id = EN_LocalImageID(std::int32_t(id) + 1)) {
 
 			//画像データを取得
 			LocalImageData imageData;

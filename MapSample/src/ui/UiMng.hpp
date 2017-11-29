@@ -21,14 +21,14 @@ namespace ui {
 		//メンバ変数
 		fw::DrawIF*		drawIF_;
 
-		std::CoordI		mapPos_;
-		std::CoordI		screenPos_;
+		std::CoordI		mapCenterPos_;
+		std::Area		mapArea_;
+		std::CoordI		screenCenterPos_;
 		std::CoordI		touchPos_;
 		std::CoordI		dragPos_;
 		bool			isTouchOn_;
 		bool			isDragOn_;
 
-		std::CoordI		texBasePos_;
 		LocalImage*		localImage;
 
 	public:

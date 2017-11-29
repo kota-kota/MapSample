@@ -74,7 +74,7 @@ void fw::File::close()
 }
 
 //ファイル読み込み
-bool fw::File::read(std::byte_t** const data, const std::int32_t offset, const size_t size)
+bool fw::File::read(std::uint8_t** const data, const std::int32_t offset, const size_t size)
 {
 	if (this->filePath_.empty()) {
 		//未作成

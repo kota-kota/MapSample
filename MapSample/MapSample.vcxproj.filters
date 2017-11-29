@@ -48,9 +48,6 @@
     <ClCompile Include="src\framework\image\Image.cpp">
       <Filter>ソース ファイル\framework\image</Filter>
     </ClCompile>
-    <ClCompile Include="src\framework\Std.cpp">
-      <Filter>ソース ファイル\framework</Filter>
-    </ClCompile>
     <ClCompile Include="src\ui\LocalImage.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
