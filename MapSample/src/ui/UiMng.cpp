@@ -1,8 +1,8 @@
 ﻿#include "UiMng.hpp"
 
-#include "LocalImage.hpp"
 #include "draw/DrawIF.hpp"
 #include "image/Image.hpp"
+#include "image/LocalImage.hpp"
 #include "io/File.hpp"
 
 
@@ -34,7 +34,7 @@ ui::UiMng::UiMng(fw::DrawIF* drawIF) :
 		this->mapArea_.ymax = this->mapCenterPos_.y + this->screenCenterPos_.y;
 
 		//ソフト持ち画像作成
-		this->localImage = new LocalImage();
+		this->localImage = new fw::LocalImage();
 		this->localImage->create();
 	}
 }
@@ -111,15 +111,16 @@ void ui::UiMng::draw()
 	}
 	{
 		std::CoordI texBasePos = { this->mapArea_.xmin, this->mapArea_.ymax };
+
 		std::int32_t xOffset = 200;
-		for (EN_LocalImageID id = EN_LocalImageID::BMP01; id <= EN_LocalImageID::BMP10; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		for (std::uint16_t id = fw::D_IMAGEID_BMP_01; id <= fw::D_IMAGEID_BMP_0A; id++) {
 		//std::int32_t xOffset = 512;
-		//for (EN_LocalImageID id = EN_LocalImageID::PNG01; id <= EN_LocalImageID::PNG09; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		//for (std::uint16_t id = fw::D_IMAGEID_PNG_01; id <= fw::D_IMAGEID_PNG_09; id++) {
 		//std::int32_t xOffset = 227;
-		//for (EN_LocalImageID id = EN_LocalImageID::JPEG01; id <= EN_LocalImageID::JPEG02; id = EN_LocalImageID(std::int32_t(id) + 1)) {
+		//for (std::uint16_t id = fw::D_IMAGEID_JPEG_01; id <= fw::D_IMAGEID_JPEG_02; id++) {
 
 			//画像データを取得
-			LocalImageData imageData;
+			fw::LocalImageData imageData;
 			this->localImage->getImage(id, &imageData);
 
 			fw::Image image;

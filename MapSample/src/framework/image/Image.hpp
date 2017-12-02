@@ -4,8 +4,7 @@
 #include "Std.hpp"
 #include <string>
 
-namespace fw
-{
+namespace fw {
 	//画像タイプ
 	enum EN_ImageType : std::uint16_t {
 		D_IMAGETYPE_LOCAL,	//ソフト持ち画像

@@ -36,9 +36,6 @@
     <ClCompile Include="src\framework\io\File.cpp">
       <Filter>ソース ファイル\framework\io</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui\WindowWGL.cpp">
-      <Filter>ソース ファイル\ui</Filter>
-    </ClCompile>
     <ClCompile Include="src\ui\UiMng.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
@@ -48,8 +45,14 @@
     <ClCompile Include="src\framework\image\Image.cpp">
       <Filter>ソース ファイル\framework\image</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui\LocalImage.cpp">
+    <ClCompile Include="src\ui\Window.cpp">
       <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WindowWIN32.cpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\image\LocalImage.cpp">
+      <Filter>ソース ファイル\framework\image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,9 +60,6 @@
       <Filter>ソース ファイル\framework\io</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\UiMng.hpp">
-      <Filter>ソース ファイル\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ui\WindowWGL.hpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
     <ClInclude Include="src\framework\draw\DrawIF.hpp">
@@ -74,8 +74,14 @@
     <ClInclude Include="src\framework\Std.hpp">
       <Filter>ソース ファイル\framework</Filter>
     </ClInclude>
-    <ClInclude Include="src\ui\LocalImage.hpp">
+    <ClInclude Include="src\ui\Window.hpp">
       <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\WindowWIN32.hpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\image\LocalImage.hpp">
+      <Filter>ソース ファイル\framework\image</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

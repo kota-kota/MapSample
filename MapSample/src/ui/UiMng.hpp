@@ -4,12 +4,12 @@
 #include "Std.hpp"
 
 namespace fw {
+	//前方宣言
 	class DrawIF;
+	class LocalImage;
 }
 
 namespace ui {
-	//前方宣言
-	class LocalImage;
 
 	//----------------------------------------------------------
 	//
@@ -29,7 +29,7 @@ namespace ui {
 		bool			isTouchOn_;
 		bool			isDragOn_;
 
-		LocalImage*		localImage;
+		fw::LocalImage*	localImage;
 
 	public:
 		//コンストラクタ
