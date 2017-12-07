@@ -1,5 +1,6 @@
 ﻿#include "DrawWGL.hpp"
 #include "image/Image.hpp"
+#include "image/Font.hpp"
 
 #include <new>
 #include <gl/GL.h>
@@ -13,13 +14,19 @@
 
 //コンストラクタ
 fw::DrawWGL::DrawWGL(const HWND hWnd)
-	: hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr)
+	: hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr), font_(nullptr)
 {
+	this->font_ = new image::Font();
 }
 
 //デストラクタ
 fw::DrawWGL::~DrawWGL()
 {
+	if (this->font_ != nullptr) {
+		//フォントオブジェクト解放
+		delete this->font_;
+	}
+
 	if (this->hGLRC_ != nullptr) {
 		//描画コンテキストハンドルを破棄
 		::wglDeleteContext(this->hGLRC_);
@@ -256,6 +263,65 @@ void fw::DrawWGL::drawImage(const std::CoordI coord, const fw::Image& image)
 
 	//テクスチャ削除
 	glDeleteTextures(1, &texId);
+}
+
+//文字描画
+void fw::DrawWGL::drawString(const std::CoordI coord, wchar_t* const str)
+{
+	std::int32_t textCnt = std::int32_t(wcslen(str));
+
+	std::vector<image::Character> charList;
+	charList.resize(textCnt);
+
+	std::CoordI dispCoord = coord;
+	for (std::int32_t i = 0; i < textCnt; i++) {
+		//ラスタライズ
+		this->font_->rasterize(str[i], &charList[i]);
+
+		std::Area area;
+		area.xmin = dispCoord.x + charList[i].bl;
+		area.xmax = dispCoord.x + charList[i].bw;
+		area.ymin = dispCoord.y - (charList[i].bh - charList[i].bt);
+		area.ymax = dispCoord.y + charList[i].bt;
+
+		//次の文字位置
+		dispCoord.x += charList[i].ax >> 6;
+		dispCoord.y += charList[i].ay >> 6;
+
+		GLuint texID;
+		glGenTextures(1, &texID);
+		glBindTexture(GL_TEXTURE_2D, texID);
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, charList[i].bw, charList[i].bh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, charList[i].buffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_TEXTURE_2D);
+
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		glBegin(GL_TRIANGLE_STRIP);
+		glTexCoord2d(0.0, 1.0);
+		glVertex2i(area.xmin, area.ymin);
+		glTexCoord2d(1.0, 1.0);
+		glVertex2i(area.xmax, area.ymin);
+		glTexCoord2d(0.0, 0.0);
+		glVertex2i(area.xmin, area.ymax);
+		glTexCoord2d(1.0, 0.0);
+		glVertex2i(area.xmax, area.ymax);
+		glEnd();
+
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glDeleteTextures(1, &texID);
+	}
 }
 
 //画面幅高さを取得

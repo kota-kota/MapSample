@@ -105,10 +105,14 @@ void ui::UiMng::draw()
 {
 	this->drawIF_->makeCurrent(true);
 	this->drawIF_->setup(this->mapCenterPos_);
+
+	//画面クリア
 	{
 		std::Color defColor = { 230, 231, 232, 255 };
 		this->drawIF_->clear(defColor);
 	}
+
+	//イメージ描画
 	{
 		std::CoordI texBasePos = { this->mapArea_.xmin, this->mapArea_.ymax };
 
@@ -143,6 +147,8 @@ void ui::UiMng::draw()
 			texBasePos.x += xOffset;
 		}
 	}
+
+	//点描画
 	{
 		std::vector<std::Color> colors(1);
 		colors[0] = { 255, 0, 0, 255 };
@@ -150,6 +156,8 @@ void ui::UiMng::draw()
 		coords[0] = { 63230028, 16092608, 0 };
 		this->drawIF_->drawPoints(coords, colors, 10.0f);
 	}
+
+	//ライン描画
 	{
 		std::vector<std::Color> colors(1);
 		colors[0] = { 255, 0, 0, 255 };
@@ -160,6 +168,15 @@ void ui::UiMng::draw()
 		coords[3] = { 63230028 + 100, 16092608 - 100, 0 };
 		coords[4] = { 63230028 - 100, 16092608 - 100, 0 };
 		this->drawIF_->drawLines(coords, colors, 2.0f);
+	}
+
+	//文字描画
+	{
+		std::CoordI coord = { 63230028, 16092608, 0 };
+		//this->drawIF_->drawString(coord, L"hijkl,HIJKL<ASCII>/OpenGL. ^-^");
+		this->drawIF_->drawString(coord, L"1234567890");
+		coord.y -= 100;
+		this->drawIF_->drawString(coord, L"東京ドームアトラクション、ですわよ。");
 	}
 
 	this->drawIF_->swapBuffers();

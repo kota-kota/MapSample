@@ -10,6 +10,8 @@ namespace std {
 	using float_t = float;
 	using double_t = double;
 
+	//dataフォルダのパス
+	static const char_t* const D_DATA_PATH = "C:/cygwin64/home/Kyohei/Programing/MapSample/data";
 
 	//----------------------------------------------------------
 	//

@@ -4,8 +4,13 @@
 #include "DrawIF.hpp"
 #include <Windows.h>
 
-namespace fw
-{
+namespace image {
+	//前方宣言
+	class Font;
+}
+
+namespace fw {
+
 	//----------------------------------------------------------
 	//
 	// WGL描画クラス
@@ -13,9 +18,10 @@ namespace fw
 	//----------------------------------------------------------
 
 	class DrawWGL : public DrawIF {
-		HWND	hWnd_;
-		HDC		hDC_;
-		HGLRC	hGLRC_;
+		HWND			hWnd_;
+		HDC				hDC_;
+		HGLRC			hGLRC_;
+		image::Font*	font_;
 
 	public:
 		//コンストラクタ
@@ -38,6 +44,8 @@ namespace fw
 		virtual void drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width);
 		//イメージ描画
 		virtual void drawImage(const std::CoordI coord, const fw::Image& image);
+		//文字描画
+		virtual void drawString(const std::CoordI coord, wchar_t* const str);
 
 		//画面幅高さを取得
 		virtual std::WH getScreenWH();

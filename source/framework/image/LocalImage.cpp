@@ -17,27 +17,27 @@ namespace {
 
 	//画像ファイルテーブル
 	static const std::vector<ImageFile> tblImageFiles = {
-		{ fw::D_IMAGEID_BMP_01, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-1.bmp", "", },
-		{ fw::D_IMAGEID_BMP_02, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-4.bmp", "", },
-		{ fw::D_IMAGEID_BMP_03, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-8.bmp", "", },
-		{ fw::D_IMAGEID_BMP_04, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/os-24.bmp", "", },
-		{ fw::D_IMAGEID_BMP_05, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/dog2.bmp", "", },
-		{ fw::D_IMAGEID_BMP_06, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-1.bmp", "", },
-		{ fw::D_IMAGEID_BMP_07, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-4.bmp", "", },
-		{ fw::D_IMAGEID_BMP_08, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-8.bmp", "", },
-		{ fw::D_IMAGEID_BMP_09, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-24.bmp", "", },
-		{ fw::D_IMAGEID_BMP_0A, EN_ImageFormat::D_IMAGEFORMAT_BMP, "./data/bitmap/win-32.bmp", "", },
-		{ fw::D_IMAGEID_PNG_01, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth1.png", "", },
-		{ fw::D_IMAGEID_PNG_02, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth2.png", "", },
-		{ fw::D_IMAGEID_PNG_03, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth4.png", "", },
-		{ fw::D_IMAGEID_PNG_04, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType0_depth8.png", "", },
-		{ fw::D_IMAGEID_PNG_05, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType2_depth8.png", "", },
-		{ fw::D_IMAGEID_PNG_06, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth1.png", "", },
-		{ fw::D_IMAGEID_PNG_07, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth2.png", "", },
-		{ fw::D_IMAGEID_PNG_08, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth4.png", "", },
-		{ fw::D_IMAGEID_PNG_09, EN_ImageFormat::D_IMAGEFORMAT_PNG, "./data/png/colorType3_depth8.png", "", },
-		{ fw::D_IMAGEID_JPEG_01, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testorig.jpg", "", },
-		{ fw::D_IMAGEID_JPEG_02, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "./data/jpeg/testimgint.jpg", "", },
+		{ fw::D_IMAGEID_BMP_01, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/os-1.bmp", "", },
+		{ fw::D_IMAGEID_BMP_02, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/os-4.bmp", "", },
+		{ fw::D_IMAGEID_BMP_03, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/os-8.bmp", "", },
+		{ fw::D_IMAGEID_BMP_04, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/os-24.bmp", "", },
+		{ fw::D_IMAGEID_BMP_05, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/dog2.bmp", "", },
+		{ fw::D_IMAGEID_BMP_06, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/win-1.bmp", "", },
+		{ fw::D_IMAGEID_BMP_07, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/win-4.bmp", "", },
+		{ fw::D_IMAGEID_BMP_08, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/win-8.bmp", "", },
+		{ fw::D_IMAGEID_BMP_09, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/win-24.bmp", "", },
+		{ fw::D_IMAGEID_BMP_0A, EN_ImageFormat::D_IMAGEFORMAT_BMP, "bitmap/win-32.bmp", "", },
+		{ fw::D_IMAGEID_PNG_01, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType0_depth1.png", "", },
+		{ fw::D_IMAGEID_PNG_02, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType0_depth2.png", "", },
+		{ fw::D_IMAGEID_PNG_03, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType0_depth4.png", "", },
+		{ fw::D_IMAGEID_PNG_04, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType0_depth8.png", "", },
+		{ fw::D_IMAGEID_PNG_05, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType2_depth8.png", "", },
+		{ fw::D_IMAGEID_PNG_06, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType3_depth1.png", "", },
+		{ fw::D_IMAGEID_PNG_07, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType3_depth2.png", "", },
+		{ fw::D_IMAGEID_PNG_08, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType3_depth4.png", "", },
+		{ fw::D_IMAGEID_PNG_09, EN_ImageFormat::D_IMAGEFORMAT_PNG, "png/colorType3_depth8.png", "", },
+		{ fw::D_IMAGEID_JPEG_01, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "jpeg/testorig.jpg", "", },
+		{ fw::D_IMAGEID_JPEG_02, EN_ImageFormat::D_IMAGEFORMAT_JPEG, "jpeg/testimgint.jpg", "", },
 	};
 }
 
@@ -65,6 +65,9 @@ fw::LocalImage::~LocalImage()
 //作成
 void fw::LocalImage::create()
 {
+	//dataフォルダパス
+	const std::string dataPath = std::D_DATA_PATH;
+
 	if (this->imageList_.empty()) {
 		//未作成の場合のみ
 
@@ -84,7 +87,7 @@ void fw::LocalImage::create()
 			if (!itrFile->bodyFile_.empty()) {
 				//本体画像ファイル読み込み
 				fw::File bodyFile;
-				bodyFile.create(itrFile->bodyFile_);
+				bodyFile.create(dataPath + "/" + itrFile->bodyFile_);
 				bodyFile.open("rb");
 				bodySize = bodyFile.getFileSize();
 				body = new std::uint8_t[bodySize];
@@ -94,7 +97,7 @@ void fw::LocalImage::create()
 			if (!itrFile->blendFile_.empty()) {
 				//ブレンド画像ファイル読み込み
 				fw::File blendFile;
-				blendFile.create(itrFile->bodyFile_);
+				blendFile.create(dataPath + "/" + itrFile->blendFile_);
 				blendFile.open("rb");
 				blendSize = blendFile.getFileSize();
 				blend = new std::uint8_t[blendSize];

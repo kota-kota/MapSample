@@ -54,6 +54,9 @@
     <ClCompile Include="..\..\..\source\framework\draw\DrawWGL.cpp">
       <Filter>ソース ファイル\framework\draw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\framework\image\Font.cpp">
+      <Filter>ソース ファイル\framework\image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\framework\draw\DrawWGL.hpp">
       <Filter>ソース ファイル\framework\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\framework\image\Font.hpp">
+      <Filter>ソース ファイル\framework\image</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
