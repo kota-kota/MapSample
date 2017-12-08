@@ -24,10 +24,8 @@
     <ClCompile Include="..\..\..\source\framework\image\Image.cpp" />
     <ClCompile Include="..\..\..\source\framework\image\LocalImage.cpp" />
     <ClCompile Include="..\..\..\source\framework\io\File.cpp" />
-    <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\main_win32.cpp" />
     <ClCompile Include="..\..\..\source\ui\UiMng.cpp" />
-    <ClCompile Include="..\..\..\source\ui\Window.cpp" />
-    <ClCompile Include="..\..\..\source\ui\WindowWIN32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\framework\draw\DrawIF.hpp" />
@@ -38,8 +36,6 @@
     <ClInclude Include="..\..\..\source\framework\io\File.hpp" />
     <ClInclude Include="..\..\..\source\framework\Std.hpp" />
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp" />
-    <ClInclude Include="..\..\..\source\ui\Window.hpp" />
-    <ClInclude Include="..\..\..\source\ui\WindowWIN32.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B864E5C0-846D-4ABA-91A2-67EF8C86FE6C}</ProjectGuid>

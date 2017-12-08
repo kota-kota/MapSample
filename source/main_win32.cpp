@@ -1,49 +1,73 @@
-﻿#include "WindowWIN32.hpp"
+﻿#include "Std.hpp"
+#include "draw/DrawWGL.hpp"
+#include "ui/UiMng.hpp"
+#include <Windows.h>
+#include <string>
 
 
+//定数定義
+namespace {
 
+	//ウィンドウ名、位置、幅高さ
+	static const std::string D_WINDOW_NAME = "MapSample";
+	static const std::Position D_WINDOW_POSITION = { 0, 0 };
+	static const std::WH D_WINDOW_WH = { 800, 400 };
+}
+
+//グローバル変数
+namespace {
+
+	//描画インターフェース
+	static fw::DrawIF* gDrawIF = nullptr;
+
+	//UiMngオブジェクト
+	static ui::UiMng* gUiMng = nullptr;
+}
+
+//関数
 namespace {
 
 	//WM_CREATEイベント処理
 	static bool winproc_create(HWND hWnd, LPARAM lParam)
 	{
-		//CreateWindowのパラメータからUiMngを取得
-		LPCREATESTRUCT lpCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
-		ui::UiMng* uiMng = static_cast<ui::UiMng*>(lpCreateStruct->lpCreateParams);
+		//描画インターフェース生成
+		gDrawIF = new fw::DrawWGL(hWnd);
+		gDrawIF->create();
 
-		if (uiMng == nullptr) {
-			return false;
-		}
+		//UiMngオブジェクト生成
+		gUiMng = new ui::UiMng(gDrawIF);
 
-		//hWndにUiMngを関連付け
-		::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(uiMng));
-
-		printf("[%s] hWnd:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, uiMng);
-
+		printf("[%s] hWnd:0x%p DrawIF:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, gDrawIF, gUiMng);
 		return true;
 	}
 
 	//WM_DESTROYイベント処理
 	static bool winproc_destroy()
 	{
-		::PostQuitMessage(0);
+		if (gUiMng != nullptr) {
+			delete gUiMng;
+		}
+		if (gDrawIF != nullptr) {
+			delete gDrawIF;
+		}
 
+		::PostQuitMessage(0);
 		return true;
 	}
 
 	//WM_PAINTイベント処理
 	static bool winproc_paint(HWND hWnd)
 	{
-		//hWndに関連付けた値からUiMngを取得
-		ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		printf("%s\n", __FUNCTION__);
 
 		PAINTSTRUCT ps;
 		::BeginPaint(hWnd, &ps);
 		::EndPaint(hWnd, &ps);
 
-		//描画
-		uiMng->draw();
+		if (gUiMng != nullptr) {
+			//描画
+			gUiMng->draw();
+		}
 
 		return true;
 	}
@@ -51,9 +75,6 @@ namespace {
 	//ユーザ操作イベント処理
 	static bool winproc_useroperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		//hWndに関連付けた値からUiMngを取得
-		ui::UiMng* uiMng = reinterpret_cast<ui::UiMng*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
 		if (msg == WM_LBUTTONDOWN) {
 			std::CoordI touchPos = { 0, 0, 0 };
 			touchPos.x = std::int16_t(LOWORD(lParam));
@@ -61,13 +82,13 @@ namespace {
 			printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
 
 			//タッチON
-			uiMng->setTouchOn(touchPos);
+			gUiMng->setTouchOn(touchPos);
 
 			return true;
 		}
 		else if (msg == WM_LBUTTONUP) {
 			//タッチOFF
-			uiMng->setTouchOff();
+			gUiMng->setTouchOff();
 
 			RECT rect;
 			::GetClientRect(hWnd, &rect);
@@ -83,7 +104,7 @@ namespace {
 				printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
 
 				//ドラッグ
-				uiMng->setDrag(dragPos);
+				gUiMng->setDrag(dragPos);
 
 				//描画更新イベント通知
 				RECT rect;
@@ -129,59 +150,26 @@ namespace {
 	}
 }
 
-
-//----------------------------------------------------------
-//
-// WIN32ウィンドウクラス
-//
-//----------------------------------------------------------
-
-//コンストラクタ
-ui::WindowWIN32::WindowWIN32()
-	: fConsole_(nullptr), hInstance_(nullptr), drawIF_(nullptr), uiMng_()
+//メイン処理
+std::int32_t main()
 {
 	//コンソールウィンドウ生成
 	::AllocConsole();
-	freopen_s(&this->fConsole_, "CONOUT$", "w", stdout);
+	FILE* fConsole = nullptr;
+	freopen_s(&fConsole, "CONOUT$", "w", stdout);
 
 	//インスタンスハンドル取得
-	this->hInstance_ = ::GetModuleHandle(nullptr);
-
-	//描画インターフェース領域確保
-	this->drawIF_ = new fw::DrawWGL();
-}
-
-//デストラクタ
-ui::WindowWIN32::~WindowWIN32()
-{
-	//描画インターフェース領域解放
-	if (this->drawIF_ != nullptr) {
-		delete this->drawIF_;
-	}
-
-	//コンソールウィンドウ破棄
-	fclose(this->fConsole_);
-	//::FreeConsole();	//x64で例外発生
-}
-
-//ウィンドウ作成
-bool ui::WindowWIN32::create(const std::string& name, const std::Position pos, const std::WH wh)
-{
-	bool result = false;
-
-	//クラス名、ウィンドウタイトル
-	LPCSTR className = TEXT(name.c_str());
-	LPCSTR windowTitle = TEXT(name.c_str());
+	HINSTANCE hInstance = ::GetModuleHandle(nullptr);
 
 	//クラス登録情報設定
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = winproc_main;
-	wcex.lpszClassName = className;
+	wcex.lpszClassName = TEXT(D_WINDOW_NAME.c_str());
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = this->hInstance_;
+	wcex.hInstance = hInstance;
 	wcex.hIcon = ::LoadIcon(nullptr, IDI_APPLICATION);
 	wcex.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = nullptr;
@@ -198,48 +186,37 @@ bool ui::WindowWIN32::create(const std::string& name, const std::Position pos, c
 	//ウィンドウ作成
 	HWND hWnd = ::CreateWindowEx(
 		0,
-		className,
-		windowTitle,
+		TEXT(D_WINDOW_NAME.c_str()),
+		TEXT(D_WINDOW_NAME.c_str()),
 		WS_OVERLAPPEDWINDOW,
-		pos.x,
-		pos.y,
-		wh.width,
-		wh.height,
+		D_WINDOW_POSITION.x,
+		D_WINDOW_POSITION.y,
+		D_WINDOW_WH.width,
+		D_WINDOW_WH.height,
 		nullptr,
 		nullptr,
-		this->hInstance_,
-		static_cast<LPVOID>(&this->uiMng_)
+		hInstance,
+		nullptr
 	);
 	if (hWnd == nullptr) {
 		printf("[%s] Failed to CreateWindow\n", __FUNCTION__);
 		goto END;
 	}
 
-	printf("[%s] DrawWGL:0x%p UiMng:0x%p\n", __FUNCTION__, this->drawIF_, &this->uiMng_);
-
-	//描画インターフェース生成
-	new(this->drawIF_) fw::DrawWGL(hWnd);
-	this->drawIF_->create();
-
-	//UiMng生成
-	new(&this->uiMng_) ui::UiMng(this->drawIF_);
-
 	// ウィンドウ表示
 	ShowWindow(hWnd, SW_SHOW);
 	UpdateWindow(hWnd);
 
-	result = true;
-
-END:
-	return result;
-}
-
-//ウィンドウ開始
-void ui::WindowWIN32::start()
-{
 	MSG msg;
 	while (GetMessage(&msg, nullptr, 0, 0) != 0) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
+END:
+	//コンソールウィンドウ破棄
+	fclose(fConsole);
+	//::FreeConsole();	//x64で例外発生
+
+	return 0;
 }
