@@ -321,7 +321,7 @@ namespace {
 				//IHDRチャンクの各種情報取得
 				this->height_ = png_get_image_height(this->pngStr_, this->pngInfo_);
 				this->width_ = png_get_image_width(this->pngStr_, this->pngInfo_);
-				this->rowByte_ = png_get_rowbytes(this->pngStr_, this->pngInfo_);
+				this->rowByte_ = int32_t(png_get_rowbytes(this->pngStr_, this->pngInfo_));
 				this->bitDepth_ = png_get_bit_depth(this->pngStr_, this->pngInfo_);
 				this->colorType_ = png_get_color_type(this->pngStr_, this->pngInfo_);
 			}
