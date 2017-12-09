@@ -6,12 +6,24 @@
 
 namespace std {
 
+	//----------------------------------------------------------
+	//
+	// 共通型定義
+	//
+	//----------------------------------------------------------
+
 	using char_t = char;
 	using float_t = float;
 	using double_t = double;
 
-	//dataフォルダのパス
-	static const char_t* const D_DATA_PATH = "C:/cygwin64/home/Kyohei/Programing/MapSample/data";
+	//----------------------------------------------------------
+	//
+	// 共通列挙体定義
+	//
+	//----------------------------------------------------------
+
+	enum EN_OffOn { OFF, ON, };
+
 
 	//----------------------------------------------------------
 	//
@@ -59,6 +71,19 @@ namespace std {
 		int32_t		xmax;
 		int32_t		ymax;
 	};
+
+
+	//----------------------------------------------------------
+	//
+	// リソース定義
+	//
+	//----------------------------------------------------------
+
+	//地図中心座標
+	static const std::CoordI D_MAP_POSITION = { 63230028, 16092608, 0 };
+
+	//dataフォルダのパス
+	static const char_t* const D_DATA_PATH = "C:/cygwin64/home/Kyohei/Programing/MapSample/data";
 }
 
 #endif //INCLUDED_FWSTD_HPP

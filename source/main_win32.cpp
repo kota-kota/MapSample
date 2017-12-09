@@ -1,6 +1,6 @@
 ﻿#include "Std.hpp"
-#include "draw/DrawWGL.hpp"
 #include "ui/UiMain.hpp"
+#include "draw/DrawWGL.hpp"
 #include <Windows.h>
 #include <string>
 
@@ -56,36 +56,39 @@ namespace {
 	//WM_LBUTTONDOWNイベント処理
 	static void winproc_lbuttondown(LPARAM lParam)
 	{
-		//タッチ座標を取得
-		std::CoordI touchPos = { 0, 0, 0 };
-		touchPos.x = std::int16_t(LOWORD(lParam));
-		touchPos.y = std::int16_t(HIWORD(lParam));
+		//座標を取得
+		std::CoordI buttonPos = { 0, 0, 0 };
+		buttonPos.x = std::int16_t(LOWORD(lParam));
+		buttonPos.y = std::int16_t(HIWORD(lParam));
 
-		//タッチON
-		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
-		gUiMain->touchOn(touchPos);
+		//ボタンイベント処理
+		//printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, buttonPos.x, buttonPos.y);
+		gUiMain->procButtonEvent(ui::EN_ButtonEvent::LEFT_DOWN, buttonPos);
 	}
 
 	//WM_LBUTTONUPイベント処理
-	static void winproc_lbuttonup()
+	static void winproc_lbuttonup(LPARAM lParam)
 	{
-		//タッチOFF
-		gUiMain->touchOff();
+		//座標を取得
+		std::CoordI buttonPos = { 0, 0, 0 };
+		buttonPos.x = std::int16_t(LOWORD(lParam));
+		buttonPos.y = std::int16_t(HIWORD(lParam));
+
+		//ボタンイベント処理
+		gUiMain->procButtonEvent(ui::EN_ButtonEvent::LEFT_UP, buttonPos);
 	}
 
 	//WM_MOUSEMOVEイベント処理
-	static void winproc_mousemove(WPARAM wParam, LPARAM lParam)
+	static void winproc_mousemove(LPARAM lParam)
 	{
-		if (wParam & MK_LBUTTON) {
-			//ドラッグ座標を取得
-			std::CoordI dragPos = { 0, 0, 0 };
-			dragPos.x = std::int16_t(LOWORD(lParam));
-			dragPos.y = std::int16_t(HIWORD(lParam));
+		//座標を取得
+		std::CoordI buttonPos = { 0, 0, 0 };
+		buttonPos.x = std::int16_t(LOWORD(lParam));
+		buttonPos.y = std::int16_t(HIWORD(lParam));
 
-			//タッチ移動
-			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
-			gUiMain->touchMove(dragPos);
-		}
+		//タッチ移動
+		//printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, buttonPos.x, buttonPos.y);
+		gUiMain->procButtonEvent(ui::EN_ButtonEvent::MOVE, buttonPos);
 	}
 
 	// ウィンドウプロシージャ
@@ -107,14 +110,17 @@ namespace {
 			break;
 
 		case WM_LBUTTONUP:
-			winproc_lbuttonup();
+			winproc_lbuttonup(lParam);
+			break;
 
 		case WM_MOUSEMOVE:
-			winproc_mousemove(wParam, lParam);
+			winproc_mousemove(lParam);
+			break;
 
 		default:
 			//デフォルト処理
 			ret = ::DefWindowProc(hWnd, msg, wParam, lParam);
+			break;
 		}
 
 		return ret;

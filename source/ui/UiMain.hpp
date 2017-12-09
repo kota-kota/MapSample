@@ -2,16 +2,20 @@
 #define INCLUDED_UIMAIN_HPP
 
 #include "Std.hpp"
+#include "UiDef.hpp"
+
 
 namespace fw {
 	//前方宣言
 	class DrawIF;
 }
-
 namespace ui {
-
 	//前方宣言
 	class UiMng;
+}
+
+
+namespace ui {
 
 	//----------------------------------------------------------
 	//
@@ -21,7 +25,6 @@ namespace ui {
 
 	class UiMain {
 		//メンバ変数
-		fw::DrawIF*	drawIF_;
 		UiMng*		uiMng_;
 
 	public:
@@ -29,14 +32,8 @@ namespace ui {
 		UiMain(fw::DrawIF* drawIF);
 		//デストラクタ
 		~UiMain();
-		//タッチON
-		void touchOn(std::CoordI touchPos);
-		//タッチOFF
-		void touchOff();
-		//タッチ移動
-		void touchMove(std::CoordI dragPos);
-		//描画
-		void draw();
+		//ボタンイベント処理
+		void procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos);
 	};
 }
 

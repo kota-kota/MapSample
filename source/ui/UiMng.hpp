@@ -2,12 +2,17 @@
 #define INCLUDED_UIMNG_HPP
 
 #include "Std.hpp"
+#include "UiDef.hpp"
 #include <thread>
 
 namespace fw {
 	//前方宣言
 	class DrawIF;
 	class LocalImage;
+}
+namespace ui {
+	//前方宣言
+	class UiScreen;
 }
 
 namespace ui {
@@ -20,19 +25,13 @@ namespace ui {
 
 	class UiMng {
 		//メンバ変数
-		std::thread		th_;
-		bool			isStart_;
+		std::EN_OffOn	isStart_;
+		std::thread		mainThread_;
+		std::thread		drawThread_;
+
 		fw::DrawIF*		drawIF_;
 		fw::LocalImage*	localImage_;
-
-		std::CoordI		mapCenterPos_;
-		std::Area		mapArea_;
-		std::CoordI		screenCenterPos_;
-		std::CoordI		touchPos_;
-		std::CoordI		dragPos_;
-		bool			isTouchOn_;
-		bool			isDragOn_;
-		bool			isUpdateDraw_;
+		UiScreen*		screen_;
 
 	public:
 		//コンストラクタ
@@ -45,20 +44,8 @@ namespace ui {
 		void start();
 		//タスク終了
 		void end();
-		//タッチON
-		void setTouchOn(std::CoordI touchPos);
-		//タッチOFF
-		void setTouchOff();
-		//ドラッグ
-		void setDrag(std::CoordI dragPos);
-		//描画更新必要有無
-		bool isUpdateDraw();
-		//描画
-		void draw();
-
-	private:
-		//メイン
-		void main();
+		//ボタンイベント処理
+		void procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos);
 	};
 }
 

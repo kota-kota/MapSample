@@ -11,7 +11,7 @@
 
 //コンストラクタ
 ui::UiMain::UiMain(fw::DrawIF* drawIF) :
-	drawIF_(drawIF), uiMng_(nullptr)
+	uiMng_(nullptr)
 {
 	this->uiMng_ = new UiMng(drawIF);
 	this->uiMng_->start();
@@ -26,26 +26,8 @@ ui::UiMain::~UiMain()
 	}
 }
 
-//タッチON
-void ui::UiMain::touchOn(std::CoordI touchPos)
+//ボタンイベント処理
+void ui::UiMain::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos)
 {
-	this->uiMng_->setTouchOn(touchPos);
-}
-
-//タッチOFF
-void ui::UiMain::touchOff()
-{
-	this->uiMng_->setTouchOff();
-}
-
-//タッチ移動
-void ui::UiMain::touchMove(std::CoordI dragPos)
-{
-	this->uiMng_->setDrag(dragPos);
-}
-
-//描画
-void ui::UiMain::draw()
-{
-	this->uiMng_->draw();
+	this->uiMng_->procButtonEvent(buttonEvent, buttonPos);
 }
