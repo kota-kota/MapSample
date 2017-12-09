@@ -32,6 +32,7 @@ namespace ui {
 		std::CoordI		dragPos_;
 		bool			isTouchOn_;
 		bool			isDragOn_;
+		bool			isUpdateDraw_;
 
 	public:
 		//コンストラクタ
@@ -50,6 +51,8 @@ namespace ui {
 		void setTouchOff();
 		//ドラッグ
 		void setDrag(std::CoordI dragPos);
+		//描画更新必要有無
+		bool isUpdateDraw();
 		//描画
 		void draw();
 

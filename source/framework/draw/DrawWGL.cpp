@@ -87,6 +87,10 @@ void fw::DrawWGL::create()
 //描画セットアップ
 void fw::DrawWGL::setup(const std::CoordI mapPos)
 {
+	PAINTSTRUCT ps;
+	::BeginPaint(this->hWnd_, &ps);
+	::EndPaint(this->hWnd_, &ps);
+
 	//画面幅高さを取得
 	std::WH screenwh = this->getScreenWH();
 

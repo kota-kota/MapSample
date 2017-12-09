@@ -12,11 +12,14 @@ namespace {
 	//メインタスク
 	static void main_uimng(ui::UiMng* const uiMng)
 	{
-		std::int32_t count = 0;
+		std::int32_t drawCnt = 0;
 		while (uiMng->isStart()) {
-			printf("%d[sec]待ちました\n", count);
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			count += 1;
+			if (uiMng->isUpdateDraw()) {
+				//描画更新必要の場合のみ描画
+				drawCnt++;
+				printf("<%d>描画必要\n", drawCnt);
+				uiMng->draw();
+			}
 		}
 	}
 }
@@ -31,7 +34,7 @@ namespace {
 //コンストラクタ
 ui::UiMng::UiMng(fw::DrawIF* drawIF) :
 	th_(), isStart_(false), drawIF_(drawIF), localImage_(nullptr), mapCenterPos_(), mapArea_(),
-	screenCenterPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false)
+	screenCenterPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false), isUpdateDraw_(false)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 	if (this->drawIF_ != nullptr) {
@@ -73,6 +76,9 @@ void ui::UiMng::start()
 {
 	this->isStart_ = true;
 	this->th_ = std::thread(&main_uimng, this);
+
+	//描画更新必要
+	this->isUpdateDraw_ = true;
 }
 
 //終了
@@ -114,6 +120,9 @@ void ui::UiMng::setTouchOff()
 
 	this->isTouchOn_ = false;
 	this->isDragOn_ = false;
+
+	//描画更新必要
+	this->isUpdateDraw_ = true;
 }
 
 //ドラッグ
@@ -133,6 +142,15 @@ void ui::UiMng::setDrag(std::CoordI dragPos)
 	this->mapCenterPos_.y -= diffPos.y;
 
 	this->touchPos_ = dragPos;
+
+	//描画更新必要
+	this->isUpdateDraw_ = true;
+}
+
+//描画更新必要有無
+bool ui::UiMng::isUpdateDraw()
+{
+	return this->isUpdateDraw_;
 }
 
 //描画
@@ -216,4 +234,7 @@ void ui::UiMng::draw()
 
 	this->drawIF_->swapBuffers();
 	this->drawIF_->makeCurrent(false);
+
+	//描画完了したので、描画更新不要
+	this->isUpdateDraw_ = false;
 }

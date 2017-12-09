@@ -53,19 +53,6 @@ namespace {
 		::PostQuitMessage(0);
 	}
 
-	//WM_PAINTイベント処理
-	static void winproc_paint(HWND hWnd)
-	{
-		printf("%s\n", __FUNCTION__);
-
-		PAINTSTRUCT ps;
-		::BeginPaint(hWnd, &ps);
-		::EndPaint(hWnd, &ps);
-
-		//描画
-		gUiMain->draw();
-	}
-
 	//WM_LBUTTONDOWNイベント処理
 	static void winproc_lbuttondown(LPARAM lParam)
 	{
@@ -80,19 +67,14 @@ namespace {
 	}
 
 	//WM_LBUTTONUPイベント処理
-	static void winproc_lbuttonup(HWND hWnd)
+	static void winproc_lbuttonup()
 	{
 		//タッチOFF
 		gUiMain->touchOff();
-
-		//描画更新イベント通知
-		RECT rect;
-		::GetClientRect(hWnd, &rect);
-		::InvalidateRect(hWnd, &rect, false);
 	}
 
 	//WM_MOUSEMOVEイベント処理
-	static void winproc_mousemove(HWND hWnd, WPARAM wParam, LPARAM lParam)
+	static void winproc_mousemove(WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam & MK_LBUTTON) {
 			//ドラッグ座標を取得
@@ -103,11 +85,6 @@ namespace {
 			//タッチ移動
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
 			gUiMain->touchMove(dragPos);
-
-			//描画更新イベント通知
-			RECT rect;
-			::GetClientRect(hWnd, &rect);
-			::InvalidateRect(hWnd, &rect, false);
 		}
 	}
 
@@ -125,19 +102,15 @@ namespace {
 			winproc_destroy();
 			break;
 
-		case WM_PAINT:
-			winproc_paint(hWnd);
-			break;
-
 		case WM_LBUTTONDOWN:
 			winproc_lbuttondown(lParam);
 			break;
 
 		case WM_LBUTTONUP:
-			winproc_lbuttonup(hWnd);
+			winproc_lbuttonup();
 
 		case WM_MOUSEMOVE:
-			winproc_mousemove(hWnd, wParam, lParam);
+			winproc_mousemove(wParam, lParam);
 
 		default:
 			//デフォルト処理
