@@ -7,6 +7,21 @@
 
 
 
+namespace {
+
+	//メインタスク
+	static void main_uimng(ui::UiMng* const uiMng)
+	{
+		std::int32_t count = 0;
+		while (uiMng->isStart()) {
+			printf("%d[sec]待ちました\n", count);
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			count += 1;
+		}
+	}
+}
+
+
 //----------------------------------------------------------
 //
 // UI管理クラス
@@ -15,8 +30,8 @@
 
 //コンストラクタ
 ui::UiMng::UiMng(fw::DrawIF* drawIF) :
-	drawIF_(drawIF), mapCenterPos_(), mapArea_(), screenCenterPos_(), touchPos_(), dragPos_(),
-	isTouchOn_(false), isDragOn_(false), localImage(nullptr)
+	th_(), isStart_(false), drawIF_(drawIF), localImage_(nullptr), mapCenterPos_(), mapArea_(),
+	screenCenterPos_(), touchPos_(), dragPos_(), isTouchOn_(false), isDragOn_(false)
 {
 	printf("[%s] DrawIF:0x%p\n", __FUNCTION__, drawIF);
 	if (this->drawIF_ != nullptr) {
@@ -34,17 +49,37 @@ ui::UiMng::UiMng(fw::DrawIF* drawIF) :
 		this->mapArea_.ymax = this->mapCenterPos_.y + this->screenCenterPos_.y;
 
 		//ソフト持ち画像作成
-		this->localImage = new fw::LocalImage();
-		this->localImage->create();
+		this->localImage_ = new fw::LocalImage();
+		this->localImage_->create();
 	}
 }
 
 //デストラクタ
 ui::UiMng::~UiMng()
 {
-	if (this->localImage != nullptr) {
-		delete this->localImage;
+	if (this->localImage_ != nullptr) {
+		delete this->localImage_;
 	}
+}
+
+//タスク開始有無
+bool ui::UiMng::isStart()
+{
+	return this->isStart_;
+}
+
+//開始
+void ui::UiMng::start()
+{
+	this->isStart_ = true;
+	this->th_ = std::thread(&main_uimng, this);
+}
+
+//終了
+void ui::UiMng::end()
+{
+	this->isStart_ = false;
+	this->th_.join();
 }
 
 //タッチON
@@ -125,7 +160,7 @@ void ui::UiMng::draw()
 
 			//画像データを取得
 			fw::LocalImageData imageData;
-			this->localImage->getImage(id, &imageData);
+			this->localImage_->getImage(id, &imageData);
 
 			fw::Image image;
 			image.id_ = imageData.id_;

@@ -3,7 +3,6 @@
 #include "draw/DrawIF.hpp"
 
 
-
 //----------------------------------------------------------
 //
 // UIメインクラス
@@ -15,11 +14,13 @@ ui::UiMain::UiMain(fw::DrawIF* drawIF) :
 	drawIF_(drawIF), uiMng_(nullptr)
 {
 	this->uiMng_ = new UiMng(drawIF);
+	this->uiMng_->start();
 }
 
 //デストラクタ
 ui::UiMain::~UiMain()
 {
+	this->uiMng_->end();
 	if (this->uiMng_ != nullptr) {
 		delete this->uiMng_;
 	}

@@ -2,6 +2,7 @@
 #define INCLUDED_UIMNG_HPP
 
 #include "Std.hpp"
+#include <thread>
 
 namespace fw {
 	//前方宣言
@@ -19,7 +20,10 @@ namespace ui {
 
 	class UiMng {
 		//メンバ変数
+		std::thread		th_;
+		bool			isStart_;
 		fw::DrawIF*		drawIF_;
+		fw::LocalImage*	localImage_;
 
 		std::CoordI		mapCenterPos_;
 		std::Area		mapArea_;
@@ -29,13 +33,17 @@ namespace ui {
 		bool			isTouchOn_;
 		bool			isDragOn_;
 
-		fw::LocalImage*	localImage;
-
 	public:
 		//コンストラクタ
 		UiMng(fw::DrawIF* drawIF);
 		//デストラクタ
 		~UiMng();
+		//タスク開始有無
+		bool isStart();
+		//タスク開始
+		void start();
+		//タスク終了
+		void end();
 		//タッチON
 		void setTouchOn(std::CoordI touchPos);
 		//タッチOFF
@@ -44,6 +52,10 @@ namespace ui {
 		void setDrag(std::CoordI dragPos);
 		//描画
 		void draw();
+
+	private:
+		//メイン
+		void main();
 	};
 }
 
