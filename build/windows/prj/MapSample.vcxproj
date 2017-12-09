@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\..\source\framework\image\LocalImage.cpp" />
     <ClCompile Include="..\..\..\source\framework\io\File.cpp" />
     <ClCompile Include="..\..\..\source\main_win32.cpp" />
+    <ClCompile Include="..\..\..\source\ui\UiMain.cpp" />
     <ClCompile Include="..\..\..\source\ui\UiMng.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +36,7 @@
     <ClInclude Include="..\..\..\source\framework\image\LocalImage.hpp" />
     <ClInclude Include="..\..\..\source\framework\io\File.hpp" />
     <ClInclude Include="..\..\..\source\framework\Std.hpp" />
+    <ClInclude Include="..\..\..\source\ui\UiMain.hpp" />
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

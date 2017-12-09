@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\..\source\main_win32.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\ui\UiMain.cpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp">
@@ -76,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\framework\image\Font.hpp">
       <Filter>ソース ファイル\framework\image</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\ui\UiMain.hpp">
+      <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

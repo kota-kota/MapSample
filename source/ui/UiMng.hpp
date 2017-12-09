@@ -33,7 +33,7 @@ namespace ui {
 
 	public:
 		//コンストラクタ
-		UiMng(fw::DrawIF* drawIF = nullptr);
+		UiMng(fw::DrawIF* drawIF);
 		//デストラクタ
 		~UiMng();
 		//タッチON

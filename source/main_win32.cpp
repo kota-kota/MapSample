@@ -1,6 +1,6 @@
 ﻿#include "Std.hpp"
 #include "draw/DrawWGL.hpp"
-#include "ui/UiMng.hpp"
+#include "ui/UiMain.hpp"
 #include <Windows.h>
 #include <string>
 
@@ -20,8 +20,8 @@ namespace {
 	//描画インターフェース
 	static fw::DrawIF* gDrawIF = nullptr;
 
-	//UiMngオブジェクト
-	static ui::UiMng* gUiMng = nullptr;
+	//UiMainオブジェクト
+	static ui::UiMain* gUiMain = nullptr;
 }
 
 //関数
@@ -34,17 +34,17 @@ namespace {
 		gDrawIF = new fw::DrawWGL(hWnd);
 		gDrawIF->create();
 
-		//UiMngオブジェクト生成
-		gUiMng = new ui::UiMng(gDrawIF);
+		//UiMainオブジェクト生成
+		gUiMain = new ui::UiMain(gDrawIF);
 
-		printf("[%s] hWnd:0x%p DrawIF:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, gDrawIF, gUiMng);
+		printf("[%s] hWnd:0x%p DrawIF:0x%p UiMain:0x%p\n", __FUNCTION__, hWnd, gDrawIF, gUiMain);
 	}
 
 	//WM_DESTROYイベント処理
 	static void winproc_destroy()
 	{
-		if (gUiMng != nullptr) {
-			delete gUiMng;
+		if (gUiMain != nullptr) {
+			delete gUiMain;
 		}
 		if (gDrawIF != nullptr) {
 			delete gDrawIF;
@@ -63,7 +63,7 @@ namespace {
 		::EndPaint(hWnd, &ps);
 
 		//描画
-		gUiMng->draw();
+		gUiMain->draw();
 	}
 
 	//WM_LBUTTONDOWNイベント処理
@@ -76,14 +76,14 @@ namespace {
 
 		//タッチON
 		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
-		gUiMng->setTouchOn(touchPos);
+		gUiMain->touchOn(touchPos);
 	}
 
 	//WM_LBUTTONUPイベント処理
 	static void winproc_lbuttonup(HWND hWnd)
 	{
 		//タッチOFF
-		gUiMng->setTouchOff();
+		gUiMain->touchOff();
 
 		//描画更新イベント通知
 		RECT rect;
@@ -100,9 +100,9 @@ namespace {
 			dragPos.x = std::int16_t(LOWORD(lParam));
 			dragPos.y = std::int16_t(HIWORD(lParam));
 
-			//ドラッグ
+			//タッチ移動
 			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
-			gUiMng->setDrag(dragPos);
+			gUiMain->touchMove(dragPos);
 
 			//描画更新イベント通知
 			RECT rect;
