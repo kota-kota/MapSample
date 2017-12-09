@@ -28,7 +28,7 @@ namespace {
 namespace {
 
 	//WM_CREATEイベント処理
-	static bool winproc_create(HWND hWnd, LPARAM lParam)
+	static void winproc_create(HWND hWnd)
 	{
 		//描画インターフェース生成
 		gDrawIF = new fw::DrawWGL(hWnd);
@@ -38,11 +38,10 @@ namespace {
 		gUiMng = new ui::UiMng(gDrawIF);
 
 		printf("[%s] hWnd:0x%p DrawIF:0x%p UiMng:0x%p\n", __FUNCTION__, hWnd, gDrawIF, gUiMng);
-		return true;
 	}
 
 	//WM_DESTROYイベント処理
-	static bool winproc_destroy()
+	static void winproc_destroy()
 	{
 		if (gUiMng != nullptr) {
 			delete gUiMng;
@@ -52,11 +51,10 @@ namespace {
 		}
 
 		::PostQuitMessage(0);
-		return true;
 	}
 
 	//WM_PAINTイベント処理
-	static bool winproc_paint(HWND hWnd)
+	static void winproc_paint(HWND hWnd)
 	{
 		printf("%s\n", __FUNCTION__);
 
@@ -64,89 +62,89 @@ namespace {
 		::BeginPaint(hWnd, &ps);
 		::EndPaint(hWnd, &ps);
 
-		if (gUiMng != nullptr) {
-			//描画
-			gUiMng->draw();
-		}
-
-		return true;
+		//描画
+		gUiMng->draw();
 	}
 
-	//ユーザ操作イベント処理
-	static bool winproc_useroperation(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	//WM_LBUTTONDOWNイベント処理
+	static void winproc_lbuttondown(LPARAM lParam)
 	{
-		if (msg == WM_LBUTTONDOWN) {
-			std::CoordI touchPos = { 0, 0, 0 };
-			touchPos.x = std::int16_t(LOWORD(lParam));
-			touchPos.y = std::int16_t(HIWORD(lParam));
-			printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
+		//タッチ座標を取得
+		std::CoordI touchPos = { 0, 0, 0 };
+		touchPos.x = std::int16_t(LOWORD(lParam));
+		touchPos.y = std::int16_t(HIWORD(lParam));
 
-			//タッチON
-			gUiMng->setTouchOn(touchPos);
+		//タッチON
+		printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, touchPos.x, touchPos.y);
+		gUiMng->setTouchOn(touchPos);
+	}
 
-			return true;
-		}
-		else if (msg == WM_LBUTTONUP) {
-			//タッチOFF
-			gUiMng->setTouchOff();
+	//WM_LBUTTONUPイベント処理
+	static void winproc_lbuttonup(HWND hWnd)
+	{
+		//タッチOFF
+		gUiMng->setTouchOff();
 
+		//描画更新イベント通知
+		RECT rect;
+		::GetClientRect(hWnd, &rect);
+		::InvalidateRect(hWnd, &rect, false);
+	}
+
+	//WM_MOUSEMOVEイベント処理
+	static void winproc_mousemove(HWND hWnd, WPARAM wParam, LPARAM lParam)
+	{
+		if (wParam & MK_LBUTTON) {
+			//ドラッグ座標を取得
+			std::CoordI dragPos = { 0, 0, 0 };
+			dragPos.x = std::int16_t(LOWORD(lParam));
+			dragPos.y = std::int16_t(HIWORD(lParam));
+
+			//ドラッグ
+			printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
+			gUiMng->setDrag(dragPos);
+
+			//描画更新イベント通知
 			RECT rect;
 			::GetClientRect(hWnd, &rect);
 			::InvalidateRect(hWnd, &rect, false);
-
-			return true;
-		}
-		else if (msg == WM_MOUSEMOVE) {
-			if (wParam & MK_LBUTTON) {
-				std::CoordI dragPos = { 0, 0, 0 };
-				dragPos.x = std::int16_t(LOWORD(lParam));
-				dragPos.y = std::int16_t(HIWORD(lParam));
-				printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, dragPos.x, dragPos.y);
-
-				//ドラッグ
-				gUiMng->setDrag(dragPos);
-
-				//描画更新イベント通知
-				RECT rect;
-				::GetClientRect(hWnd, &rect);
-				::InvalidateRect(hWnd, &rect, false);
-
-				return true;
-			}
-			return false;
-		}
-		else {
-			return false;
 		}
 	}
 
 	// ウィンドウプロシージャ
 	static LRESULT CALLBACK winproc_main(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		bool ret = true;
+		LRESULT ret = 0L;
 
 		switch (msg) {
 		case WM_CREATE:
-			ret = winproc_create(hWnd, lParam);
+			winproc_create(hWnd);
 			break;
 
 		case WM_DESTROY:
-			ret = winproc_destroy();
+			winproc_destroy();
 			break;
 
 		case WM_PAINT:
-			ret = winproc_paint(hWnd);
+			winproc_paint(hWnd);
 			break;
 
+		case WM_LBUTTONDOWN:
+			winproc_lbuttondown(lParam);
+			break;
+
+		case WM_LBUTTONUP:
+			winproc_lbuttonup(hWnd);
+
+		case WM_MOUSEMOVE:
+			winproc_mousemove(hWnd, wParam, lParam);
+
 		default:
-			ret = winproc_useroperation(hWnd, msg, wParam, lParam);
-			if (!ret) {
-				//デフォルト処理
-				return ::DefWindowProc(hWnd, msg, wParam, lParam);
-			}
+			//デフォルト処理
+			ret = ::DefWindowProc(hWnd, msg, wParam, lParam);
 		}
 
-		return (0L);
+		return ret;
 	}
 }
 

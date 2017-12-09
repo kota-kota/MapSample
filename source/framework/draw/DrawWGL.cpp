@@ -16,7 +16,6 @@
 fw::DrawWGL::DrawWGL(const HWND hWnd)
 	: hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr), font_(nullptr)
 {
-	this->font_ = new image::Font();
 }
 
 //デストラクタ
@@ -80,6 +79,9 @@ void fw::DrawWGL::create()
 
 	//描画コンテキストハンドルを作成
 	this->hGLRC_ = ::wglCreateContext(this->hDC_);
+
+	//フォントオブジェクトを作成
+	this->font_ = new image::Font();
 }
 
 //描画セットアップ
