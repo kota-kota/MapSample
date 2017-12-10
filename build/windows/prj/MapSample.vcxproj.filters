@@ -54,6 +54,9 @@
     <ClCompile Include="..\..\..\source\ui\UiMain.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\ui\UiScreen.cpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp">
@@ -81,6 +84,12 @@
       <Filter>ソース ファイル\framework\image</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\ui\UiMain.hpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\ui\UiScreen.hpp">
+      <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\ui\UiDef.hpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClInclude>
   </ItemGroup>

@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\..\source\main_win32.cpp" />
     <ClCompile Include="..\..\..\source\ui\UiMain.cpp" />
     <ClCompile Include="..\..\..\source\ui\UiMng.cpp" />
+    <ClCompile Include="..\..\..\source\ui\UiScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\framework\draw\DrawIF.hpp" />
@@ -36,8 +37,10 @@
     <ClInclude Include="..\..\..\source\framework\image\LocalImage.hpp" />
     <ClInclude Include="..\..\..\source\framework\io\File.hpp" />
     <ClInclude Include="..\..\..\source\framework\Std.hpp" />
+    <ClInclude Include="..\..\..\source\ui\UiDef.hpp" />
     <ClInclude Include="..\..\..\source\ui\UiMain.hpp" />
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp" />
+    <ClInclude Include="..\..\..\source\ui\UiScreen.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B864E5C0-846D-4ABA-91A2-67EF8C86FE6C}</ProjectGuid>
