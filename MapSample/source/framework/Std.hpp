@@ -83,7 +83,7 @@ namespace std {
 	static const std::CoordI D_MAP_POSITION = { 63230028, 16092608, 0 };
 
 	//dataフォルダのパス
-	static const char_t* const D_DATA_PATH = "C:/cygwin64/home/Kyohei/Programing/MapSample/data";
+	static const char_t* const D_DATA_PATH = "C:/cygwin64/home/Kyohei/program/data";
 }
 
 #endif //INCLUDED_FWSTD_HPP
