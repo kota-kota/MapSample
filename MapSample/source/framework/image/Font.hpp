@@ -1,4 +1,4 @@
-#ifndef INCLUDED_FONT_HPP
+ï»¿#ifndef INCLUDED_FONT_HPP
 #define INCLUDED_FONT_HPP
 
 #include "Std.hpp"
@@ -12,7 +12,7 @@ namespace image {
 
 	class Character {
 	public:
-		//ƒƒ“ƒo•Ï”
+		//ãƒ¡ãƒ³ãƒå¤‰æ•°
 		std::uint32_t	ax;		//advance.x
 		std::uint32_t	ay;		//advance.y
 		std::uint32_t	bw;		//bitmap.width
@@ -22,24 +22,24 @@ namespace image {
 		std::uint8_t*	buffer;	//buffer
 
 	public:
-		//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		Character();
-		//ƒfƒXƒgƒ‰ƒNƒ^
+		//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		~Character();
 	};
 
-	//ƒtƒHƒ“ƒgƒNƒ‰ƒX
+	//ãƒ•ã‚©ãƒ³ãƒˆã‚¯ãƒ©ã‚¹
 	class Font {
-		//ƒƒ“ƒo•Ï”
+		//ãƒ¡ãƒ³ãƒå¤‰æ•°
 		FT_Library	ftLibrary;
 		FT_Face		ftFace;
 
 	public:
-		//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		Font();
-		//ƒfƒXƒgƒ‰ƒNƒ^
+		//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		~Font();
-		//ƒ‰ƒXƒ^ƒ‰ƒCƒY
+		//ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚º
 		void rasterize(const wchar_t charCode, Character* const c);
 	};
 }

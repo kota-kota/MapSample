@@ -1,19 +1,19 @@
-#include "Font.hpp"
+ï»¿#include "Font.hpp"
 #include <string>
 
 namespace {
-	//ƒtƒHƒ“ƒgƒtƒ@ƒCƒ‹
+	//ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚¡ã‚¤ãƒ«
 	const std::string fontFile = "font/ipagp.ttf";
 }
 
 
-//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 image::Character::Character() :
 	ax(0), ay(0), bw(0), bh(0), bl(0), bt(0), buffer(nullptr)
 {
 }
 
-//ƒfƒXƒgƒ‰ƒNƒ^
+//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 image::Character::~Character()
 {
 	if (this->buffer != nullptr) {
@@ -22,29 +22,29 @@ image::Character::~Character()
 }
 
 
-//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 image::Font::Font()
 	: ftLibrary(nullptr), ftFace(nullptr)
 {
-	//dataƒtƒHƒ‹ƒ_ƒpƒX
+	//dataãƒ•ã‚©ãƒ«ãƒ€ãƒ‘ã‚¹
 	const std::string dataPath = std::D_DATA_PATH;
 
-	//ƒtƒHƒ“ƒgƒtƒ@ƒCƒ‹ƒpƒX
+	//ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
 	const std::string fontFilePath = dataPath + "/" + fontFile;
 
-	//FreeType‰Šú‰»
+	//FreeTypeåˆæœŸåŒ–
 	FT_Init_FreeType(&this->ftLibrary);
 	FT_New_Face(this->ftLibrary, fontFilePath.c_str(), 0, &this->ftFace);
 }
 
-//ƒfƒXƒgƒ‰ƒNƒ^
+//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 image::Font::~Font()
 {
 	FT_Done_Face(this->ftFace);
 	FT_Done_FreeType(this->ftLibrary);
 }
 
-//ƒ‰ƒXƒ^ƒ‰ƒCƒY
+//ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚º
 void image::Font::rasterize(const wchar_t charCode, Character* const c)
 {
 	FT_Face face = this->ftFace;
@@ -54,9 +54,9 @@ void image::Font::rasterize(const wchar_t charCode, Character* const c)
 	FT_UInt glyphIndex = FT_Get_Char_Index(face, charCode);
 	FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 
-	//‘•ü
-	//FT_GlyphSlot_Embolden(face->glyph);	//‘¾Žš
-	//FT_GlyphSlot_Oblique(face->glyph);	//ŽÎ‘Ì
+	//è£…é£¾
+	//FT_GlyphSlot_Embolden(face->glyph);	//å¤ªå­—
+	//FT_GlyphSlot_Oblique(face->glyph);	//æ–œä½“
 
 	FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
