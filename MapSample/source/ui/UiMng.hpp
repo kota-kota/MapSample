@@ -38,12 +38,14 @@ namespace ui {
 		UiMng(fw::DrawIF* drawIF);
 		//デストラクタ
 		~UiMng();
-		//タスク開始有無
-		bool isStart();
 		//タスク開始
 		void start();
 		//タスク終了
 		void end();
+		//イベント処理
+		void procEvent();
+		//描画処理
+		void procDraw();
 		//ボタンイベント処理
 		void procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos);
 	};

@@ -40,7 +40,7 @@ namespace fw
 		//イメージ描画
 		virtual void drawImage(const std::CoordI coord, const fw::Image& image) = 0;
 		//文字描画
-		virtual void drawString(const std::CoordI coord, wchar_t* const str) = 0;
+		virtual void drawString(const std::CoordI coord, const wchar_t* const str) = 0;
 
 		//画面幅高さを取得
 		virtual std::WH getScreenWH() = 0;

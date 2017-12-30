@@ -272,7 +272,7 @@ void fw::DrawWGL::drawImage(const std::CoordI coord, const fw::Image& image)
 }
 
 //文字描画
-void fw::DrawWGL::drawString(const std::CoordI coord, wchar_t* const str)
+void fw::DrawWGL::drawString(const std::CoordI coord, const wchar_t* const str)
 {
 	std::int32_t textCnt = std::int32_t(wcslen(str));
 

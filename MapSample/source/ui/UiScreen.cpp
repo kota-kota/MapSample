@@ -34,31 +34,17 @@ ui::UiScreen::~UiScreen()
 {
 }
 
-//描画更新必要有無
-bool ui::UiScreen::isUpdateDraw()
+//表示データ作成
+void ui::UiScreen::makeViewData()
 {
-	return (this->status_.isUpdate_ == std::EN_OffOn::ON) ? true : false;
-}
-
-//描画
-void ui::UiScreen::draw()
-{
-	fw::DrawIF* drawIF = this->status_.drawIF_;
 	fw::LocalImage* localImage = this->status_.localImage_;
-	std::CoordI mapPos = this->status_.mapPos_;
 	std::Area mapArea = this->status_.mapArea_;
-	std::Position screenPos = this->status_.screenPos_;
 
-	drawIF->makeCurrent(true);
-	drawIF->setup(mapPos);
+	//背景色
+	std::Color backColor = { 230, 231, 232, 255 };
+	this->viewData_.setBackColor(backColor);
 
-	//画面クリア
-	{
-		std::Color defColor = { 230, 231, 232, 255 };
-		drawIF->clear(defColor);
-	}
-
-	//イメージ描画
+	//イメージ
 	{
 		std::CoordI texBasePos = { mapArea.xmin, mapArea.ymax };
 
@@ -88,22 +74,22 @@ void ui::UiScreen::draw()
 			image.body_.pallete_ = nullptr;
 			image.isBlend_ = 0;
 
-			drawIF->drawImage(texBasePos, image);
+			this->viewData_.setDrawParts(new ViewImage(texBasePos, image));
 
 			texBasePos.x += xOffset;
 		}
 	}
 
-	//点描画
+	//点
 	{
-		std::vector<std::Color> colors(1);
+		DrawColors colors(1);
 		colors[0] = { 255, 0, 0, 255 };
-		std::vector<std::CoordI> coords(1);
+		DrawCoords coords(1);
 		coords[0] = { 63230028, 16092608, 0 };
-		drawIF->drawPoints(coords, colors, 10.0f);
+		this->viewData_.setDrawParts(new ViewPoint(coords, colors, 10.0f));
 	}
 
-	//ライン描画
+	//ライン
 	{
 		std::vector<std::Color> colors(1);
 		colors[0] = { 255, 0, 0, 255 };
@@ -113,20 +99,32 @@ void ui::UiScreen::draw()
 		coords[2] = { 63230028 + 100, 16092608 + 100, 0 };
 		coords[3] = { 63230028 + 100, 16092608 - 100, 0 };
 		coords[4] = { 63230028 - 100, 16092608 - 100, 0 };
-		drawIF->drawLines(coords, colors, 2.0f);
+		this->viewData_.setDrawParts(new ViewLine(coords, colors, 2.0f));
 	}
 
-	//文字描画
+	//文字
 	{
 		std::CoordI coord = { 63230028, 16092608, 0 };
-		//this->drawIF_->drawString(coord, L"hijkl,HIJKL<ASCII>/OpenGL. ^-^");
-		drawIF->drawString(coord, L"1234567890");
+		this->viewData_.setDrawParts(new ViewString(coord, L"hijkl,HIJKL<ASCII>/OpenGL. ^-^"));
 		coord.y -= 100;
-		drawIF->drawString(coord, L"東京ドームアトラクション、ですわよ。");
+		this->viewData_.setDrawParts(new ViewString(coord, L"東京ドームアトラクション、ですわよ。"));
 	}
+}
 
-	drawIF->swapBuffers();
-	drawIF->makeCurrent(false);
+//描画更新必要有無
+bool ui::UiScreen::isUpdateDraw()
+{
+	return (this->status_.isUpdate_ == std::EN_OffOn::ON) ? true : false;
+}
+
+//描画
+void ui::UiScreen::draw()
+{
+	fw::DrawIF* drawIF = this->status_.drawIF_;
+	std::CoordI mapPos = this->status_.mapPos_;
+
+	//描画
+	this->viewData_.draw(drawIF, mapPos);
 
 	//描画完了したので、描画更新不要
 	this->status_.isUpdate_ = std::EN_OffOn::OFF;

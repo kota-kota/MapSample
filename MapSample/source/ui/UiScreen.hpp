@@ -3,6 +3,7 @@
 
 #include "Std.hpp"
 #include "UiDef.hpp"
+#include "ViewData.hpp"
 
 namespace fw {
 	//前方宣言
@@ -37,6 +38,7 @@ namespace ui {
 	class UiScreen {
 		//メンバ変数
 		UiStatus		status_;
+		ViewData		viewData_;
 
 		std::CoordI		touchPos_;
 		std::CoordI		dragPos_;
@@ -47,6 +49,8 @@ namespace ui {
 		UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImage, const std::CoordI mapPos);
 		//デストラクタ
 		~UiScreen();
+		//表示データ作成
+		void makeViewData();
 		//描画更新必要有無
 		bool isUpdateDraw();
 		//描画
