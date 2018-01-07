@@ -1,6 +1,11 @@
 ﻿#include "Std.hpp"
 #include "ui/UiMain.hpp"
+#ifdef DRAWIF_WGL
 #include "draw/DrawWGL.hpp"
+#endif //DRAWIF_WGL
+#ifdef DRAWIF_WEGL
+#include "draw/DrawWEGL.hpp"
+#endif //DRAWIF_WEGL
 #include <Windows.h>
 #include <string>
 
@@ -31,7 +36,12 @@ namespace {
 	static void winproc_create(HWND hWnd)
 	{
 		//描画インターフェース生成
+#ifdef DRAWIF_WGL
 		gDrawIF = new fw::DrawWGL(hWnd);
+#endif //DRAWIF_WGL
+#ifdef DRAWIF_WEGL
+		gDrawIF = new fw::DrawWEGL(hWnd);
+#endif //DRAWIF_WEGL
 		gDrawIF->create();
 
 		//UiMainオブジェクト生成
@@ -57,9 +67,9 @@ namespace {
 	static void winproc_lbuttondown(LPARAM lParam)
 	{
 		//座標を取得
-		std::CoordI buttonPos = { 0, 0, 0 };
-		buttonPos.x = std::int16_t(LOWORD(lParam));
-		buttonPos.y = std::int16_t(HIWORD(lParam));
+		std::Position buttonPos = { 0 };
+		buttonPos.x = std::int32_t(LOWORD(lParam));
+		buttonPos.y = std::int32_t(HIWORD(lParam));
 
 		//ボタンイベント処理
 		//printf("[%s] WM_LBUTTONDOWN:(%d, %d)\n", __FUNCTION__, buttonPos.x, buttonPos.y);
@@ -70,9 +80,9 @@ namespace {
 	static void winproc_lbuttonup(LPARAM lParam)
 	{
 		//座標を取得
-		std::CoordI buttonPos = { 0, 0, 0 };
-		buttonPos.x = std::int16_t(LOWORD(lParam));
-		buttonPos.y = std::int16_t(HIWORD(lParam));
+		std::Position buttonPos = { 0 };
+		buttonPos.x = std::int32_t(LOWORD(lParam));
+		buttonPos.y = std::int32_t(HIWORD(lParam));
 
 		//ボタンイベント処理
 		gUiMain->procButtonEvent(ui::EN_ButtonEvent::LEFT_UP, buttonPos);
@@ -82,9 +92,9 @@ namespace {
 	static void winproc_mousemove(LPARAM lParam)
 	{
 		//座標を取得
-		std::CoordI buttonPos = { 0, 0, 0 };
-		buttonPos.x = std::int16_t(LOWORD(lParam));
-		buttonPos.y = std::int16_t(HIWORD(lParam));
+		std::Position buttonPos = { 0 };
+		buttonPos.x = std::int32_t(LOWORD(lParam));
+		buttonPos.y = std::int32_t(HIWORD(lParam));
 
 		//タッチ移動
 		//printf("[%s] WM_MOUSEMOVE:(%d, %d)\n", __FUNCTION__, buttonPos.x, buttonPos.y);

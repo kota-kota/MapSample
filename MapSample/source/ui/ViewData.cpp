@@ -10,7 +10,7 @@
 //----------------------------------------------------------
 
 //コンストラクタ
-ui::ViewPoint::ViewPoint(const DrawCoords& coords, const DrawColors& colors, const float_t width) :
+ui::ViewPoint::ViewPoint(const fw::DrawCoords& coords, const fw::DrawColors& colors, const std::float_t width) :
 	coords_(coords), colors_(colors), width_(width)
 {
 }
@@ -29,7 +29,7 @@ void ui::ViewPoint::draw(fw::DrawIF* const drawIF)
 //----------------------------------------------------------
 
 //コンストラクタ
-ui::ViewLine::ViewLine(const DrawCoords& coords, const DrawColors& colors, const float_t width) :
+ui::ViewLine::ViewLine(const fw::DrawCoords& coords, const fw::DrawColors& colors, const std::float_t width) :
 	coords_(coords), colors_(colors), width_(width)
 {
 }
@@ -48,7 +48,7 @@ void ui::ViewLine::draw(fw::DrawIF* const drawIF)
 //----------------------------------------------------------
 
 //コンストラクタ
-ui::ViewPolygon::ViewPolygon(const DrawCoords& coords, const DrawColors& colors) :
+ui::ViewPolygon::ViewPolygon(const fw::DrawCoords& coords, const fw::DrawColors& colors) :
 	coords_(coords), colors_(colors)
 {
 }
@@ -56,6 +56,7 @@ ui::ViewPolygon::ViewPolygon(const DrawCoords& coords, const DrawColors& colors)
 //描画
 void ui::ViewPolygon::draw(fw::DrawIF* const drawIF)
 {
+	drawIF->drawPolygons(this->coords_, this->colors_);
 }
 
 
@@ -117,7 +118,7 @@ ui::ViewData::~ViewData()
 }
 
 //背景色設定
-void ui::ViewData::setBackColor(const std::Color& backColor)
+void ui::ViewData::setBackColor(const std::ColorUB& backColor)
 {
 	this->backColor_ = backColor;
 }
@@ -129,7 +130,7 @@ void ui::ViewData::setDrawParts(ViewParts* const parts)
 }
 
 //描画
-void ui::ViewData::draw(fw::DrawIF* const drawIF, std::CoordI& mapPos)
+void ui::ViewData::draw(fw::DrawIF* const drawIF, const std::Position& mapPos)
 {
 	drawIF->makeCurrent(true);
 	drawIF->setup(mapPos);

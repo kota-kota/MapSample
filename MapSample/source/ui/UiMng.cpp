@@ -90,7 +90,7 @@ void ui::UiMng::procDraw()
 }
 
 //ボタンイベント処理
-void ui::UiMng::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos)
+void ui::UiMng::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::Position& buttonPos)
 {
 	switch (buttonEvent) {
 	case EN_ButtonEvent::LEFT_DOWN:		this->screen_->procButtonLeftDown(buttonPos);	break;

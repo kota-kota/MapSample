@@ -1,16 +1,13 @@
-﻿#ifndef INCLUDED_UIDRAW_HPP
-#define INCLUDED_UIDRAW_HPP
+﻿#ifndef INCLUDED_VIEWDATA_HPP
+#define INCLUDED_VIEWDATA_HPP
 
 #include "Std.hpp"
 #include "UiDef.hpp"
+#include "draw/DrawIF.hpp"
 #include "image/Image.hpp"
 #include <string>
 #include <vector>
 
-namespace fw {
-	//前方宣言
-	class DrawIF;
-}
 
 namespace ui {
 
@@ -19,10 +16,6 @@ namespace ui {
 	// 各描画物定数定義
 	//
 	//----------------------------------------------------------
-
-	//型定義
-	using DrawColors = std::vector<std::Color>;
-	using DrawCoords = std::vector<std::CoordI>;
 
 	//描画物タイプ
 	enum EN_DrawPartsType {
@@ -53,13 +46,13 @@ namespace ui {
 	//----------------------------------------------------------
 	class ViewPoint : public ViewParts {
 		//メンバ変数
-		DrawCoords		coords_;	//座標
-		DrawColors		colors_;	//色
+		fw::DrawCoords	coords_;	//座標
+		fw::DrawColors	colors_;	//色
 		std::float_t	width_;		//点幅
 
 	public:
 		//コンストラクタ
-		ViewPoint(const DrawCoords& coords, const DrawColors& colors, const float_t width);
+		ViewPoint(const fw::DrawCoords& coords, const fw::DrawColors& colors, const std::float_t width);
 		//描画
 		virtual void draw(fw::DrawIF* const drawIF);
 	};
@@ -72,13 +65,13 @@ namespace ui {
 	//----------------------------------------------------------
 	class ViewLine : public ViewParts {
 		//メンバ変数
-		DrawCoords		coords_;	//座標
-		DrawColors		colors_;	//色
+		fw::DrawCoords	coords_;	//座標
+		fw::DrawColors	colors_;	//色
 		std::float_t	width_;		//線幅
 
 	public:
 		//コンストラクタ
-		ViewLine(const DrawCoords& coords, const DrawColors& colors, const float_t width);
+		ViewLine(const fw::DrawCoords& coords, const fw::DrawColors& colors, const std::float_t width);
 		//描画
 		virtual void draw(fw::DrawIF* const drawIF);
 	};
@@ -91,12 +84,12 @@ namespace ui {
 	//----------------------------------------------------------
 	class ViewPolygon : public ViewParts {
 		//メンバ変数
-		DrawCoords		coords_;	//座標
-		DrawColors		colors_;	//色
+		fw::DrawCoords	coords_;	//座標
+		fw::DrawColors	colors_;	//色
 
 	public:
 		//コンストラクタ
-		ViewPolygon(const DrawCoords& coords, const DrawColors& colors);
+		ViewPolygon(const fw::DrawCoords& coords, const fw::DrawColors& colors);
 		//描画
 		virtual void draw(fw::DrawIF* const drawIF);
 	};
@@ -147,7 +140,7 @@ namespace ui {
 
 	class ViewData {
 		//メンバ変数
-		std::Color					backColor_;	//背景色
+		std::ColorUB				backColor_;	//背景色
 		std::vector<ViewParts*>		partsList_;	//描画物リスト
 
 	public:
@@ -156,12 +149,12 @@ namespace ui {
 		//デストラクタ
 		~ViewData();
 		//背景色設定
-		void setBackColor(const std::Color& backColor);
+		void setBackColor(const std::ColorUB& backColor);
 		//描画物設定
 		void setDrawParts(ViewParts* const parts);
 		//描画
-		void draw(fw::DrawIF* const drawIF, std::CoordI& mapPos);
+		void draw(fw::DrawIF* const drawIF, const std::Position& mapPos);
 	};
 }
 
-#endif //INCLUDED_UIDRAW_HPP
+#endif //INCLUDED_VIEWDATA_HPP

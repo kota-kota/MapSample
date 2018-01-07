@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\framework\draw\DrawWEGL.cpp" />
     <ClCompile Include="..\..\..\source\framework\draw\DrawWGL.cpp" />
     <ClCompile Include="..\..\..\source\framework\image\Font.cpp" />
     <ClCompile Include="..\..\..\source\framework\image\Image.cpp" />
     <ClCompile Include="..\..\..\source\framework\image\LocalImage.cpp" />
     <ClCompile Include="..\..\..\source\framework\io\File.cpp" />
+    <ClCompile Include="..\..\..\source\framework\Math.cpp" />
     <ClCompile Include="..\..\..\source\main_win32.cpp" />
     <ClCompile Include="..\..\..\source\ui\ViewData.cpp" />
     <ClCompile Include="..\..\..\source\ui\UiMain.cpp" />
@@ -32,11 +34,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\framework\draw\DrawIF.hpp" />
+    <ClInclude Include="..\..\..\source\framework\draw\DrawWEGL.hpp" />
     <ClInclude Include="..\..\..\source\framework\draw\DrawWGL.hpp" />
     <ClInclude Include="..\..\..\source\framework\image\Font.hpp" />
     <ClInclude Include="..\..\..\source\framework\image\Image.hpp" />
     <ClInclude Include="..\..\..\source\framework\image\LocalImage.hpp" />
     <ClInclude Include="..\..\..\source\framework\io\File.hpp" />
+    <ClInclude Include="..\..\..\source\framework\Math.hpp" />
     <ClInclude Include="..\..\..\source\framework\Std.hpp" />
     <ClInclude Include="..\..\..\source\ui\UiDef.hpp" />
     <ClInclude Include="..\..\..\source\ui\ViewData.hpp" />
@@ -121,13 +125,13 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)library\powervr\Include;$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)library\freetype\Lib\x86;$(SolutionDir)library\libjpeg\Lib\x86;$(SolutionDir)library\libpng\Lib\x86;$(SolutionDir)library\zlib\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)library\powervr\Lib\x86;$(SolutionDir)library\freetype\Lib\x86;$(SolutionDir)library\libjpeg\Lib\x86;$(SolutionDir)library\libpng\Lib\x86;$(SolutionDir)library\zlib\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
     </Link>
@@ -141,16 +145,15 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)library\powervr\Include;$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)library\freetype\Lib\x64;$(SolutionDir)library\libjpeg\Lib\x64;$(SolutionDir)library\libpng\Lib\x64;$(SolutionDir)library\zlib\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)library\powervr\Lib\x64;$(SolutionDir)library\freetype\Lib\x64;$(SolutionDir)library\libjpeg\Lib\x64;$(SolutionDir)library\libpng\Lib\x64;$(SolutionDir)library\zlib\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /D /Q $(SolutionDir)library\powervr\Lib\x64\*.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -160,15 +163,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)library\powervr\Include;$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)library\freetype\Lib\x86;$(SolutionDir)library\libjpeg\Lib\x86;$(SolutionDir)library\libpng\Lib\x86;$(SolutionDir)library\zlib\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)library\powervr\Lib\x86;$(SolutionDir)library\freetype\Lib\x86;$(SolutionDir)library\libjpeg\Lib\x86;$(SolutionDir)library\libpng\Lib\x86;$(SolutionDir)library\zlib\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>opengl32.lib;libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -182,20 +185,19 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)library\powervr\Include;$(SolutionDir)library\freetype\Include;$(SolutionDir)library\libjpeg\Include;$(SolutionDir)library\zlib\Include;$(SolutionDir)library\libpng\Include;..\..\..\source\framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)library\freetype\Lib\x64;$(SolutionDir)library\libjpeg\Lib\x64;$(SolutionDir)library\zlib\Lib\x64;$(SolutionDir)library\libpng\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)library\powervr\Lib\x64;$(SolutionDir)library\freetype\Lib\x64;$(SolutionDir)library\libjpeg\Lib\x64;$(SolutionDir)library\zlib\Lib\x64;$(SolutionDir)library\libpng\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpng16.lib;zlib.lib;jpeg-static.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /D /Q $(SolutionDir)library\powervr\Lib\x64\*.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

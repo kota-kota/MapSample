@@ -47,7 +47,7 @@ namespace ui {
 		//描画処理
 		void procDraw();
 		//ボタンイベント処理
-		void procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos);
+		void procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::Position& buttonPos);
 	};
 }
 

@@ -10,7 +10,7 @@
 //----------------------------------------------------------
 
 //コンストラクタ
-ui::UiScreen::UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImage, const std::CoordI mapPos) :
+ui::UiScreen::UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImage, const std::Position& mapPos) :
 	status_(), touchPos_(), dragPos_(), buttonEvent_(ui::EN_ButtonEvent::INVALID)
 {
 	//画面中心座標
@@ -18,15 +18,15 @@ ui::UiScreen::UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImag
 	std::Position screenPos = { screenwh.width / 2, screenwh.height / 2 };
 
 	//地図エリア
-	std::Area mapArea = { mapPos.x - screenPos.x, mapPos.y - screenPos.y, mapPos.x + screenPos.x, mapPos.y + screenPos.y };
+	std::AreaI mapArea = { mapPos.x - screenPos.x, mapPos.y - screenPos.y, mapPos.x + screenPos.x, mapPos.y + screenPos.y };
 
 	//ステータスを初期化
 	this->status_.isUpdate_ = std::EN_OffOn::ON;
 	this->status_.drawIF_ = drawIF;
 	this->status_.localImage_ = localImage;
+	this->status_.screenPos_ = screenPos;
 	this->status_.mapPos_ = mapPos;
 	this->status_.mapArea_ = mapArea;
-	this->status_.screenPos_ = screenPos;
 }
 
 //デストラクタ
@@ -38,15 +38,16 @@ ui::UiScreen::~UiScreen()
 void ui::UiScreen::makeViewData()
 {
 	fw::LocalImage* localImage = this->status_.localImage_;
-	std::Area mapArea = this->status_.mapArea_;
+	std::AreaI mapArea = this->status_.mapArea_;
 
 	//背景色
-	std::Color backColor = { 230, 231, 232, 255 };
+	//std::ColorUB backColor = { 230, 231, 232, 255 };
+	std::ColorUB backColor = { 255, 150, 150, 255 };
 	this->viewData_.setBackColor(backColor);
 
 	//イメージ
 	{
-		std::CoordI texBasePos = { mapArea.xmin, mapArea.ymax };
+		std::CoordI texBasePos = { mapArea.xmin, mapArea.ymax, 0 };
 
 		std::int32_t xOffset = 200;
 		for (std::uint16_t id = fw::D_IMAGEID_BMP_01; id <= fw::D_IMAGEID_BMP_0A; id++) {
@@ -82,24 +83,67 @@ void ui::UiScreen::makeViewData()
 
 	//点
 	{
-		DrawColors colors(1);
-		colors[0] = { 255, 0, 0, 255 };
-		DrawCoords coords(1);
-		coords[0] = { 63230028, 16092608, 0 };
-		this->viewData_.setDrawParts(new ViewPoint(coords, colors, 10.0f));
+		const std::int32_t coordNum = 3;
+		const std::ColorUB pointColor = { 255, 0, 0, 255 };
+		const std::CoordI pointCoord = { std::D_MAP_POSITION.x - 350, std::D_MAP_POSITION.y, 0 };
+		const std::CoordI offset[coordNum] = {
+			{ 0, 0, 0 },
+			{ 100, 0, 0 },
+			{ 200, 0, 0 },
+		};
+
+		fw::DrawColors colors(coordNum);
+		fw::DrawCoords coords(coordNum);
+		for (std::int32_t i = 0; i < coordNum; i++) {
+			colors[i] = pointColor;
+			coords[i] = { pointCoord.x + offset[i].x, pointCoord.y + offset[i].y, pointCoord.z + offset[i].z };
+		}
+		this->viewData_.setDrawParts(new ViewPoint(coords, colors, 10.0F));
 	}
 
 	//ライン
 	{
-		std::vector<std::Color> colors(1);
-		colors[0] = { 255, 0, 0, 255 };
-		std::vector<std::CoordI> coords(5);
-		coords[0] = { 63230028 - 100, 16092608 - 100, 0 };
-		coords[1] = { 63230028 - 100, 16092608 + 100, 0 };
-		coords[2] = { 63230028 + 100, 16092608 + 100, 0 };
-		coords[3] = { 63230028 + 100, 16092608 - 100, 0 };
-		coords[4] = { 63230028 - 100, 16092608 - 100, 0 };
-		this->viewData_.setDrawParts(new ViewLine(coords, colors, 2.0f));
+		const std::int32_t coordNum = 5;
+		const std::ColorUB lineColor = { 255, 0, 0, 255 };
+		const std::CoordI lineCoord = { std::D_MAP_POSITION.x - 350, std::D_MAP_POSITION.y - 30, 0 };
+		const std::CoordI offset[coordNum] = {
+			{ 0, 0, 0 },
+			{ 30, 5, 0 },
+			{ 60, -15, 0 },
+			{ 90, 10, 0 },
+			{ 120, 0, 0 },
+		};
+
+		fw::DrawColors colors(coordNum);
+		fw::DrawCoords coords(coordNum);
+		for (std::int32_t i = 0; i < coordNum; i++) {
+			colors[i] = lineColor;
+			coords[i] = { lineCoord.x + offset[i].x, lineCoord.y + offset[i].y, lineCoord.z + offset[i].z };
+		}
+		this->viewData_.setDrawParts(new ViewLine(coords, colors, 2.0F));
+	}
+
+	//ポリゴン
+	{
+		const std::int32_t coordNum = 6;
+		const std::ColorUB polyColor = { 255, 0, 0, 255 };
+		const std::CoordI polyCoord = { std::D_MAP_POSITION.x - 350, std::D_MAP_POSITION.y - 60, 0 };
+		const std::CoordI offset[coordNum] = {
+			{ 0, 0, 0 },
+			{ 0, -15, 0 },
+			{ 200, -10, 0 },
+			{ 200, -30, 0 },
+			{ 500, 10, 0 },
+			{ 500, 0, 0 },
+		};
+
+		fw::DrawColors colors(coordNum);
+		fw::DrawCoords coords(coordNum);
+		for (std::int32_t i = 0; i < coordNum; i++) {
+			colors[i] = polyColor;
+			coords[i] = { polyCoord.x + offset[i].x, polyCoord.y + offset[i].y, polyCoord.z + offset[i].z };
+		}
+		this->viewData_.setDrawParts(new ViewPolygon(coords, colors));
 	}
 
 	//文字
@@ -121,7 +165,7 @@ bool ui::UiScreen::isUpdateDraw()
 void ui::UiScreen::draw()
 {
 	fw::DrawIF* drawIF = this->status_.drawIF_;
-	std::CoordI mapPos = this->status_.mapPos_;
+	std::Position mapPos = this->status_.mapPos_;
 
 	//描画
 	this->viewData_.draw(drawIF, mapPos);
@@ -131,7 +175,7 @@ void ui::UiScreen::draw()
 }
 
 //ボタンイベント処理:LEFT_DOWN
-void ui::UiScreen::procButtonLeftDown(const std::CoordI buttonPos)
+void ui::UiScreen::procButtonLeftDown(const std::Position& buttonPos)
 {
 	//タッチ座標を保持
 	this->touchPos_ = buttonPos;
@@ -146,7 +190,7 @@ void ui::UiScreen::procButtonLeftUp()
 		//タッチスクロール
 
 		//差分座標を計算
-		std::CoordI diffPos;
+		std::Position diffPos = { 0 };
 		diffPos.x = this->status_.screenPos_.x - this->touchPos_.x;
 		diffPos.y = this->status_.screenPos_.y - this->touchPos_.y;
 
@@ -165,12 +209,12 @@ void ui::UiScreen::procButtonLeftUp()
 }
 
 //ボタンイベント処理:MOVE
-void ui::UiScreen::procButtonMove(const std::CoordI buttonPos)
+void ui::UiScreen::procButtonMove(const std::Position& buttonPos)
 {
 	//ドラッグスクロール
 	if ((this->buttonEvent_ == LEFT_DOWN) || (this->buttonEvent_ == LEFT_MOVE)) {
 		//差分座標を計算
-		std::CoordI diffPos;
+		std::Position diffPos = { 0 };
 		diffPos.x = this->touchPos_.x - buttonPos.x;
 		diffPos.y = this->touchPos_.y - buttonPos.y;
 
@@ -178,11 +222,11 @@ void ui::UiScreen::procButtonMove(const std::CoordI buttonPos)
 		this->status_.mapPos_.x += diffPos.x;
 		this->status_.mapPos_.y -= diffPos.y;
 
-		this->touchPos_ = buttonPos;
-
 		//描画更新必要
 		this->status_.isUpdate_ = std::EN_OffOn::ON;
 
+		//状態を更新
+		this->touchPos_ = buttonPos;
 		this->buttonEvent_ = LEFT_MOVE;
 	}
 }

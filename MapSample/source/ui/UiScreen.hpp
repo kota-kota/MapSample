@@ -23,9 +23,9 @@ namespace ui {
 		std::EN_OffOn	isUpdate_;
 		fw::DrawIF*		drawIF_;
 		fw::LocalImage*	localImage_;
-		std::CoordI		mapPos_;
-		std::Area		mapArea_;
 		std::Position	screenPos_;
+		std::Position	mapPos_;
+		std::AreaI		mapArea_;
 	};
 
 
@@ -37,16 +37,16 @@ namespace ui {
 
 	class UiScreen {
 		//メンバ変数
-		UiStatus		status_;
-		ViewData		viewData_;
+		UiStatus			status_;
+		ViewData			viewData_;
 
-		std::CoordI		touchPos_;
-		std::CoordI		dragPos_;
+		std::Position		touchPos_;
+		std::Position		dragPos_;
 		ui::EN_ButtonEvent	buttonEvent_;
 
 	public:
 		//コンストラクタ
-		UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImage, const std::CoordI mapPos);
+		UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImage, const std::Position& mapPos);
 		//デストラクタ
 		~UiScreen();
 		//表示データ作成
@@ -56,11 +56,11 @@ namespace ui {
 		//描画
 		void draw();
 		//ボタンイベント処理:LEFT_DOWN
-		void procButtonLeftDown(const std::CoordI buttonPos);
+		void procButtonLeftDown(const std::Position& buttonPos);
 		//ボタンイベント処理:LEFT_UP
 		void procButtonLeftUp();
 		//ボタンイベント処理:MOVE
-		void procButtonMove(const std::CoordI buttonPos);
+		void procButtonMove(const std::Position& buttonPos);
 	};
 }
 

@@ -27,7 +27,7 @@ ui::UiMain::~UiMain()
 }
 
 //ボタンイベント処理
-void ui::UiMain::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::CoordI buttonPos)
+void ui::UiMain::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::Position& buttonPos)
 {
 	this->uiMng_->procButtonEvent(buttonEvent, buttonPos);
 }

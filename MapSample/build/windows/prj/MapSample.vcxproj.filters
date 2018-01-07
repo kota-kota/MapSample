@@ -60,6 +60,12 @@
     <ClCompile Include="..\..\..\source\ui\ViewData.cpp">
       <Filter>ソース ファイル\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\framework\Math.cpp">
+      <Filter>ソース ファイル\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\framework\draw\DrawWEGL.cpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp">
@@ -97,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\ui\ViewData.hpp">
       <Filter>ソース ファイル\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\framework\Math.hpp">
+      <Filter>ソース ファイル\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\framework\draw\DrawWEGL.hpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

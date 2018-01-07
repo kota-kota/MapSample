@@ -1,7 +1,11 @@
 ﻿#ifndef INCLUDED_DRAWWGL_HPP
 #define INCLUDED_DRAWWGL_HPP
 
+#include "Std.hpp"
+
+#ifdef DRAWIF_WGL
 #include "DrawIF.hpp"
+#include "Math.hpp"
 #include <Windows.h>
 
 namespace image {
@@ -31,25 +35,28 @@ namespace fw {
 		//作成
 		virtual void create();
 		//セットアップ
-		virtual void setup(const std::CoordI mapPos);
+		virtual void setup(const std::Position& mapPos);
 		//描画カレント
 		virtual void makeCurrent(const bool current);
 		//描画更新
 		virtual void swapBuffers();
 		//クリア
-		virtual void clear(const std::Color color);
+		virtual void clear(const std::ColorUB& color);
 		//点描画
-		virtual void drawPoints(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t size);
+		virtual void drawPoints(const DrawCoords& coords, const DrawColors& colors, const std::float_t size);
 		//ライン描画
-		virtual void drawLines(const std::vector<std::CoordI>& coords, const std::vector<std::Color>& colors, const std::float_t width);
+		virtual void drawLines(const DrawCoords& coords, const DrawColors& colors, const std::float_t width);
+		//ポリゴン描画
+		virtual void drawPolygons(const DrawCoords& coords, const DrawColors& colors);
 		//イメージ描画
-		virtual void drawImage(const std::CoordI coord, const fw::Image& image);
+		virtual void drawImage(const std::CoordI& coord, const fw::Image& image);
 		//文字描画
-		virtual void drawString(const std::CoordI coord, const wchar_t* const str);
+		virtual void drawString(const std::CoordI& coord, const wchar_t* const str);
 
 		//画面幅高さを取得
 		virtual std::WH getScreenWH();
 	};
 }
 
+#endif //DRAWIF_WGL
 #endif //INCLUDED_DRAWWGL_HPP
