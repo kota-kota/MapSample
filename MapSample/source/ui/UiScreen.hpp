@@ -26,6 +26,7 @@ namespace ui {
 		std::Position	screenPos_;
 		std::Position	mapPos_;
 		std::AreaI		mapArea_;
+		fw::DrawStatus	drawStatus_;
 	};
 
 
@@ -59,8 +60,20 @@ namespace ui {
 		void procButtonLeftDown(const std::Position& buttonPos);
 		//ボタンイベント処理:LEFT_UP
 		void procButtonLeftUp();
+		//ホイールイベント処理:WHEEL_FORWARD
+		void procButtonWheelForward();
+		//ホイールイベント処理:WHEEL_BACKWARD
+		void procButtonWheelBackward();
 		//ボタンイベント処理:MOVE
 		void procButtonMove(const std::Position& buttonPos);
+
+	private:
+		//描画ステータス初期化
+		void initDrawStatus();
+		//中心座標を移動
+		void moveMapPosition(const std::int32_t dx, const std::int32_t dy);
+		//ビュー変換行列を更新
+		void updateViewMatrix();
 	};
 }
 

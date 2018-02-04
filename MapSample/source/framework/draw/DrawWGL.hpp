@@ -1,11 +1,9 @@
 ﻿#ifndef INCLUDED_DRAWWGL_HPP
 #define INCLUDED_DRAWWGL_HPP
 
-#include "Std.hpp"
+#include "DrawIF.hpp"
 
 #ifdef DRAWIF_WGL
-#include "DrawIF.hpp"
-#include "Math.hpp"
 #include <Windows.h>
 
 namespace image {
@@ -25,17 +23,16 @@ namespace fw {
 		HWND			hWnd_;
 		HDC				hDC_;
 		HGLRC			hGLRC_;
-		image::Font*	font_;
 
 	public:
 		//コンストラクタ
-		DrawWGL(const HWND hWnd = nullptr);
+		DrawWGL(const HWND hWnd);
 		//デストラクタ
 		virtual ~DrawWGL();
 		//作成
 		virtual void create();
 		//セットアップ
-		virtual void setup(const std::Position& mapPos);
+		virtual void setup(const DrawStatus& drawStatus);
 		//描画カレント
 		virtual void makeCurrent(const bool current);
 		//描画更新

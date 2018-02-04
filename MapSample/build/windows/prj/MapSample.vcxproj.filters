@@ -66,6 +66,9 @@
     <ClCompile Include="..\..\..\source\framework\draw\DrawWEGL.cpp">
       <Filter>ソース ファイル\framework\draw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\framework\draw\DrawIF.cpp">
+      <Filter>ソース ファイル\framework\draw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\ui\UiMng.hpp">

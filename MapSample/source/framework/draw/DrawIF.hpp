@@ -2,11 +2,16 @@
 #define INCLUDED_DRAWIF_HPP
 
 #include "Std.hpp"
+#include "Math.hpp"
 #include <vector>
+
+#define DRAWIF_WGL
+//#define DRAWIF_WEGL
 
 namespace fw {
 	//前方宣言
 	struct Image;
+	class Font;
 }
 
 namespace fw {
@@ -14,6 +19,21 @@ namespace fw {
 	//描画用配列
 	using DrawCoords = std::vector<std::CoordI>;
 	using DrawColors = std::vector<std::ColorUB>;
+
+	//----------------------------------------------------------
+	//
+	// 描画ステータス構造体
+	//
+	//----------------------------------------------------------
+
+	struct DrawStatus {
+		std::AreaI		viewport_;
+		fw::VectorD		viewEye_;
+		fw::VectorD		viewLook_;
+		fw::VectorD		viewUp_;
+		fw::MatrixD		viewMat_;
+		fw::MatrixD		projMat_;
+	};
 
 
 	//----------------------------------------------------------
@@ -23,13 +43,18 @@ namespace fw {
 	//----------------------------------------------------------
 
 	class DrawIF {
+	protected:
+		fw::Font*		font_;		//フォント
+
 	public:
+		//コンストラクタ
+		DrawIF();
 		//デストラクタ
-		virtual ~DrawIF() {}
+		virtual ~DrawIF();
 		//作成
 		virtual void create() = 0;
 		//セットアップ
-		virtual void setup(const std::Position& mapPos) = 0;
+		virtual void setup(const DrawStatus& drawStatus) = 0;
 		//描画カレント
 		virtual void makeCurrent(const bool current) = 0;
 		//描画更新

@@ -8,13 +8,13 @@ namespace {
 
 
 //コンストラクタ
-image::Character::Character() :
+fw::Character::Character() :
 	ax(0), ay(0), bw(0), bh(0), bl(0), bt(0), buffer(nullptr)
 {
 }
 
 //デストラクタ
-image::Character::~Character()
+fw::Character::~Character()
 {
 	if (this->buffer != nullptr) {
 		delete[] this->buffer;
@@ -23,7 +23,7 @@ image::Character::~Character()
 
 
 //コンストラクタ
-image::Font::Font()
+fw::Font::Font()
 	: ftLibrary(nullptr), ftFace(nullptr)
 {
 	//dataフォルダパス
@@ -38,14 +38,14 @@ image::Font::Font()
 }
 
 //デストラクタ
-image::Font::~Font()
+fw::Font::~Font()
 {
 	FT_Done_Face(this->ftFace);
 	FT_Done_FreeType(this->ftLibrary);
 }
 
 //ラスタライズ
-void image::Font::rasterize(const wchar_t charCode, Character* const c)
+void fw::Font::rasterize(const wchar_t charCode, Character* const c)
 {
 	FT_Face face = this->ftFace;
 

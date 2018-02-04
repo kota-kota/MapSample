@@ -3,6 +3,14 @@
 #include "image/LocalImage.hpp"
 
 
+namespace {
+	//定数定義
+	const std::double_t	VIEW_EYE_Z = 10.0;
+	const std::double_t	PROJ_NEAR = 1.0;
+	const std::double_t PROJ_FAR = 1000.0;
+}
+
+
 //----------------------------------------------------------
 //
 // UI画面クラス
@@ -27,6 +35,7 @@ ui::UiScreen::UiScreen(fw::DrawIF* const drawIF, fw::LocalImage* const localImag
 	this->status_.screenPos_ = screenPos;
 	this->status_.mapPos_ = mapPos;
 	this->status_.mapArea_ = mapArea;
+	this->initDrawStatus();
 }
 
 //デストラクタ
@@ -165,10 +174,13 @@ bool ui::UiScreen::isUpdateDraw()
 void ui::UiScreen::draw()
 {
 	fw::DrawIF* drawIF = this->status_.drawIF_;
-	std::Position mapPos = this->status_.mapPos_;
 
 	//描画
-	this->viewData_.draw(drawIF, mapPos);
+	drawIF->makeCurrent(true);
+	drawIF->setup(this->status_.drawStatus_);
+	this->viewData_.draw(drawIF);
+	drawIF->swapBuffers();
+	drawIF->makeCurrent(false);
 
 	//描画完了したので、描画更新不要
 	this->status_.isUpdate_ = std::EN_OffOn::OFF;
@@ -194,9 +206,8 @@ void ui::UiScreen::procButtonLeftUp()
 		diffPos.x = this->status_.screenPos_.x - this->touchPos_.x;
 		diffPos.y = this->status_.screenPos_.y - this->touchPos_.y;
 
-		//地図座標に反映
-		this->status_.mapPos_.x -= diffPos.x;
-		this->status_.mapPos_.y += diffPos.y;
+		//中心座標を移動
+		this->moveMapPosition(-diffPos.x, diffPos.y);
 
 		//描画更新必要
 		this->status_.isUpdate_ = std::EN_OffOn::ON;
@@ -206,6 +217,26 @@ void ui::UiScreen::procButtonLeftUp()
 	}
 
 	this->buttonEvent_ = INVALID;
+}
+
+//ホイールイベント処理:WHEEL_FORWARD
+void ui::UiScreen::procButtonWheelForward()
+{
+	this->status_.drawStatus_.viewEye_.z += 1.0;
+	this->updateViewMatrix();
+
+	//描画更新必要
+	this->status_.isUpdate_ = std::EN_OffOn::ON;
+}
+
+//ホイールイベント処理:WHEEL_BACKWARD
+void ui::UiScreen::procButtonWheelBackward()
+{
+	this->status_.drawStatus_.viewEye_.z -= 1.0;
+	this->updateViewMatrix();
+
+	//描画更新必要
+	this->status_.isUpdate_ = std::EN_OffOn::ON;
 }
 
 //ボタンイベント処理:MOVE
@@ -218,9 +249,8 @@ void ui::UiScreen::procButtonMove(const std::Position& buttonPos)
 		diffPos.x = this->touchPos_.x - buttonPos.x;
 		diffPos.y = this->touchPos_.y - buttonPos.y;
 
-		//地図座標に反映
-		this->status_.mapPos_.x += diffPos.x;
-		this->status_.mapPos_.y -= diffPos.y;
+		//中心座標を移動
+		this->moveMapPosition(diffPos.x, -diffPos.y);
 
 		//描画更新必要
 		this->status_.isUpdate_ = std::EN_OffOn::ON;
@@ -229,4 +259,56 @@ void ui::UiScreen::procButtonMove(const std::Position& buttonPos)
 		this->touchPos_ = buttonPos;
 		this->buttonEvent_ = LEFT_MOVE;
 	}
+}
+
+//描画ステータス初期化
+void ui::UiScreen::initDrawStatus()
+{
+	const std::WH wh = this->status_.drawIF_->getScreenWH();
+	const std::Position mapPos = this->status_.mapPos_;
+
+	//ビューポート
+	this->status_.drawStatus_.viewport_ = { 0, 0, wh.width, wh.height };
+
+	//ビュー変換行列
+	this->status_.drawStatus_.viewEye_ = { std::double_t(mapPos.x), std::double_t(mapPos.y), VIEW_EYE_Z };
+	this->status_.drawStatus_.viewLook_ = { std::double_t(mapPos.x), std::double_t(mapPos.y), 0.0 };
+	this->status_.drawStatus_.viewUp_ = { 0.0, 1.0, 0.0 };
+	this->updateViewMatrix();
+
+	//プロジェクション変換行列(視野空間を計算)
+	const std::double_t correct = VIEW_EYE_Z / PROJ_NEAR;
+	const std::double_t width = (std::double_t(wh.width) / 2.0) / correct;
+	const std::double_t height = (std::double_t(wh.height) / 2.0) / correct;
+	std::double_t left = -width;
+	std::double_t right = width;
+	std::double_t bottom = -height;
+	std::double_t top = height;
+	std::double_t znear = PROJ_NEAR;
+	std::double_t zfar = PROJ_FAR;
+	this->status_.drawStatus_.projMat_ = fw::Math::frustumMatrix(left, right, bottom, top, znear, zfar);
+}
+
+//中心座標を移動
+void ui::UiScreen::moveMapPosition(const std::int32_t dx, const std::int32_t dy)
+{
+	//地図座標に反映
+	this->status_.mapPos_.x += dx;
+	this->status_.mapPos_.y += dy;
+
+	//ビュー変換行列の更新
+	this->status_.drawStatus_.viewEye_.x += std::double_t(dx);
+	this->status_.drawStatus_.viewEye_.y += std::double_t(dy);
+	this->status_.drawStatus_.viewLook_.x += std::double_t(dx);
+	this->status_.drawStatus_.viewLook_.y += std::double_t(dy);
+	this->updateViewMatrix();
+}
+
+//ビュー変換行列を更新
+void ui::UiScreen::updateViewMatrix()
+{
+	const fw::VectorD& eye = this->status_.drawStatus_.viewEye_;
+	const fw::VectorD& look = this->status_.drawStatus_.viewLook_;
+	const fw::VectorD& up = this->status_.drawStatus_.viewUp_;
+	this->status_.drawStatus_.viewMat_ = fw::Math::lookMatrix(eye, look, up);
 }

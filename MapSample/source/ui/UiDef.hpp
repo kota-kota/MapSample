@@ -10,9 +10,8 @@ namespace ui {
 		LEFT_DOWN,		//左ボタン押す
 		LEFT_UP,		//左ボタン離す
 		LEFT_MOVE,		//左ボタン押下+移動
-		WHEEL_DOWN,		//ホイールボタン押す
-		WHEEL_UP,		//ホイールボタン離す
-		WHEEL_MOVE,		//ホイールボタン押下+移動
+		WHEEL_FORWARD,	//ホイール奥
+		WHEEL_BACKWARD,	//ホイール手前
 		RIGHT_DOWN,		//右ボタン押す
 		RIGHT_UP,		//右ボタン離す
 		RIGHT_MOVE,		//右ボタン押下+移動

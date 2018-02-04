@@ -130,17 +130,11 @@ void ui::ViewData::setDrawParts(ViewParts* const parts)
 }
 
 //描画
-void ui::ViewData::draw(fw::DrawIF* const drawIF, const std::Position& mapPos)
+void ui::ViewData::draw(fw::DrawIF* const drawIF)
 {
-	drawIF->makeCurrent(true);
-	drawIF->setup(mapPos);
-
 	drawIF->clear(this->backColor_);
 
 	for (auto itr = this->partsList_.begin(); itr != this->partsList_.end(); itr++) {
 		(*itr)->draw(drawIF);
 	}
-
-	drawIF->swapBuffers();
-	drawIF->makeCurrent(false);
 }

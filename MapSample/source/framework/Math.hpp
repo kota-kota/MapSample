@@ -16,7 +16,7 @@ namespace fw {
 
 	//4*4行列
 	template <typename T> struct Matrix {
-		T	mat[4][4];
+		T	mat[4][4];	//[行][列]
 	};
 	using MatrixF = Matrix<std::float_t>;
 	using MatrixD = Matrix<std::double_t>;
@@ -60,12 +60,12 @@ namespace fw {
 		static MatrixD scaleMatrix(const VectorD& scale);
 		//モデル変換行列の生成
 		static MatrixD modelMatrix(const VectorD& trans, const VectorD& rotate, const VectorD& scale);
-		//カメラ視野行列の生成(ortho)
-		static MatrixD orthoMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t near, const std::double_t far);
+		//カメラ視野行列の生成(orthogonal)
+		static MatrixD orthogonalMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t znear, const std::double_t zfar);
 		//カメラ視野行列の生成(frustum)
-		static MatrixD frustumMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t near, const std::double_t far);
+		static MatrixD frustumMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t znear, const std::double_t zfar);
 		//カメラ視野行列の生成(perspective)
-		static MatrixD perspectiveMatrix(const std::double_t near, const std::double_t far, const std::double_t degFovy, const std::double_t aspect);
+		static MatrixD perspectiveMatrix(const std::double_t fovy, const std::double_t aspect, const std::double_t znear, const std::double_t zfar);
 		//カメラ視点行列の生成(lookAt)
 		static MatrixD lookMatrix(const VectorD& eye, const VectorD& look, const VectorD& up);
 	};

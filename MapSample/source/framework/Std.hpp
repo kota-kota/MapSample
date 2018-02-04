@@ -3,9 +3,6 @@
 
 #include <cstdint>
 
-#define DRAWIF_WGL
-//#define DRAWIF_WEGL
-
 namespace std {
 
 	//----------------------------------------------------------

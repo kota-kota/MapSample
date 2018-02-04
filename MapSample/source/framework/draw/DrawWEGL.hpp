@@ -1,11 +1,9 @@
 ﻿#ifndef INCLUDED_DRAWWGLES_HPP
 #define INCLUDED_DRAWWGLES_HPP
 
-#include "Std.hpp"
+#include "DrawIF.hpp"
 
 #ifdef DRAWIF_WEGL
-#include "DrawIF.hpp"
-#include "Math.hpp"
 #include <Windows.h>
 
 namespace image {
@@ -52,9 +50,8 @@ namespace fw {
 		void*			context_;
 		image::Font*	font_;
 
-		fw::MatrixF		model_;
-		fw::MatrixF		view_;
-		fw::MatrixF		proj_;
+		fw::MatrixF		view_;	//ビュー変換行列
+		fw::MatrixF		proj_;	//プロジェクション変換行列
 
 		ShaderPara		shaderPara_;
 

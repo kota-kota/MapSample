@@ -277,35 +277,39 @@ fw::MatrixD fw::Math::modelMatrix(const VectorD& trans, const VectorD& rotate, c
 	return matrix;
 }
 
-//カメラ視野行列の生成(ortho)
+//カメラ視野行列の生成(orthogonalMatrix)
 //left		垂直座標(左)
 //right		垂直座標(右)
 //bottom	水平座標(下)
 //top		水平座標(上)
-//near		Z位置(手前)
-//far		Z位置(奥)
-fw::MatrixD fw::Math::orthoMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t near, const std::double_t far)
+//znear		Z位置(手前)
+//zfar		Z位置(奥)
+fw::MatrixD fw::Math::orthogonalMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t znear, const std::double_t zfar)
 {
 	MatrixD matrix = { 0.0 };
 
+	//1行目
 	matrix.mat[0][0] = 2.0 / (right - left);
 	matrix.mat[0][1] = 0.0;
 	matrix.mat[0][2] = 0.0;
-	matrix.mat[0][3] = 0.0;
+	matrix.mat[0][3] = -(right + left) / (right - left);
 
+	//2行目
 	matrix.mat[1][0] = 0.0;
 	matrix.mat[1][1] = 2.0 / (top - bottom);
 	matrix.mat[1][2] = 0.0;
-	matrix.mat[1][3] = 0.0;
+	matrix.mat[1][3] = -(top + bottom) / (top - bottom);
 
+	//3行目
 	matrix.mat[2][0] = 0.0;
 	matrix.mat[2][1] = 0.0;
-	matrix.mat[2][2] = -2.0 / (far - near);
-	matrix.mat[2][3] = 0.0;
+	matrix.mat[2][2] = -2.0 / (zfar - znear);
+	matrix.mat[2][3] = -(zfar + znear) / (zfar - znear);
 
-	matrix.mat[3][0] = (right + left) / (right - left);
-	matrix.mat[3][1] = (top + bottom) / (top - bottom);
-	matrix.mat[3][2] = (far + near) / (far - near);
+	//4行目
+	matrix.mat[3][0] = 0.0;
+	matrix.mat[3][1] = 0.0;
+	matrix.mat[3][2] = 0.0;
 	matrix.mat[3][3] = 1.0;
 
 	return matrix;
@@ -315,26 +319,26 @@ fw::MatrixD fw::Math::orthoMatrix(const std::double_t left, const std::double_t 
 //right		垂直座標(右)
 //bottom	水平座標(下)
 //top		水平座標(上)
-//near		Z位置(手前)
-//far		Z位置(奥)
-fw::MatrixD fw::Math::frustumMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t near, const std::double_t far)
+//znear		Z位置(手前)
+//zfar		Z位置(奥)
+fw::MatrixD fw::Math::frustumMatrix(const std::double_t left, const std::double_t right, const std::double_t bottom, const std::double_t top, const std::double_t znear, const std::double_t zfar)
 {
 	MatrixD matrix = { 0.0 };
 
-	matrix.mat[0][0] = (2.0 * near) / (right - left);
+	matrix.mat[0][0] = (2.0 * znear) / (right - left);
 	matrix.mat[0][1] = 0.0;
-	matrix.mat[0][2] = 0.0;
+	matrix.mat[0][2] = (right + left) / (right - left);
 	matrix.mat[0][3] = 0.0;
 
 	matrix.mat[1][0] = 0.0;
-	matrix.mat[1][1] = (2.0 * near) / (top - bottom);
-	matrix.mat[1][2] = 0.0;
+	matrix.mat[1][1] = (2.0 * znear) / (top - bottom);
+	matrix.mat[1][2] = (top + bottom) / (top - bottom);
 	matrix.mat[1][3] = 0.0;
 
 	matrix.mat[2][0] = 0.0;
 	matrix.mat[2][1] = 0.0;
-	matrix.mat[2][2] = (near + far) / (near - far);
-	matrix.mat[2][3] = (2.0 * near * far) / (near - far);
+	matrix.mat[2][2] = -(zfar + znear) / (zfar - znear);
+	matrix.mat[2][3] = -(2.0 * zfar * znear) / (zfar - znear);
 
 	matrix.mat[3][0] = 0.0;
 	matrix.mat[3][1] = 0.0;
@@ -344,14 +348,14 @@ fw::MatrixD fw::Math::frustumMatrix(const std::double_t left, const std::double_
 	return matrix;
 }
 //カメラ視野行列の生成(perspective)
-//near		Z位置(手前)
-//far		Z位置(奥)
-//degFovy	縦の視野角(度)
+//fovy		縦の視野角(度)
 //aspect	横の視野角(倍率)
-fw::MatrixD fw::Math::perspectiveMatrix(const std::double_t near, const std::double_t far, const std::double_t degFovy, const std::double_t aspect)
+//znear		Z位置(手前)
+//zfar		Z位置(奥)
+fw::MatrixD fw::Math::perspectiveMatrix(const std::double_t fovy, const std::double_t aspect, const std::double_t znear, const std::double_t zfar)
 {
 	//縦の視野角を度からラジアンに変換
-	std::double_t radFovy = convDegree2Radian(degFovy);
+	std::double_t radFovy = convDegree2Radian(fovy);
 	std::double_t f = 1.0 / (tan(radFovy) / 2.0);
 
 	MatrixD matrix = { 0.0 };
@@ -368,8 +372,8 @@ fw::MatrixD fw::Math::perspectiveMatrix(const std::double_t near, const std::dou
 
 	matrix.mat[2][0] = 0.0;
 	matrix.mat[2][1] = 0.0;
-	matrix.mat[2][2] = (near + far) / (near - far);
-	matrix.mat[2][3] = (2.0 * near * far) / (near - far);
+	matrix.mat[2][2] = (znear + zfar) / (znear - zfar);
+	matrix.mat[2][3] = (2.0 * znear * zfar) / (znear - zfar);
 
 	matrix.mat[3][0] = 0.0;
 	matrix.mat[3][1] = 0.0;
@@ -385,19 +389,17 @@ fw::MatrixD fw::Math::perspectiveMatrix(const std::double_t near, const std::dou
 //up	向き
 fw::MatrixD fw::Math::lookMatrix(const VectorD& eye, const VectorD& look, const VectorD& up)
 {
-	//視点ベクトルの正規化
-	VectorD upVector = normalizeVector(up);
-
-	//forward(正規化)
+	//カメラ前方向ベクトル(Z軸)
 	VectorD forwardVector = { (look.x - eye.x), (look.y - eye.y), (look.z - eye.z) };
 	forwardVector = normalizeVector(forwardVector);
 
-	//side(正規化)
-	VectorD sideVector= crossVector(forwardVector, upVector);
+	//カメラ横方向ベクトル(前方向ベクトルと向きベクトルの外積)(X軸)
+	VectorD sideVector= crossVector(forwardVector, up);
 	sideVector = normalizeVector(sideVector);
 
-	upVector = crossVector(sideVector, forwardVector);
-
+	//カメラ上方向ベクトル(横方向ベクトルと前方向ベクトルの外積)(Y軸)
+	VectorD upVector = crossVector(sideVector, forwardVector);
+	upVector = normalizeVector(upVector);
 
 	MatrixD matrix = { 0.0 };
 

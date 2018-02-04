@@ -8,7 +8,7 @@
 #include <freetype/ftsynth.h>
 
 
-namespace image {
+namespace fw {
 
 	class Character {
 	public:

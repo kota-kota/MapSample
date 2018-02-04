@@ -153,7 +153,7 @@ namespace ui {
 		//描画物設定
 		void setDrawParts(ViewParts* const parts);
 		//描画
-		void draw(fw::DrawIF* const drawIF, const std::Position& mapPos);
+		void draw(fw::DrawIF* const drawIF);
 	};
 }
 

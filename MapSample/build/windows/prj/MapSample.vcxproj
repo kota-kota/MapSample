@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\framework\draw\DrawIF.cpp" />
     <ClCompile Include="..\..\..\source\framework\draw\DrawWEGL.cpp" />
     <ClCompile Include="..\..\..\source\framework\draw\DrawWGL.cpp" />
     <ClCompile Include="..\..\..\source\framework\image\Font.cpp" />

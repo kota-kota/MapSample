@@ -5,9 +5,11 @@
 #include "image/Font.hpp"
 
 #include <gl/GL.h>
+#include <gl/GLU.h>
 
 
 #pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "glu32.lib")
 
 
 //----------------------------------------------------------
@@ -18,18 +20,13 @@
 
 //コンストラクタ
 fw::DrawWGL::DrawWGL(const HWND hWnd) :
-	hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr), font_(nullptr)
+	DrawIF(), hWnd_(hWnd), hDC_(nullptr), hGLRC_(nullptr)
 {
 }
 
 //デストラクタ
 fw::DrawWGL::~DrawWGL()
 {
-	if (this->font_ != nullptr) {
-		//フォントオブジェクト解放
-		delete this->font_;
-	}
-
 	if (this->hGLRC_ != nullptr) {
 		//描画コンテキストハンドルを破棄
 		::wglDeleteContext(this->hGLRC_);
@@ -94,32 +91,32 @@ void fw::DrawWGL::create()
 
 	//カレントを解除
 	::wglMakeCurrent(this->hDC_, nullptr);
-
-	//フォントオブジェクトを作成
-	this->font_ = new image::Font();
 }
 
 //描画セットアップ
-void fw::DrawWGL::setup(const std::Position& mapPos)
+void fw::DrawWGL::setup(const DrawStatus& drawStatus)
 {
 	PAINTSTRUCT ps;
 	::BeginPaint(this->hWnd_, &ps);
 	::EndPaint(this->hWnd_, &ps);
 
-	//画面幅高さを取得
-	std::WH screenwh = this->getScreenWH();
-
 	//ビューポート設定
-	glViewport(0, 0, screenwh.width, screenwh.height);
+	const std::AreaI vp = drawStatus.viewport_;
+	glViewport(vp.xmin, vp.ymin, vp.xmax, vp.ymax);
+
+	//ビュー変換行列(OpenGLのため転置)
+	const fw::MatrixD cViewMatD = fw::Math::transposeMatrix(drawStatus.viewMat_);
+	fw::MatrixF cViewMatF = fw::Math::convMatrixD2MatrixF(cViewMatD);
+
+	//プロジェクション変換行列(OpenGLのため転置)
+	const fw::MatrixD cProjMatD = fw::Math::transposeMatrix(drawStatus.projMat_);
+	fw::MatrixF cProjMatF = fw::Math::convMatrixD2MatrixF(cProjMatD);
 
 	//プロジェクション設定
-	std::double_t left = std::double_t(mapPos.x) - std::double_t(screenwh.width) / 2.0;
-	std::double_t right = left + std::double_t(screenwh.width);
-	std::double_t top = std::double_t(mapPos.y) + std::double_t(screenwh.height) / 2.0;
-	std::double_t bottom = top - std::double_t(screenwh.height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(left, right, bottom, top, -1.0, 1.0);
+	glMultMatrixf(static_cast<GLfloat*>(&cProjMatF.mat[0][0]));
+	glMultMatrixf(static_cast<GLfloat*>(&cViewMatF.mat[0][0]));
 
 	//モデルビュー設定
 	glMatrixMode(GL_MODELVIEW);
@@ -160,6 +157,8 @@ void fw::DrawWGL::clear(const std::ColorUB& color)
 //点描画
 void fw::DrawWGL::drawPoints(const DrawCoords& coords, const DrawColors& colors, const std::float_t size)
 {
+	glPushMatrix();
+
 	//点の大きさを設定
 	glPointSize(size);
 
@@ -179,11 +178,25 @@ void fw::DrawWGL::drawPoints(const DrawCoords& coords, const DrawColors& colors,
 		}
 	}
 	glEnd();
+
+	glPopMatrix();
 }
 
 //ライン描画
 void fw::DrawWGL::drawLines(const DrawCoords& coords, const DrawColors& colors, const std::float_t width)
 {
+	glPushMatrix();
+
+	//fw::VectorD rotate = { 0.0, 0.0, 30.0 };
+	//fw::MatrixD model = fw::Math::rotateMatrix(rotate);
+	//model = fw::Math::transposeMatrix(model);
+	//fw::MatrixF modelf = fw::Math::convMatrixD2MatrixF(model);
+
+	//モデルビュー設定
+	//glLoadIdentity();
+	//glMultMatrixf(static_cast<GLfloat*>(&modelf.mat[0][0]));
+	//glMultMatrixf(static_cast<GLfloat*>(&this->view_.mat[0][0]));
+
 	//ラインの太さを設定
 	glLineWidth(width);
 
@@ -203,11 +216,15 @@ void fw::DrawWGL::drawLines(const DrawCoords& coords, const DrawColors& colors, 
 		}
 	}
 	glEnd();
+
+	glPopMatrix();
 }
 
 //ポリゴン描画
 void fw::DrawWGL::drawPolygons(const DrawCoords& coords, const DrawColors& colors)
 {
+	glPushMatrix();
+
 	//ポリゴン描画
 	glBegin(GL_TRIANGLE_STRIP);
 	{
@@ -224,6 +241,8 @@ void fw::DrawWGL::drawPolygons(const DrawCoords& coords, const DrawColors& color
 		}
 	}
 	glEnd();
+
+	glPopMatrix();
 }
 
 //イメージ描画
@@ -303,7 +322,7 @@ void fw::DrawWGL::drawString(const std::CoordI& coord, const wchar_t* const str)
 {
 	std::int32_t textCnt = std::int32_t(wcslen(str));
 
-	std::vector<image::Character> charList;
+	std::vector<fw::Character> charList;
 	charList.resize(textCnt);
 
 	std::CoordI dispCoord = coord;

@@ -93,9 +93,11 @@ void ui::UiMng::procDraw()
 void ui::UiMng::procButtonEvent(const ui::EN_ButtonEvent buttonEvent, const std::Position& buttonPos)
 {
 	switch (buttonEvent) {
-	case EN_ButtonEvent::LEFT_DOWN:		this->screen_->procButtonLeftDown(buttonPos);	break;
-	case EN_ButtonEvent::LEFT_UP:		this->screen_->procButtonLeftUp();				break;
-	case EN_ButtonEvent::MOVE:			this->screen_->procButtonMove(buttonPos);		break;
-	default:																			break;
+	case EN_ButtonEvent::LEFT_DOWN:			this->screen_->procButtonLeftDown(buttonPos);	break;
+	case EN_ButtonEvent::LEFT_UP:			this->screen_->procButtonLeftUp();				break;
+	case EN_ButtonEvent::WHEEL_FORWARD:		this->screen_->procButtonWheelForward();		break;
+	case EN_ButtonEvent::WHEEL_BACKWARD:	this->screen_->procButtonWheelBackward();		break;
+	case EN_ButtonEvent::MOVE:				this->screen_->procButtonMove(buttonPos);		break;
+	default:																				break;
 	}
 }

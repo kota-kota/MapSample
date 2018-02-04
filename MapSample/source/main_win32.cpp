@@ -1,11 +1,7 @@
 ﻿#include "Std.hpp"
 #include "ui/UiMain.hpp"
-#ifdef DRAWIF_WGL
 #include "draw/DrawWGL.hpp"
-#endif //DRAWIF_WGL
-#ifdef DRAWIF_WEGL
 #include "draw/DrawWEGL.hpp"
-#endif //DRAWIF_WEGL
 #include <Windows.h>
 #include <string>
 
@@ -88,6 +84,27 @@ namespace {
 		gUiMain->procButtonEvent(ui::EN_ButtonEvent::LEFT_UP, buttonPos);
 	}
 
+	//WM_MOUSEWHEELイベント処理
+	static void winproc_mousewheel(WPARAM wParam, LPARAM lParam)
+	{
+		//座標を取得
+		std::Position buttonPos = { 0 };
+		buttonPos.x = std::int32_t(LOWORD(lParam));
+		buttonPos.y = std::int32_t(HIWORD(lParam));
+
+		//回転量を取得(120の倍数、正値は奥、負値は手前)
+		std::int32_t zdelta = std::int32_t(GET_WHEEL_DELTA_WPARAM(wParam));
+
+		if (zdelta >= 0) {
+			//ホイール処理(奥)
+			gUiMain->procButtonEvent(ui::EN_ButtonEvent::WHEEL_FORWARD, buttonPos);
+		}
+		else {
+			//ホイール処理(手前)
+			gUiMain->procButtonEvent(ui::EN_ButtonEvent::WHEEL_BACKWARD, buttonPos);
+		}
+	}
+
 	//WM_MOUSEMOVEイベント処理
 	static void winproc_mousemove(LPARAM lParam)
 	{
@@ -121,6 +138,10 @@ namespace {
 
 		case WM_LBUTTONUP:
 			winproc_lbuttonup(lParam);
+			break;
+
+		case WM_MOUSEWHEEL:
+			winproc_mousewheel(wParam, lParam);
 			break;
 
 		case WM_MOUSEMOVE:

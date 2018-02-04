@@ -10,7 +10,6 @@
 
 
 #pragma comment(lib, "libEGL.lib")
-#pragma comment(lib, "libGLES_CM.lib")
 #pragma comment(lib, "libGLESv2.lib")
 
 
@@ -328,11 +327,6 @@ void fw::DrawWEGL::create()
 	//カレント解除
 	(void)::eglMakeCurrent(this->display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
-	//MVP変換行列を初期化
-	this->model_ = fw::Math::identifyMatrixF();
-	this->view_ = fw::Math::identifyMatrixF();
-	this->proj_ = fw::Math::identifyMatrixF();
-
 	//フォントオブジェクトを作成
 	this->font_ = new image::Font();
 }
@@ -347,20 +341,29 @@ void fw::DrawWEGL::setup(const std::Position& mapPos)
 	//画面幅高さを取得
 	std::WH screenwh = this->getScreenWH();
 
+	//視野空間を計算
+	std::double_t left = std::double_t(mapPos.x) - std::double_t(screenwh.width) / 2.0;
+	std::double_t right = left + std::double_t(screenwh.width);
+	std::double_t top = std::double_t(mapPos.y) + std::double_t(screenwh.height) / 2.0;
+	std::double_t bottom = top - std::double_t(screenwh.height);
+	std::double_t znear = -1.0;
+	std::double_t zfar = 1.0;
+
 	//ビューポート設定
 	glViewport(0, 0, screenwh.width, screenwh.height);
 
-	//プロジェクション設定
-	std::double_t left = mapPos.x - screenwh.width / 2;
-	std::double_t right = left + screenwh.width;
-	std::double_t top = mapPos.y + screenwh.height / 2;
-	std::double_t bottom = top - screenwh.height;
-	fw::MatrixD proj = fw::Math::orthoMatrix(left, right, bottom, top, -1.0, 1.0);
+	//モデル変換行列の設定
+	this->model_ = fw::Math::identifyMatrixF();
+
+	//ビュー変換行列の設定
+	this->view_ = fw::Math::identifyMatrixF();
+
+	//プロジェクション変換行列の設定
+	//OpenGLは行と列の扱いが逆のため転置しておく
+	fw::MatrixD proj = fw::Math::orthogonalMatrix(left, right, bottom, top, znear, zfar);
+	//fw::MatrixD proj = fw::Math::frustumMatrix(left, right, bottom, top, znear, zfar);
 	proj = fw::Math::transposeMatrix(proj);
 	this->proj_ = fw::Math::convMatrixD2MatrixF(proj);
-
-	//モデルビュー設定
-	this->model_ = fw::Math::identifyMatrixF();
 }
 
 //描画カレント
@@ -410,30 +413,6 @@ void fw::DrawWEGL::drawLines(const DrawCoords& coords, const DrawColors& colors,
 	glEnableVertexAttribArray(colorRGBA.attr_point_);
 	glEnableVertexAttribArray(colorRGBA.attr_color_);
 
-	this->proj_ = fw::Math::identifyMatrixF();
-	glUniformMatrix4fv(colorRGBA.unif_model_, 1, GL_FALSE, (GLfloat*)this->model_.mat);
-	glUniformMatrix4fv(colorRGBA.unif_view_, 1, GL_FALSE, (GLfloat*)this->view_.mat);
-	glUniformMatrix4fv(colorRGBA.unif_proj_, 1, GL_FALSE, (GLfloat*)this->proj_.mat);
-
-	//頂点データ転送
-	std::CoordF coord[4];
-	coord[0] = { -0.7f, -0.7f, 1.0f };
-	coord[1] = { -0.7f, 0.7f, 1.0f };
-	coord[2] = { 0.7f, 0.7f, 1.0f };
-	coord[3] = { 0.7f, -0.7f, 1.0f };
-	std::ColorUB color[4];
-	color[0] = { 255, 0, 0, 255 };
-	color[1] = { 255, 0, 0, 255 };
-	color[2] = { 255, 0, 0, 255 };
-	color[3] = { 255, 0, 0, 255 };
-	glVertexAttribPointer(colorRGBA.attr_point_, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)coord);
-	glVertexAttribPointer(colorRGBA.attr_color_, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, (GLubyte*)color);
-
-	//描画
-	glLineWidth(width);
-	glDrawArrays(GL_LINE_STRIP, 0, 4);
-
-	/*
 	//MVP変換行列をシェーダへ転送(OpenGLは行と列が逆なので転置する)
 	glUniformMatrix4fv(colorRGBA.unif_model_, 1, GL_FALSE, (GLfloat*)this->model_.mat);
 	glUniformMatrix4fv(colorRGBA.unif_view_, 1, GL_FALSE, (GLfloat*)this->view_.mat);
@@ -441,12 +420,11 @@ void fw::DrawWEGL::drawLines(const DrawCoords& coords, const DrawColors& colors,
 
 	//頂点データ転送
 	glVertexAttribPointer(colorRGBA.attr_point_, 3, GL_INT, GL_FALSE, 0, (GLint*)&coords[0]);
-	glVertexAttribPointer(colorRGBA.attr_color_, 4, GL_INT, GL_FALSE, 0, (GLint*)&colors[0]);
+	glVertexAttribPointer(colorRGBA.attr_color_, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, (GLubyte*)&colors[0]);
 
 	//描画
 	glLineWidth(width);
-	glDrawArrays(GL_LINE_LOOP, 0, coords.size());
-	*/
+	glDrawArrays(GL_LINE_STRIP, 0, coords.size());
 
 	//attribute変数無効化
 	glDisableVertexAttribArray(colorRGBA.attr_point_);
