@@ -4,8 +4,6 @@
 #include "png/png.h"
 #include "png/pngstruct.h"
 
-#pragma comment(lib, "zlib.lib")
-
 namespace {
 
 	//----------------------------------------------------------

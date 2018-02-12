@@ -11,6 +11,8 @@
  * and license in png.h
  */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "pngpriv.h"
 #ifdef PNG_SIMPLIFIED_WRITE_STDIO_SUPPORTED
 #  include <errno.h>

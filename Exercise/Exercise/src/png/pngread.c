@@ -14,6 +14,8 @@
  * read a PNG file or stream.
  */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "pngpriv.h"
 #if defined(PNG_SIMPLIFIED_READ_SUPPORTED) && defined(PNG_STDIO_SUPPORTED)
 #  include <errno.h>

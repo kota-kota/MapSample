@@ -19,6 +19,9 @@
     <Filter Include="ソース ファイル\png">
       <UniqueIdentifier>{01a12948-eedd-43e2-98a1-96d3bd5dc15e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\zlib">
+      <UniqueIdentifier>{ad53e9b1-e95e-481b-88fd-f7ebee99e102}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -72,10 +75,55 @@
     <ClCompile Include="src\png\pngwutil.c">
       <Filter>ソース ファイル\png</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\library\lpng1632\pngread.c">
+    <ClCompile Include="src\zlib\adler32.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\compress.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\crc32.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\deflate.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\gzclose.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\gzlib.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\gzread.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\gzwrite.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\infback.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\inffast.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\inflate.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\inftrees.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\trees.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\uncompr.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib\zutil.c">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngread.c">
       <Filter>ソース ファイル\png</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\library\lpng1632\pngwrite.c">
+    <ClCompile Include="src\png\pngwrite.c">
       <Filter>ソース ファイル\png</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,6 +160,39 @@
     </ClInclude>
     <ClInclude Include="src\png\pngstruct.h">
       <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\crc32.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\deflate.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\gzguts.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\inffast.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\inffixed.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\inflate.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\inftrees.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\trees.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\zconf.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\zlib.h">
+      <Filter>ソース ファイル\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib\zutil.h">
+      <Filter>ソース ファイル\zlib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
