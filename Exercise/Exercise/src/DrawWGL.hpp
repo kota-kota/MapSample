@@ -5,7 +5,7 @@
 #include <Windows.h>
 
 
-namespace draw {
+namespace ui {
 
 	//座標
 	template <typename T> struct Coord {
@@ -26,6 +26,16 @@ namespace draw {
 	using CoordTexF = CoordTex<std::float32_t>;
 	using CoordTexD = CoordTex<std::float64_t>;
 
+	//エリア
+	template <typename T> struct Area {
+		T	xmin;
+		T	ymin;
+		T	xmax;
+		T	ymax;
+	};
+	using AreaI = Area<std::int32_t>;
+	using AreaF = Area<std::float32_t>;
+
 	//色
 	template <typename T> struct Color {
 		T	r;
@@ -35,23 +45,6 @@ namespace draw {
 	};
 	using ColorUB = Color<std::uint8_t>;
 	using ColorF = Color<std::float32_t>;
-
-
-	//----------------------------------------------------------
-	//
-	// 画像デコードI/Fクラス
-	//
-	//----------------------------------------------------------
-
-	class ImageDecorder {
-	public:
-		//デストラクタ
-		virtual ~ImageDecorder() {]
-		//デコードデータを取得
-		virtual std::uint8_t* getDecodeData(std::int32_t* const decodeSize, std::int32_t* const width, std::int32_t* const height) = 0;
-		//RGBA8888画像へデコード
-		virtual void decodeRgba8888() = 0;
-	};
 
 
 	//----------------------------------------------------------
@@ -79,11 +72,11 @@ namespace draw {
 		//描画更新
 		void swapBuffers();
 		//クリア
-		void clear(const draw::ColorUB& color);
+		void clear(const ui::ColorUB& color);
 		//イメージ描画
-		//void drawImage(const draw::CoordI& coord, const fw::Image& image);
+		void drawImage(const ui::CoordI& coord, const uint8_t* const image, const int32_t width, const int32_t height);
 		//文字描画
-		//void drawString(const std::CoordI& coord, const wchar_t* const str);
+		//void drawString(const ui::CoordI& coord, const wchar_t* const str);
 	};
 }
 

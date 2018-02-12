@@ -2,10 +2,12 @@
 #define INCLUDED_DIGITALWATCH_HPP
 
 #include "Type.hpp"
-#include "DrawWGL.hpp"
 #include <Windows.h>
 
 namespace ui {
+
+	//前方宣言
+	class DrawWGL;
 
 	//----------------------------------------------------------
 	//
@@ -16,7 +18,7 @@ namespace ui {
 	class DigitalWatch {
 		//メンバ変数
 		HWND			hWnd_;
-		draw::DrawWGL*	drawIF_;
+		ui::DrawWGL*	drawIF_;
 
 	public:
 		//コンストラクタ

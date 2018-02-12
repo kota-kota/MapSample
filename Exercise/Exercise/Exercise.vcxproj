@@ -127,12 +127,14 @@
   <ItemGroup>
     <ClCompile Include="src\DigitalWatch.cpp" />
     <ClCompile Include="src\DrawWGL.cpp" />
+    <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DigitalWatch.hpp" />
     <ClInclude Include="src\DrawWGL.hpp" />
     <ClInclude Include="src\fw\Type.hpp" />
+    <ClInclude Include="src\Image.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
