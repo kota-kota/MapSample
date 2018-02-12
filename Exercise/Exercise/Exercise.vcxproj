@@ -69,20 +69,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)libpng\Include;$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libpng\Lib\$(PlatformTarget);$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)libpng\Include;$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libpng\Lib\$(PlatformTarget);$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)libpng\Include;$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libpng\Lib\$(PlatformTarget);$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)libpng\Include;$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libpng\Lib\$(PlatformTarget);$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)zlib\Include;$(ProjectDir)src\fw;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)zlib\Lib\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -125,16 +125,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\library\lpng1632\pngread.c" />
+    <ClCompile Include="..\..\..\library\lpng1632\pngwrite.c" />
     <ClCompile Include="src\DigitalWatch.cpp" />
     <ClCompile Include="src\DrawWGL.cpp" />
     <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\png\png.c" />
+    <ClCompile Include="src\png\pngerror.c" />
+    <ClCompile Include="src\png\pngget.c" />
+    <ClCompile Include="src\png\pngmem.c" />
+    <ClCompile Include="src\png\pngpread.c" />
+    <ClCompile Include="src\png\pngrio.c" />
+    <ClCompile Include="src\png\pngrtran.c" />
+    <ClCompile Include="src\png\pngrutil.c" />
+    <ClCompile Include="src\png\pngset.c" />
+    <ClCompile Include="src\png\pngtrans.c" />
+    <ClCompile Include="src\png\pngwio.c" />
+    <ClCompile Include="src\png\pngwtran.c" />
+    <ClCompile Include="src\png\pngwutil.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DigitalWatch.hpp" />
     <ClInclude Include="src\DrawWGL.hpp" />
     <ClInclude Include="src\fw\Type.hpp" />
     <ClInclude Include="src\Image.hpp" />
+    <ClInclude Include="src\png\png.h" />
+    <ClInclude Include="src\png\pngconf.h" />
+    <ClInclude Include="src\png\pngdebug.h" />
+    <ClInclude Include="src\png\pnginfo.h" />
+    <ClInclude Include="src\png\pnglibconf.h" />
+    <ClInclude Include="src\png\pngpriv.h" />
+    <ClInclude Include="src\png\pngstruct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

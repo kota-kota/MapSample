@@ -16,6 +16,9 @@
     <Filter Include="ソース ファイル\fw">
       <UniqueIdentifier>{ff8b0f4c-cd2a-41dd-a29d-f50857426ef5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\png">
+      <UniqueIdentifier>{01a12948-eedd-43e2-98a1-96d3bd5dc15e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -30,6 +33,51 @@
     <ClCompile Include="src\Image.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\png\png.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngerror.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngget.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngmem.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngpread.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngrio.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngrtran.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngrutil.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngset.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngtrans.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngwio.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngwtran.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="src\png\pngwutil.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\library\lpng1632\pngread.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\library\lpng1632\pngwrite.c">
+      <Filter>ソース ファイル\png</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DigitalWatch.hpp">
@@ -43,6 +91,27 @@
     </ClInclude>
     <ClInclude Include="src\Image.hpp">
       <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\png.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pngconf.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pngdebug.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pnginfo.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pnglibconf.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pngpriv.h">
+      <Filter>ソース ファイル\png</Filter>
+    </ClInclude>
+    <ClInclude Include="src\png\pngstruct.h">
+      <Filter>ソース ファイル\png</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

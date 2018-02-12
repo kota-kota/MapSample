@@ -1,10 +1,9 @@
 ﻿#include "Image.hpp"
 
 #include <cstdio>
-#include <png.h>
-#include <pngstruct.h>
+#include "png/png.h"
+#include "png/pngstruct.h"
 
-#pragma comment(lib, "libpng16.lib")
 #pragma comment(lib, "zlib.lib")
 
 namespace {
