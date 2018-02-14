@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 
+//FreeType
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 namespace {
 	const std::string topPath = "./image";
 
@@ -29,6 +33,92 @@ namespace {
 		{ 0xf0,	ui::EN_ImageFormat::PNG,	"sym_colon.png" },
 	};
 	static const int32_t tblDigitalWatchImageNum = sizeof(tblDigitalWatchImage) / sizeof(tblDigitalWatchImage[0]);
+
+#define WIDTH   320
+#define HEIGHT  240
+	unsigned char txtimage[HEIGHT][WIDTH];
+	void draw_bitmap(FT_Bitmap* bitmap, FT_Int x, FT_Int y)
+	{
+		FT_Int  i, j, p, q;
+		FT_Int  x_max = x + bitmap->width;
+		FT_Int  y_max = y + bitmap->rows;
+
+		for (i = x, p = 0; i < x_max; i++, p++)
+		{
+			for (j = y, q = 0; j < y_max; j++, q++)
+			{
+				if (i < 0 || j < 0 ||
+					i >= WIDTH || j >= HEIGHT)
+					continue;
+
+				txtimage[j][i] |= bitmap->buffer[q * bitmap->width + p];
+			}
+		}
+	}
+	void test_freetype()
+	{
+		FT_Library    library;
+		FT_Face       face;
+
+		FT_GlyphSlot  slot;
+		FT_Matrix     matrix;                 /* transformation matrix */
+		FT_Vector     pen;                    /* untransformed origin  */
+		FT_Error      error;
+
+		char*         filename;
+		wchar_t*         text;
+
+		double        angle;
+		int           target_height;
+		int           n, num_chars;
+
+
+		filename = "ipagp.ttf";                           /* first argument     */
+		text = L"opqrstu";                           /* second argument    */
+		num_chars = wcslen(text);
+		target_height = HEIGHT;
+
+		error = FT_Init_FreeType(&library);              /* initialize library */
+														 /* error handling omitted */
+
+		error = FT_New_Face(library, filename, 0, &face);/* create face object */
+														 /* error handling omitted */
+
+														 /* use 50pt at 100dpi */
+		//error = FT_Set_Char_Size(face, 20 * 64, 0, 96, 0);                /* set character size */
+									/* error handling omitted */
+		FT_Set_Pixel_Sizes(face, 20, 20);
+		slot = face->glyph;
+
+		/* the pen position in 26.6 cartesian space coordinates; */
+		/* start at (300,200) relative to the upper left corner  */
+		//pen.x = 300 * 64;
+		//pen.y = (target_height - 200) * 64;
+		pen.x = 0;
+		pen.y = 0;
+
+		for (n = 0; n < num_chars; n++)
+		{
+			/* set transformation */
+			FT_Set_Transform(face, nullptr, &pen);
+
+			/* load glyph image into the slot (erase previous one) */
+			error = FT_Load_Char(face, text[n], FT_LOAD_RENDER);
+			if (error)
+				continue;                 /* ignore errors */
+
+										  /* now, draw to our target surface (convert position) */
+			draw_bitmap(&slot->bitmap, slot->bitmap_left, target_height - slot->bitmap_top);
+			//draw_bitmap(&slot->bitmap, slot->bitmap_left, slot->bitmap_top);
+
+			/* increment pen position */
+			pen.x += slot->advance.x;
+			pen.y += slot->advance.y;
+		}
+
+		FT_Done_Face(face);
+		FT_Done_FreeType(library);
+	}
 };
 
 
@@ -104,7 +194,28 @@ namespace ui {
 
 		//画像描画
 		ui::CoordI point = { 0, 0 };
-		this->drawIF_->drawImage(point, decode, width, height);
+		//this->drawIF_->drawImage(point, decode, width, height);
+
+		/*
+		//画像描画(テキストテスト)
+		test_freetype();
+		std::uint8_t* test = new uint8_t[HEIGHT * WIDTH * 4];
+		std::int32_t ofs = 0;
+		for (int32_t h = 0; h < HEIGHT; h++) {
+			for (int32_t w = 0; w < WIDTH; w++) {
+				test[ofs + 0] = txtimage[h][w];
+				test[ofs + 1] = txtimage[h][w];
+				test[ofs + 2] = txtimage[h][w];
+				test[ofs + 3] = 255;
+				ofs += 4;
+			}
+		}
+		this->drawIF_->drawImage(point, test, WIDTH, HEIGHT);
+		delete[] test;
+		*/
+
+		//文字描画
+		this->drawIF_->drawString(point, L"東京ドーム　アトラクション");
 
 		//描画終了
 		this->drawIF_->swapBuffers();

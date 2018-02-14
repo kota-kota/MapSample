@@ -26,8 +26,8 @@ namespace {
 	static const std::string winName = "Exercise";
 	static const std::int32_t winPosX = 0;
 	static const std::int32_t winPosY = 0;
-	static const std::int32_t winWidth = 500;
-	static const std::int32_t winHeight = 200;
+	static const std::int32_t winWidth = 800;
+	static const std::int32_t winHeight = 500;
 }
 
 //関数

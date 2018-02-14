@@ -1,11 +1,35 @@
 ﻿#include "DrawWGL.hpp"
 #include "Image.hpp"
+#include <vector>
+
+//OpenGL
 #include <gl/GL.h>
 #include <gl/GLU.h>
+
+//FreeType
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
 
 
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glu32.lib")
+#pragma comment(lib, "freetype28.lib")
+
+
+namespace {
+	//フォント文字データ構造体
+	struct FontChar {
+		std::uint32_t	id_;		//ID(グリフインデックス)
+		std::int32_t	w_;			//幅
+		std::int32_t	h_;			//高さ
+		std::int32_t	distX_;		//調整位置(X方向)
+		std::int32_t	distY_;		//調整位置(Y方向,ベースライン基準)
+		std::int32_t	nextOfsX_;	//次文字へのオフセット(X方向)
+		std::int32_t	baseLine_;	//ベースライン
+		std::uint8_t*	buffer_;	//バッファ
+	};
+}
 
 
 namespace ui {
@@ -211,29 +235,108 @@ namespace ui {
 		//テクスチャ削除
 		glDeleteTextures(1, &texId);
 	}
-	/*
+
 	//文字描画
-	void DrawWGL::drawString(const std::CoordI& coord, const wchar_t* const str)
+	void DrawWGL::drawString(const ui::CoordI& coord, const std::wstring& str)
 	{
-		std::int32_t textCnt = std::int32_t(wcslen(str));
+		//文字数
+		const std::int32_t numChars = std::int32_t(str.length());
 
-		std::vector<Character> charList;
-		charList.resize(textCnt);
+		std::vector<FontChar> ftCharList(numChars);
 
-		std::CoordI dispCoord = coord;
-		for (std::int32_t i = 0; i < textCnt; i++) {
-			//ラスタライズ
-			this->font_->rasterize(str[i], &charList[i]);
+		//FreeTypeを初期化
+		FT_Library ftLibrary;
+		FT_Init_FreeType(&ftLibrary);
 
-			std::AreaI area;
-			area.xmin = dispCoord.x + charList[i].bl;
-			area.xmax = dispCoord.x + charList[i].bw;
-			area.ymin = dispCoord.y - (charList[i].bh - charList[i].bt);
-			area.ymax = dispCoord.y + charList[i].bt;
+		//フェイスオブジェクトを作成
+		FT_Face ftFace;
+		FT_New_Face(ftLibrary, "./ipagp.ttf", 0, &ftFace);
 
-			//次の文字位置
-			dispCoord.x += charList[i].ax >> 6;
-			dispCoord.y += charList[i].ay >> 6;
+		//ピクセルサイズを指定
+		FT_Set_Pixel_Sizes(ftFace, 20, 20);
+
+		//グリフを取得
+		FT_GlyphSlot slot = ftFace->glyph;
+
+		//文字数分ラスタライズ
+		for (std::int32_t c = 0; c < numChars; c++) {
+			FontChar& ftChar = ftCharList[c];
+
+			//グリフインデックスを取得
+			FT_UInt glyphIndex = FT_Get_Char_Index(ftFace, str[c]);
+
+			//グリフイメージをロード
+			FT_Load_Glyph(ftFace, glyphIndex, FT_LOAD_RENDER);
+
+			//文字ラスタ情報を取得
+			ftChar.id_ = glyphIndex;
+			ftChar.w_ = slot->metrics.width >> 6;
+			ftChar.h_ = slot->metrics.height >> 6;
+			ftChar.distX_ = slot->metrics.horiBearingX >> 6;
+			ftChar.distY_ = slot->metrics.horiBearingY >> 6;
+			ftChar.nextOfsX_ = slot->metrics.horiAdvance >> 6;
+			ftChar.baseLine_ = ftChar.h_ - ftChar.distY_;
+			ftChar.buffer_ = nullptr;
+			std::int32_t bufferSize = ftChar.w_ * ftChar.h_;
+			if (bufferSize > 0) {
+				ftChar.buffer_ = new std::uint8_t[ftChar.w_ * ftChar.h_];
+				(void)memcpy_s(ftChar.buffer_, bufferSize, slot->bitmap.buffer, slot->bitmap.width * slot->bitmap.rows);
+			}
+		}
+
+		//文字列の幅、高さ、ベースラインを取得
+		std::int32_t maxWidth = 0;		//文字列の幅
+		std::int32_t maxHeight = 0;		//文字列の高さ
+		std::int32_t baseLine = 0;		//文字列のベースライン
+		for (std::int32_t c = 0; c < numChars; c++) {
+			FontChar& ftChar = ftCharList[c];
+
+			//幅(次文字へのオフセットで計算)
+			maxWidth += ftChar.nextOfsX_;
+			//高さ
+			if (maxHeight < ftChar.h_) { maxHeight = ftChar.h_; }
+			//ベースライン
+			if (baseLine < ftChar.baseLine_) { baseLine = ftChar.baseLine_; }
+		}
+		//文字列のベースライン分高さを調整
+		maxHeight += baseLine;
+
+		//文字列バッファ確保
+		std::uint8_t* strBuffer = nullptr;
+		std::int32_t strBufferSize = maxWidth * maxHeight;
+		if (strBufferSize > 0) {
+			strBuffer = new std::uint8_t[strBufferSize];
+			memset(strBuffer, 0, strBufferSize);
+		}
+
+		if (strBuffer != nullptr) {
+			//文字列画像作成
+			int32_t staWrite = 0;
+			for (std::int32_t c = 0; c < numChars; c++) {
+				FontChar& ftChar = ftCharList[c];
+
+				//書き込み位置
+				std::int32_t iWrite = staWrite + ftChar.distX_;	//開始位置(自身の文字のX方向の調整分だけ書き込み位置を進めておく)
+				iWrite += maxWidth * (maxHeight - ftChar.h_);	//文字列の高さと自身の文字の高さの差分だけ書き込み位置を進める
+				iWrite -= maxWidth * baseLine;					//文字列のベースライン分だけ書き込み位置を戻す
+				iWrite += maxWidth * ftChar.baseLine_;			//自身の文字のベースライン分だけ書き込み位置を進める
+
+				for (std::int32_t ih = 0; ih < ftChar.h_; ih++) {
+					(void)memcpy_s(&strBuffer[iWrite], ftChar.w_, &ftChar.buffer_[ih * ftChar.w_], ftChar.w_);
+					iWrite += maxWidth;
+				}
+
+				//次文字へのオフセット分進める
+				staWrite += ftChar.nextOfsX_;
+			}
+
+			//文字列描画
+			//描画エリア
+			ui::AreaI area;
+			area.xmin = coord.x;
+			area.ymin = coord.y - maxHeight;
+			area.xmax = area.xmin + maxWidth;
+			area.ymax = area.ymin + maxHeight;
 
 			GLuint texID;
 			glGenTextures(1, &texID);
@@ -241,7 +344,7 @@ namespace ui {
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, charList[i].bw, charList[i].bh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, charList[i].buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, maxWidth, maxHeight, 0, GL_ALPHA, GL_UNSIGNED_BYTE, strBuffer);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -250,17 +353,19 @@ namespace ui {
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_TEXTURE_2D);
-
-			glColor4ub(0, 0, 0, 255);
 			glBegin(GL_TRIANGLE_STRIP);
-			glTexCoord2f(0.0F, 1.0F);
-			glVertex3i(area.xmin, area.ymin, 0);
-			glTexCoord2f(1.0F, 1.0F);
-			glVertex3i(area.xmax, area.ymin, 0);
-			glTexCoord2f(0.0F, 0.0F);
-			glVertex3i(area.xmin, area.ymax, 0);
-			glTexCoord2f(1.0F, 0.0F);
-			glVertex3i(area.xmax, area.ymax, 0);
+			{
+				glColor4ub(0, 0, 0, 255);
+				//座標
+				glTexCoord2f(0.0F, 0.0F);
+				glVertex3i(area.xmin, area.ymax, 0);
+				glTexCoord2f(1.0F, 0.0F);
+				glVertex3i(area.xmax, area.ymax, 0);
+				glTexCoord2f(0.0F, 1.0F);
+				glVertex3i(area.xmin, area.ymin, 0);
+				glTexCoord2f(1.0F, 1.0F);
+				glVertex3i(area.xmax, area.ymin, 0);
+			}
 			glEnd();
 
 			glDisable(GL_TEXTURE_2D);
@@ -268,7 +373,16 @@ namespace ui {
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDeleteTextures(1, &texID);
+
+			//解放
+			delete[] strBuffer;
+			for (std::int32_t c = 0; c < numChars; c++) {
+				delete[] ftCharList[c].buffer_;
+			}
 		}
+
+		//終了処理
+		FT_Done_Face(ftFace);
+		FT_Done_FreeType(ftLibrary);
 	}
-	*/
 }

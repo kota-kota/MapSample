@@ -3,6 +3,7 @@
 
 #include "Type.hpp"
 #include <Windows.h>
+#include <string>
 
 
 namespace ui {
@@ -76,7 +77,7 @@ namespace ui {
 		//イメージ描画
 		void drawImage(const ui::CoordI& coord, const uint8_t* const image, const int32_t width, const int32_t height);
 		//文字描画
-		//void drawString(const ui::CoordI& coord, const wchar_t* const str);
+		void drawString(const ui::CoordI& coord, const std::wstring& str);
 	};
 }
 
