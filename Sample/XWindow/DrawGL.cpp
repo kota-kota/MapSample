@@ -216,7 +216,7 @@ namespace draw {
 
 	//コンストラクタ
 	DrawGL::DrawGL() :
-		shader_(), proj_()
+		shader_(), curShaderType_(EN_ShaderType::INVALID), proj_()
 	{
 		printf("<DrawGL::DrawGL>\n");
 		printf("Vevdor: %s\n", glGetString(GL_VENDOR));
@@ -260,50 +260,53 @@ namespace draw {
 	}
 
 	//ライン描画
-	void DrawGL::drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width)
+	void DrawGL::drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width, const EN_LineType type)
 	{
 		//カラーRRGBAシェーダを使用
-		Shader* shader = &this->shader_[EN_ShaderType::COLOR_RGBA];
-		ShaderPara shaderPara = shader->getShaderPara();
+		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
 
-		//シェーダプログラムをバインド
-		glUseProgram(shaderPara.prog_id);
-
-		//attribute変数有効化
-		glEnableVertexAttribArray(shaderPara.attr_point);
-		glEnableVertexAttribArray(shaderPara.attr_color);
-
-		//MVP変換行列をシェーダへ転送(OpenGLは行と列が逆)
+		//MVP変換行列をシェーダへ転送
 		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, (GLfloat*)this->proj_.mat);
 
 		//頂点データ転送
 		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)points);
 		glVertexAttribPointer(shaderPara.attr_color, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, (GLubyte*)colors);
 
+		//ライン描画種別からモードを取得
+		GLenum mode = 0;
+		if(type == EN_LineType::LINES) { mode = GL_LINES; }
+		else if(type == EN_LineType::LINE_STRIP) { mode = GL_LINE_STRIP; }
+		else if(type == EN_LineType::LINE_LOOP) { mode = GL_LINE_LOOP; }
+		else { /* 未サポート */ };
+
 		//描画
 		glLineWidth(width);
-		glDrawArrays(GL_LINE_STRIP, 0, pointNum);
+		glDrawArrays(mode, 0, pointNum);
+	}
 
-		//attribute変数無効化
-		glDisableVertexAttribArray(shaderPara.attr_point);
-		glDisableVertexAttribArray(shaderPara.attr_color);
+	//カラーRGBA使用開始
+	ShaderPara DrawGL::useShader_COLOR_RGBA()
+	{
+		//カラーRGBA
+		const EN_ShaderType type = EN_ShaderType::COLOR_RGBA;
 
-#if 0
-		//頂点配列の転送開始
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, points);
+		//シェーダパラメータ取得
+		Shader* shader = &this->shader_[type];
+		ShaderPara shaderPara = shader->getShaderPara();
 
-		//ライン幅
-		glLineWidth(width);
+		//現在使用中でなければ使用開始
+		if(this->curShaderType_ != type) {
+			//シェーダプログラムをバインド
+			glUseProgram(shaderPara.prog_id);
 
-		//ライン色
-		glColor4ub(color.r_, color.g_, color.b_, color.a_);
+			//attribute変数有効化
+			glEnableVertexAttribArray(shaderPara.attr_point);
+			glEnableVertexAttribArray(shaderPara.attr_color);
 
-		//ライン描画
-		glDrawArrays(GL_LINE_STRIP, 0, pointNum);
+			//使用中のシェーダ種別に設定
+			this->curShaderType_ = type;
+		}
 
-		//頂点配列の転送終了
-		glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+		return shaderPara;
 	}
 }

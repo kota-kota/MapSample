@@ -50,7 +50,7 @@ namespace {
 		windowIF->makeCurrent(true);
 		drawIF->setup(area);
 		drawIF->clear(backColor);
-		drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F);
+		drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
 		windowIF->swapBuffers();
 		windowIF->makeCurrent(false);
 	}

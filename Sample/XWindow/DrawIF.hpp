@@ -37,6 +37,13 @@ namespace draw {
 		std::int32_t	ymax;
 	};
 
+	//ライン描画種別
+	enum EN_LineType {
+		LINES,
+		LINE_STRIP,
+		LINE_LOOP,
+	};
+
 	/**
 	 * 描画インターフェースクラス
 	 */
@@ -49,7 +56,7 @@ namespace draw {
 		//クリア
 		virtual void clear(const ColorUB& color) = 0;
 		//ライン描画
-		virtual void drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width) = 0;
+		virtual void drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width, const EN_LineType type) = 0;
 
 		//行列の転置
 		static MatrixF transMatrix(const MatrixF& m);

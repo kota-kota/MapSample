@@ -58,8 +58,9 @@ namespace draw {
 	 */
 	class DrawGL : public DrawIF {
 		//メンバ変数
-		Shader	shader_[EN_ShaderType::NUM];
-		MatrixF	proj_;
+		Shader			shader_[EN_ShaderType::NUM];
+		EN_ShaderType	curShaderType_;
+		MatrixF			proj_;
 
 	public:
 		//コンストラクタ
@@ -71,7 +72,11 @@ namespace draw {
 		//クリア
 		virtual void clear(const ColorUB& color);
 		//ライン描画
-		virtual void drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width);
+		virtual void drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width, const EN_LineType type);
+
+	private:
+		//カラーRGBA使用開始
+		ShaderPara useShader_COLOR_RGBA();
 	};
 };
 
