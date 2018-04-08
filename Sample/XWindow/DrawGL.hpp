@@ -72,7 +72,9 @@ namespace draw {
 		//クリア
 		virtual void clear(const ColorUB& color);
 		//ライン描画
-		virtual void drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width, const EN_LineType type);
+		virtual void drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type);
+		//ポリゴン描画
+		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
 
 	private:
 		//カラーRGBA使用開始

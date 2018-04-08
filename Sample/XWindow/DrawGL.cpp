@@ -18,7 +18,7 @@ namespace {
 		"#version 100\n"
 		"varying lowp vec4 vary_color;\n"
 		"void main() {\n"
-		"    gl_FragColor = vary_color;\n"
+		"    gl_FragColor = vary_color / 255.0;\n"
 		"}\n";
 
 	//テクスチャRGBA バーテックスシェーダ
@@ -260,17 +260,17 @@ namespace draw {
 	}
 
 	//ライン描画
-	void DrawGL::drawLines(const int32_t pointNum, PointF* const points, ColorUB* colors, const std::float32_t width, const EN_LineType type)
+	void DrawGL::drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type)
 	{
 		//カラーRRGBAシェーダを使用
 		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
 
 		//MVP変換行列をシェーダへ転送
-		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, (GLfloat*)this->proj_.mat);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
 
 		//頂点データ転送
-		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)points);
-		glVertexAttribPointer(shaderPara.attr_color, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, (GLubyte*)colors);
+		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat*>(points));
+		glVertexAttribPointer(shaderPara.attr_color, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, static_cast<GLubyte*>(colors));
 
 		//ライン描画種別からモードを取得
 		GLenum mode = 0;
@@ -281,6 +281,29 @@ namespace draw {
 
 		//描画
 		glLineWidth(width);
+		glDrawArrays(mode, 0, pointNum);
+	}
+
+	//ポリゴン描画
+	void DrawGL::drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type)
+	{
+		//カラーRRGBAシェーダを使用
+		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
+
+		//MVP変換行列をシェーダへ転送
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+
+		//頂点データ転送
+		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat*>(points));
+		glVertexAttribPointer(shaderPara.attr_color, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, static_cast<GLubyte*>(colors));
+
+		//ポリゴン描画種別からモードを取得
+		GLenum mode = 0;
+		if(type == EN_PolygonType::TRIANGLE_STRIP) { mode = GL_TRIANGLE_STRIP; }
+		else if(type == EN_PolygonType::TRIANGLE_FAN) { mode = GL_TRIANGLE_FAN; }
+		else { /* 未サポート */ };
+
+		//描画
 		glDrawArrays(mode, 0, pointNum);
 	}
 

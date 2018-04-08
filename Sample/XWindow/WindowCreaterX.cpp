@@ -24,20 +24,30 @@ namespace {
 		EGL_NONE,
 	};
 
-	draw::ColorUB backColor = { 0, 255, 0, 255 };
-	draw::ColorUB lineColor = { 255, 0, 0, 255 };
+	draw::ColorUB backColor = { 125, 125, 125, 255 };
 	const std::int32_t linePointNum = 4;
-	draw::PointF linePoints[linePointNum] = {
+	std::float32_t linePoints[linePointNum * 3] = {
 		0.0F, 0.0F, 0.0F,
 		50.0F, 50.0F, 0.0F,
 		150.0F, 100.0F, 0.0F,
 		300.0F, 0.0F, 0.0F,
 	};
-	draw::ColorUB lineColors[linePointNum] = {
+	std::uint8_t lineColors[linePointNum * 4] = {
 		255, 0, 0, 255,
 		255, 0, 0, 255,
 		255, 0, 0, 255,
 		255, 0, 0, 255,
+	};
+	const std::int32_t polygonPointNum = 3;
+	std::float32_t polygonPoints[polygonPointNum * 3] = {
+		150.0F, 150.0F, 0.0F,
+		200.0F, 200.0F, 0.0F,
+		240.0F, 150.0F, 0.0F,
+	};
+	std::uint8_t polygonColors[polygonPointNum * 4] = {
+		255, 0, 0, 255,
+		0, 255, 0, 255,
+		0, 0, 255, 255,
 	};
 
 	void drawSample(window::WindowIF* windowIF, draw::DrawIF* drawIF)
@@ -51,6 +61,7 @@ namespace {
 		drawIF->setup(area);
 		drawIF->clear(backColor);
 		drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
+		drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
 		windowIF->swapBuffers();
 		windowIF->makeCurrent(false);
 	}

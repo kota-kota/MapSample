@@ -3,7 +3,7 @@ OBJDIR	= ./obj
 BINDIR	= ./bin
 
 CC		= g++
-CFLAGS	= -std=c++11 -Wextra -g -MMD -MP
+CFLAGS	= -std=c++11 -Wall -g -MMD -MP
 LDFLAGS	= -lX11 -lEGL -lGLESv2
 LIBS	=
 INCS	= -I$(SRCDIR)
