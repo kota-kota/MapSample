@@ -4,7 +4,7 @@ BINDIR	= ./bin
 
 CC		= g++
 CFLAGS	= -std=c++11 -Wextra -g -MMD -MP
-LDFLAGS	= -lX11 -lEGL -lGLESv2
+LDFLAGS	= -lX11 -lGL
 LIBS	=
 INCS	= -I$(SRCDIR)
 SRCS	= $(wildcard $(SRCDIR)/*.cpp)

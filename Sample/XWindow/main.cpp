@@ -1,9 +1,12 @@
-﻿#include "WindowIF.hpp"
-#include "WindowX.hpp"
+﻿#include "WindowCreaterX.hpp"
 
 int main()
 {
-	window::WindowIF* windowIF = new window::WindowX();
-	windowIF->create();
-	return windowIF->start();
+	window::WindowCreater* windowCreater = new window::WindowCreaterX();
+	int rc = windowCreater->create();
+	if(rc == 0) {
+		rc = windowCreater->start();
+	}
+	delete windowCreater;
+	return rc;
 }

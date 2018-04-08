@@ -1,16 +1,23 @@
 ﻿#ifndef INCLUDED_WINDOWIF_HPP
 #define INCLUDED_WINDOWIF_HPP
 
-namespace window{
+#include "Type.hpp"
 
+namespace window {
+
+	/**
+	 * ウィンドウ操作インターフェースクラス
+	 */
 	class WindowIF {
 	public:
 		//デストラクタ
 		virtual ~WindowIF() {}
-		//ウィンドウ作成
-		virtual int create() = 0;
-		//ウィンドウ開始
-		virtual int start() = 0;
+		//ウィンドウサイズ取得
+		virtual void getWindowSize(std::int32_t* const width, std::int32_t* const height) = 0;
+		//描画カレント
+		virtual void makeCurrent(const bool current) = 0;
+		//描画更新
+		virtual void swapBuffers() = 0;
 	};
 }
 
