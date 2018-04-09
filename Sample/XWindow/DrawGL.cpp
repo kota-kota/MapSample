@@ -307,7 +307,75 @@ namespace draw {
 		glDrawArrays(mode, 0, pointNum);
 	}
 
-	//カラーRGBA使用開始
+	//画像描画
+	void DrawGL::drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr)
+	{
+		//テクスチャRGBAシェーダを使用
+		ShaderPara shaderPara = this->useShader_TEXTURE_RGBA();
+
+		//MVP変換行列をシェーダへ転送
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+
+		//GL描画設定
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+
+		//テクスチャ生成
+		GLuint texId;
+		glGenTextures(1, &texId);
+
+		//テクスチャバインド
+		glBindTexture(GL_TEXTURE_2D, texId);
+
+		//テクスチャロード
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgAttr.width, imgAttr.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+		//テクスチャパラメータ設定
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		//テクスチャユニット0を指定
+		glUniform1i(shaderPara.unif_texture, 0);
+
+		//頂点座標
+		const GLint pointNum = 4;
+		GLfloat p[pointNum * 3] = {
+			point[0] - (imgAttr.width / 2), point[1] + (imgAttr.height / 2), point[2],
+			point[0] + (imgAttr.width / 2), point[1] + (imgAttr.height / 2), point[2],
+			point[0] - (imgAttr.width / 2), point[1] - (imgAttr.height / 2), point[2],
+			point[0] + (imgAttr.width / 2), point[1] - (imgAttr.height / 2), point[2],
+		};
+
+		//UV座標
+		GLfloat uv[pointNum * 2] = {
+			0.0F, 0.0F,
+			1.0F, 0.0F,
+			0.0F, 1.0F,
+			1.0F, 1.0F,
+		};
+
+		//頂点データ転送
+		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&p[0]);
+		glVertexAttribPointer(shaderPara.attr_uv, 2, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&uv[0]);
+
+		//描画
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, pointNum);
+
+		//テクスチャアンバインド
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//テクスチャ破棄
+		glDeleteTextures(1, &texId);
+
+		//GL描画設定解除
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+	}
+
+	//シェーダパラメータ使用開始
 	ShaderPara DrawGL::useShader_COLOR_RGBA()
 	{
 		//カラーRGBA
@@ -325,6 +393,30 @@ namespace draw {
 			//attribute変数有効化
 			glEnableVertexAttribArray(shaderPara.attr_point);
 			glEnableVertexAttribArray(shaderPara.attr_color);
+
+			//使用中のシェーダ種別に設定
+			this->curShaderType_ = type;
+		}
+
+		return shaderPara;
+	}
+	ShaderPara DrawGL::useShader_TEXTURE_RGBA()
+	{
+		//テクスチャRGBA
+		const EN_ShaderType type = EN_ShaderType::TEXTURE_RGBA;
+
+		//シェーダパラメータ取得
+		Shader* shader = &this->shader_[type];
+		ShaderPara shaderPara = shader->getShaderPara();
+
+		//現在使用中でなければ使用開始
+		if(this->curShaderType_ != type) {
+			//シェーダプログラムをバインド
+			glUseProgram(shaderPara.prog_id);
+
+			//attribute変数有効化
+			glEnableVertexAttribArray(shaderPara.attr_point);
+			glEnableVertexAttribArray(shaderPara.attr_uv);
 
 			//使用中のシェーダ種別に設定
 			this->curShaderType_ = type;

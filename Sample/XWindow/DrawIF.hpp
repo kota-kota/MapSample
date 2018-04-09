@@ -17,12 +17,14 @@ namespace draw {
 		std::float32_t	mat[16];	//行1[0:3] 行2[4:7] 行3[8:11] 行4[12:15]
 	};
 
+	//描画座標
 	struct PointF {
 		std::float32_t	x;
 		std::float32_t	y;
 		std::float32_t	z;
 	};
 
+	//描画色
 	struct ColorUB {
 		std::uint8_t	r;
 		std::uint8_t	g;
@@ -30,6 +32,7 @@ namespace draw {
 		std::uint8_t	a;
 	};
 
+	//エリア
 	struct AreaI {
 		std::int32_t	xmin;
 		std::int32_t	ymin;
@@ -50,6 +53,35 @@ namespace draw {
 		TRIANGLE_FAN,
 	};
 
+	//画像ピクセル形式
+	enum EN_PixelFormat {
+		A,
+		RGB,
+		RGBA,
+	};
+
+	//基準位置(X位置_Y位置)
+	enum EN_BaseLoc {
+		LEFT_TOP,
+		LEFT_CENTER,
+		LEFT_BOTTOM,
+		CENTER_TOP,
+		CENTER_CENTER,
+		CENTER_BOTTOM,
+		RIGHT_TOP,
+		RIGHT_CENTER,
+		RIGHT_BOTTOM,
+	};
+
+	//画像描画属性
+	struct ImageAttr {
+		std::uint32_t	id;
+		std::int32_t	width;
+		std::int32_t	height;
+		EN_PixelFormat	pixFormat;
+		EN_BaseLoc		baseLoc;
+	};
+
 	/**
 	 * 描画インターフェースクラス
 	 */
@@ -65,6 +97,8 @@ namespace draw {
 		virtual void drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type) = 0;
 		//ポリゴン描画
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type) = 0;
+		//画像描画
+		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
 
 		//行列の転置
 		static MatrixF transMatrix(const MatrixF& m);

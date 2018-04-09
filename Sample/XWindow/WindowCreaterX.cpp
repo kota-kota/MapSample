@@ -1,7 +1,9 @@
 ﻿#include "WindowCreaterX.hpp"
 #include "WindowIFX.hpp"
 #include "DrawGL.hpp"
+#include "ImageDecorder.hpp"
 #include <cstdio>
+#include <string>
 
 
 namespace {
@@ -24,7 +26,10 @@ namespace {
 		EGL_NONE,
 	};
 
+	//背景色
 	draw::ColorUB backColor = { 125, 125, 125, 255 };
+
+	//ライン
 	const std::int32_t linePointNum = 4;
 	std::float32_t linePoints[linePointNum * 3] = {
 		0.0F, 0.0F, 0.0F,
@@ -38,6 +43,8 @@ namespace {
 		255, 0, 0, 255,
 		255, 0, 0, 255,
 	};
+
+	//ポリゴン
 	const std::int32_t polygonPointNum = 3;
 	std::float32_t polygonPoints[polygonPointNum * 3] = {
 		150.0F, 150.0F, 0.0F,
@@ -50,9 +57,30 @@ namespace {
 		0, 0, 255, 255,
 	};
 
+	//画像
+	struct ImgFile {
+		std::string				filePath;
+		draw::EN_ImageFormat	format;
+	};
+	const std::int32_t imgFileNum = 1;
+	ImgFile imgFile[imgFileNum] = {
+		{ "./bitmap/win-8.bmp", draw::EN_ImageFormat::BMP },
+	};
+	std::float32_t imgPoint[imgFileNum * 3] = {
+		150.0F, 150.0F, 0.0F,
+	};
+	bool makeImg = false;
+	draw::ImageDecorder imgDecoder[imgFileNum];
+
 	void drawSample(window::WindowIF* windowIF, draw::DrawIF* drawIF)
 	{
 		printf("drawSample\n");
+
+		if(!makeImg) {
+			for(std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
+				imgDecoder[iImg].decode_RGBA8888(imgFile[iImg].filePath.c_str(), imgFile[iImg].format);
+			}
+		}
 
 		draw::AreaI area = {0, 0, 0, 0};
 		windowIF->getWindowSize(&area.xmax, &area.ymax);
@@ -62,6 +90,17 @@ namespace {
 		drawIF->clear(backColor);
 		drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
 		drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
+		for(std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
+			std::int32_t dataSize, w, h;
+			std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
+			draw::ImageAttr imgAttr;
+			imgAttr.id = 0;
+			imgAttr.width = w;
+			imgAttr.height = h;
+			imgAttr.pixFormat = draw::EN_PixelFormat::RGBA;
+			imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
+			drawIF->drawImage(&imgPoint[0], data, imgAttr);
+		}
 		windowIF->swapBuffers();
 		windowIF->makeCurrent(false);
 	}

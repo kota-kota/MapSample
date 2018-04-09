@@ -75,10 +75,13 @@ namespace draw {
 		virtual void drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type);
 		//ポリゴン描画
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
+		//画像描画
+		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr);
 
 	private:
-		//カラーRGBA使用開始
+		//シェーダパラメータ使用開始
 		ShaderPara useShader_COLOR_RGBA();
+		ShaderPara useShader_TEXTURE_RGBA();
 	};
 };
 
