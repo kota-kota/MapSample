@@ -1,12 +1,13 @@
 ﻿#include <Windows.h>
 #include <tchar.h>
+
 #include <EGL/egl.h>
+
 #include <cstdio>
 #include <string>
 
 #include "WindowIFWIN32.hpp"
 #include "DrawGL.hpp"
-
 #include "ImageDecorder.hpp"
 
 //定数定義

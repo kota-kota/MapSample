@@ -222,6 +222,7 @@ namespace draw {
 		printf("Vevdor: %s\n", glGetString(GL_VENDOR));
 		printf("GPU: %s\n", glGetString(GL_RENDERER));
 		printf("OpenGL: %s\n", glGetString(GL_VERSION));
+		printf("Extension: %s\n", glGetString(GL_EXTENSIONS));
 
 		//シェーダ作成
 		this->shader_[EN_ShaderType::COLOR_RGBA].create(EN_ShaderType::COLOR_RGBA);
