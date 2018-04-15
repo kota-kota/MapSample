@@ -11,7 +11,7 @@ namespace window {
 	WindowIFWIN32::WindowIFWIN32(HWND hWnd, EGLDisplay eglDpy, EGLSurface eglWin, EGLContext eglCtx) :
 		hWnd_(hWnd), eglDpy_(eglDpy), eglWin_(eglWin), eglCtx_(eglCtx)
 	{
-#if 0	//TEST
+#if 1	//TEST
 		//FBO作成
 
 		//カレント設定

@@ -36,6 +36,13 @@ namespace {
 		EGL_NONE,
 	};
 
+	//EGLPBuffer属性
+	EGLint attr_pbuffer[] = {
+		EGL_WIDTH,		200,
+		EGL_HEIGHT,		200,
+		EGL_NONE,
+	};
+
 	//EGLコンテキスト属性
 	EGLint attr_context[] = {
 		EGL_CONTEXT_CLIENT_VERSION,	2,
@@ -235,6 +242,26 @@ namespace {
 		void destroy()
 		{
 			printf("<Window::destroy>\n");
+			if (this->drawIF_ != nullptr) {
+				printf("delete DrawIF %p\n", this->drawIF_);
+				delete this->drawIF_;
+			}
+			if (this->windowIF_ != nullptr) {
+				printf("delete WindowIF %p\n", this->windowIF_);
+				delete this->windowIF_;
+			}
+			if (this->eglCtx_ != EGL_NO_CONTEXT) {
+				printf("eglDestroyContext %p\n", this->eglCtx_);
+				eglDestroyContext(this->eglDpy_, this->eglCtx_);
+			}
+			if (this->eglWin_ != EGL_NO_SURFACE) {
+				printf("eglDestroySurface %p\n", this->eglWin_);
+				eglDestroySurface(this->eglDpy_, this->eglWin_);
+			}
+			if (this->eglDpy_ != EGL_NO_DISPLAY) {
+				printf("eglTerminate %p\n", this->eglDpy_);
+				eglTerminate(this->eglDpy_);
+			}
 			if (this->hWnd_ != nullptr) {
 				::DestroyWindow(this->hWnd_);
 			}
@@ -302,6 +329,14 @@ namespace {
 				goto END;
 			}
 			printf("eglCreateWindowSurface %p\n", this->eglWin_);
+
+			//EGLPBufferサーフェイスを作成
+			EGLSurface pbuf = eglCreatePbufferSurface(this->eglDpy_, this->eglCfg_, attr_pbuffer);
+			if (pbuf == EGL_NO_SURFACE) {
+				//失敗
+				printf("[ERROR] %s:%d eglCreatePbufferSurface\n", __FUNCTION__, __LINE__);
+			}
+			printf("eglCreatePbufferSurface %p\n", pbuf);
 
 			//EGLコンテキストを作成
 			this->eglCtx_ = eglCreateContext(this->eglDpy_, this->eglCfg_, EGL_NO_CONTEXT, attr_context);
