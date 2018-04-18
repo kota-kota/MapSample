@@ -61,9 +61,9 @@ namespace draw {
 		//パレットデータを取得
 		std::int32_t getPalleteData(PalColor* const pallete, const std::int32_t numMaxPal);
 		//パレットBMP画像からRGBA8888画像へデコード
-		std::int32_t decodeRgba8888FromPalleteBitmap(std::uint8_t** const decData);
+		std::int32_t decodePalleteBitmap_RGBA8888(std::uint8_t** const decData);
 		//トゥルーカラーBitmap画像からRGBA8888画像へデコード
-		std::int32_t decodeRgba8888FromTrueColorBitmap(std::uint8_t** const decData);
+		std::int32_t decodeTrueColorBitmap_RGBA8888(std::uint8_t** const decData);
 
 		//コピーコンストラクタ(禁止)
 		ImageBMP(const ImageBMP& org) = delete;

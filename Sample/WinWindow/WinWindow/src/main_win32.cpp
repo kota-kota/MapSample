@@ -88,12 +88,14 @@ namespace {
 		std::string				filePath;
 		draw::EN_ImageFormat	format;
 	};
-	const std::int32_t imgFileNum = 1;
+	const std::int32_t imgFileNum = 2;
 	ImgFile imgFile[imgFileNum] = {
+		{ "./data/png/colorType2_depth8.png", draw::EN_ImageFormat::PNG },
 		{ "./data/bitmap/win-8.bmp", draw::EN_ImageFormat::BMP },
 	};
 	std::float32_t imgPoint[imgFileNum * 3] = {
-		500.0F, 150.0F, 0.0F,
+		500.0F, 100.0F, 0.0F,
+		500.0F, 300.0F, 0.0F,
 	};
 	bool makeImg = false;
 	draw::ImageDecorder imgDecoder[imgFileNum];

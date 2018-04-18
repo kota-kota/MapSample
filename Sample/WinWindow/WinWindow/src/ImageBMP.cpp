@@ -3,41 +3,44 @@
 
 
 namespace {
-	//定数定義
-	static const std::int32_t PALLETE_MAXNUM = 256;			//パレット最大数(256色)
-	static const std::int32_t BYTE_PER_PIXEL_RGBA8888 = 4;	//RGBA8888画像の1ピクセルあたりのバイト数
+
+	//RGBA8888画像の1ピクセルあたりのバイト数
+	static const std::int32_t BYTE_PER_PIXEL_RGBA8888 = 4;
+
+	//パレット最大数(256色)
+	static const std::int32_t PALLETE_MAXNUM = 256;
 
 	//Bitmapファイルヘッダ(Windows,OS/2共通)
-	static const std::int16_t BFH_HEADERSIZE = 14;
-	static const std::int16_t BFH_FILETYPE_OFS = 0;		//ファイルタイプ
-	static const std::int16_t BFH_FILESIZE_OFS = 2;		//ファイルサイズ[byte]
-	static const std::int16_t BFH_RESERVED1_OFS = 6;	//予約領域1
-	static const std::int16_t BFH_RESERVED2_OFS = 8;	//予約領域2
-	static const std::int16_t BFH_IMAGEOFS_OFS = 10;	//ファイル先頭から画像データまでのオフセット[byte]
+	static const std::int32_t BFH_HEADERSIZE = 14;
+	static const std::int32_t BFH_FILETYPE_OFS = 0;		//ファイルタイプ
+	static const std::int32_t BFH_FILESIZE_OFS = 2;		//ファイルサイズ[byte]
+	static const std::int32_t BFH_RESERVED1_OFS = 6;	//予約領域1
+	static const std::int32_t BFH_RESERVED2_OFS = 8;	//予約領域2
+	static const std::int32_t BFH_IMAGEOFS_OFS = 10;	//ファイル先頭から画像データまでのオフセット[byte]
 
 	//Bitmap情報ヘッダ(Windows)
-	static const std::int16_t BIH_HEADERSIZE = 40;
-	static const std::int16_t BIH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
-	static const std::int16_t BIH_WIDTH_OFS = 18;		//画像の幅[pixel]
-	static const std::int16_t BIH_HEIGHT_OFS = 22;		//画像の高さ[pixel]
-	static const std::int16_t BIH_PLANENUM_OFS = 26;	//プレーン数
-	static const std::int16_t BIH_BITCOUNT_OFS = 28;	//色ビット数[bit]
-	static const std::int16_t BIH_COMPRESSION_OFS = 30;	//圧縮形式
-	static const std::int16_t BIH_IMGDATASIZE_OFS = 34;	//画像データサイズ[byte]
-	static const std::int16_t BIH_XDPM_OFS = 38;		//水平解像度[dot/m]
-	static const std::int16_t BIH_YDPM_OFS = 42;		//垂直解像度[dot/m]
-	static const std::int16_t BIH_PALLETENUM_OFS = 46;	//パレット数[使用色数]
-	static const std::int16_t BIH_IMPCOLORNUM_OFS = 50;	//重要色数
-	static const std::int16_t BIH_PALLETE_OFS = 54;		//パレット
+	static const std::int32_t BIH_HEADERSIZE = 40;
+	static const std::int32_t BIH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
+	static const std::int32_t BIH_WIDTH_OFS = 18;		//画像の幅[pixel]
+	static const std::int32_t BIH_HEIGHT_OFS = 22;		//画像の高さ[pixel]
+	static const std::int32_t BIH_PLANENUM_OFS = 26;	//プレーン数
+	static const std::int32_t BIH_BITCOUNT_OFS = 28;	//色ビット数[bit]
+	static const std::int32_t BIH_COMPRESSION_OFS = 30;	//圧縮形式
+	static const std::int32_t BIH_IMGDATASIZE_OFS = 34;	//画像データサイズ[byte]
+	static const std::int32_t BIH_XDPM_OFS = 38;		//水平解像度[dot/m]
+	static const std::int32_t BIH_YDPM_OFS = 42;		//垂直解像度[dot/m]
+	static const std::int32_t BIH_PALLETENUM_OFS = 46;	//パレット数[使用色数]
+	static const std::int32_t BIH_IMPCOLORNUM_OFS = 50;	//重要色数
+	static const std::int32_t BIH_PALLETE_OFS = 54;		//パレット
 
 	//Bitmapコアヘッダ(OS/2)
-	static const std::int16_t BCH_HEADERSIZE = 12;
-	static const std::int16_t BCH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
-	static const std::int16_t BCH_WIDTH_OFS = 18;		//画像の幅[pixel]
-	static const std::int16_t BCH_HEIGHT_OFS = 20;		//画像の高さ[pixel]
-	static const std::int16_t BCH_PLANENUM_OFS = 22;	//プレーン数
-	static const std::int16_t BCH_BITCOUNT_OFS = 24;	//色ビット数[bit]
-	static const std::int16_t BCH_PALLETE_OFS = 26;		//パレット
+	static const std::int32_t BCH_HEADERSIZE = 12;
+	static const std::int32_t BCH_HEADERSIZE_OFS = 14;	//情報ヘッダサイズ[byte]
+	static const std::int32_t BCH_WIDTH_OFS = 18;		//画像の幅[pixel]
+	static const std::int32_t BCH_HEIGHT_OFS = 20;		//画像の高さ[pixel]
+	static const std::int32_t BCH_PLANENUM_OFS = 22;	//プレーン数
+	static const std::int32_t BCH_BITCOUNT_OFS = 24;	//色ビット数[bit]
+	static const std::int32_t BCH_PALLETE_OFS = 26;		//パレット
 
 	//Bitmap圧縮形式
 	static const std::uint32_t COMPRESSION_BI_RGB = 0;			//無圧縮
@@ -51,13 +54,13 @@ namespace {
 	class ByteReader {
 	public:
 		//1バイトを読み込み(LE)
-		static void read1ByteLe(const std::uint8_t* const data, const std::int16_t offset, uint8_t* const readData)
+		static void read1ByteLe(const std::uint8_t* const data, const std::int32_t offset, uint8_t* const readData)
 		{
 			*readData = *(data + offset + 0);
 		}
 
 		//2バイトを読み込み(LE)
-		static void read2ByteLe(const std::uint8_t* const data, const std::int16_t offset, uint16_t* const readData)
+		static void read2ByteLe(const std::uint8_t* const data, const std::int32_t offset, uint16_t* const readData)
 		{
 			*readData = 0;
 			uint16_t v1 = uint16_t(*(data + offset + 0));
@@ -67,7 +70,7 @@ namespace {
 		}
 
 		//4バイトを読み込み(LE)
-		static void read4ByteLe(const std::uint8_t* const data, const std::int16_t offset, uint32_t* const readData)
+		static void read4ByteLe(const std::uint8_t* const data, const std::int32_t offset, uint32_t* const readData)
 		{
 			*readData = 0;
 			uint32_t v1 = uint32_t(*(data + offset + 0));
@@ -179,11 +182,11 @@ namespace draw {
 		case 1:		//1bit
 		case 4:		//4bit
 		case 8:		//8bit
-			rc = this->decodeRgba8888FromPalleteBitmap(decData);
+			rc = this->decodePalleteBitmap_RGBA8888(decData);
 			break;
 		case 24:	//24bit
 		case 32:	//32bit
-			rc = this->decodeRgba8888FromTrueColorBitmap(decData);
+			rc = this->decodeTrueColorBitmap_RGBA8888(decData);
 			break;
 		default:
 			rc = -1;
@@ -297,9 +300,9 @@ namespace draw {
 			std::uint32_t writeOffset = 0;
 			for (std::uint16_t p = 0; p < this->palleteNum_; p++) {
 				//青→緑→赤
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 0, &(pallete[writeOffset].b));
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 1, &(pallete[writeOffset].g));
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 2, &(pallete[writeOffset].r));
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 0, &(pallete[writeOffset].b));
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 1, &(pallete[writeOffset].g));
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 2, &(pallete[writeOffset].r));
 
 				writeOffset++;
 				readOffset += 3;
@@ -318,7 +321,7 @@ namespace draw {
 	}
 
 	//パレットBMP画像からRGBA8888画像へデコード
-	std::int32_t ImageBMP::decodeRgba8888FromPalleteBitmap(std::uint8_t** const decData)
+	std::int32_t ImageBMP::decodePalleteBitmap_RGBA8888(std::uint8_t** const decData)
 	{
 		std::int32_t rc = 0;
 
@@ -343,7 +346,7 @@ namespace draw {
 				for (std::int32_t w = 0; w < this->width_; w++) {
 					//画像データはパレットインデックス
 					std::uint8_t index = 0;
-					ByteReader::read1ByteLe(this->bmp_, readOffset, &index);
+					ByteReader::read1ByteLe(this->bmp_, int16_t(readOffset), &index);
 					std::int32_t palleteOffset = (index >> bitOfs) & bitMask;
 
 					//出力データへRGBA値を設定
@@ -374,7 +377,7 @@ namespace draw {
 	}
 
 	//トゥルーカラーBitmap画像からRGBA8888画像へデコード
-	std::int32_t ImageBMP::decodeRgba8888FromTrueColorBitmap(std::uint8_t** const decData)
+	std::int32_t ImageBMP::decodeTrueColorBitmap_RGBA8888(std::uint8_t** const decData)
 	{
 		//パディングバイト数を取得
 		std::int32_t paddingByte = getPaddingByte();
@@ -388,15 +391,15 @@ namespace draw {
 			for (std::int32_t w = 0; w < this->width_; w++) {
 				//画像データはBGR値
 				std::uint8_t b = 255;
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 0, &b);
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 0, &b);
 				std::uint8_t g = 255;
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 1, &g);
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 1, &g);
 				std::uint8_t r = 255;
-				ByteReader::read1ByteLe(this->bmp_, readOffset + 2, &r);
+				ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 2, &r);
 				std::uint8_t a = 255;
 				if (this->bitCount_ == 32) {
 					//ビット数が32bitの場合、A値を読み込み
-					ByteReader::read1ByteLe(this->bmp_, readOffset + 3, &a);
+					ByteReader::read1ByteLe(this->bmp_, int32_t(readOffset) + 3, &a);
 
 					//読み込み位置を更新
 					readOffset++;

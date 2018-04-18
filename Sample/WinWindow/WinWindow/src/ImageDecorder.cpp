@@ -1,5 +1,6 @@
 ﻿#include "ImageDecorder.hpp"
 #include "ImageBMP.hpp"
+#include "ImagePNG.hpp"
 #include <fstream>
 
 
@@ -87,6 +88,24 @@ namespace draw {
 
 				//BMP画像をRGBA8888画像へデコード
 				rc = bmp.decode_RGBA8888(&this->decData_);
+			}
+		}
+		else if (format == EN_ImageFormat::PNG) {
+			//PNG画像
+
+			//画像PNGオブジェクト生成
+			ImagePNG png;
+			rc = png.create(data, dataSize);
+			if (rc == 0) {
+				//画像幅高さを取得
+				png.getWH(&this->width_, &this->height_);
+
+				//デコードデータ格納領域を確保
+				this->decDataSize_ = this->width_ * this->height_ * BYTE_PER_PIXEL_RGBA8888;
+				this->decData_ = new std::uint8_t[this->decDataSize_];
+
+				//BMP画像をRGBA8888画像へデコード
+				rc = png.decode_RGBA8888(&this->decData_);
 			}
 		}
 
