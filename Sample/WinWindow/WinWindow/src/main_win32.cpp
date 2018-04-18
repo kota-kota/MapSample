@@ -1,14 +1,13 @@
-﻿#include <Windows.h>
-#include <tchar.h>
+﻿#include "LayerManager.hpp"
+#include "DrawGL.hpp"
+#include "ImageDecorder.hpp"
 
-#include <EGL/egl.h>
+#include <Windows.h>
+#include <tchar.h>
 
 #include <cstdio>
 #include <string>
 
-#include "WindowIFWIN32.hpp"
-#include "DrawGL.hpp"
-#include "ImageDecorder.hpp"
 
 //定数定義
 namespace {
@@ -94,44 +93,74 @@ namespace {
 		{ "./data/bitmap/win-8.bmp", draw::EN_ImageFormat::BMP },
 	};
 	std::float32_t imgPoint[imgFileNum * 3] = {
-		150.0F, 150.0F, 0.0F,
+		500.0F, 150.0F, 0.0F,
 	};
 	bool makeImg = false;
 	draw::ImageDecorder imgDecoder[imgFileNum];
 
-	//サンプル描画
-	void drawSample(window::WindowIF* windowIF, draw::DrawIF* drawIF)
-	{
-		printf("<drawSample>\n");
+	//画面
+	class Screen {
+		window::LayerIF*	layer_;
 
-		if (!makeImg) {
-			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
-				imgDecoder[iImg].decode_RGBA8888(imgFile[iImg].filePath.c_str(), imgFile[iImg].format);
+	public:
+		//コンストラクタ
+		Screen() :
+			layer_(nullptr)
+		{
+		}
+
+		//画面作成
+		void Screen::create(window::LayerIF* layer)
+		{
+			this->layer_ = layer;
+		}
+
+		//画面破棄
+		void Screen::destroy()
+		{
+		}
+
+		//サンプル描画
+		void Screen::draw()
+		{
+			printf("<Screen::draw>\n");
+
+			//描画インターフェースを取得
+			draw::DrawIF* drawIF = this->layer_->getDrawIF();
+
+			if (!makeImg) {
+				for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
+					imgDecoder[iImg].decode_RGBA8888(imgFile[iImg].filePath.c_str(), imgFile[iImg].format);
+				}
 			}
-		}
 
-		draw::AreaI area = { 0, 0, 0, 0 };
-		windowIF->getWindowSize(&area.xmax, &area.ymax);
+			draw::AreaI area = { 0, 0, 0, 0 };
+			this->layer_->getSize(&area.xmax, &area.ymax);
 
-		windowIF->makeCurrent(true);
-		drawIF->setup(area);
-		drawIF->clear(backColor);
-		drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
-		drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
-		for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
-			std::int32_t dataSize, w, h;
-			std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
-			draw::ImageAttr imgAttr;
-			imgAttr.id = 0;
-			imgAttr.width = w;
-			imgAttr.height = h;
-			imgAttr.pixFormat = draw::EN_PixelFormat::RGBA;
-			imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
-			drawIF->drawImage(&imgPoint[0], data, imgAttr);
+			//描画開始
+			this->layer_->beginDraw();
+
+			//描画処理
+			drawIF->setup(area);
+			drawIF->clear(backColor);
+			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
+			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
+			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
+				std::int32_t dataSize, w, h;
+				std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
+				draw::ImageAttr imgAttr;
+				imgAttr.id = 0;
+				imgAttr.width = w;
+				imgAttr.height = h;
+				imgAttr.pixFormat = draw::EN_PixelFormat::RGBA;
+				imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
+				drawIF->drawImage(&imgPoint[0], data, imgAttr);
+			}
+
+			//描画終了
+			this->layer_->endDraw();
 		}
-		windowIF->swapBuffers();
-		windowIF->makeCurrent(false);
-	}
+	};
 }
 
 //内部関数
@@ -149,20 +178,15 @@ namespace {
 	 */
 	class Window {
 		//メンバ変数
-		HINSTANCE		hInstance_;
-		HWND			hWnd_;
-		EGLDisplay		eglDpy_;
-		EGLConfig		eglCfg_;
-		EGLSurface		eglWin_;
-		EGLContext		eglCtx_;
-		window::WindowIF*	windowIF_;
-		draw::DrawIF*		drawIF_;
+		HINSTANCE				hInstance_;
+		HWND					hWnd_;
+		window::LayerManager	layerManager_;
+		Screen					screen_;
 
 	public:
 		//コンストラクタ
 		Window() :
-			hInstance_(nullptr), hWnd_(nullptr), eglDpy_(EGL_NO_DISPLAY), eglCfg_(), eglWin_(EGL_NO_SURFACE), eglCtx_(EGL_NO_CONTEXT),
-			windowIF_(nullptr), drawIF_(nullptr)
+			hInstance_(nullptr), hWnd_(nullptr), layerManager_(), screen_()
 		{
 		}
 
@@ -242,26 +266,6 @@ namespace {
 		void destroy()
 		{
 			printf("<Window::destroy>\n");
-			if (this->drawIF_ != nullptr) {
-				printf("delete DrawIF %p\n", this->drawIF_);
-				delete this->drawIF_;
-			}
-			if (this->windowIF_ != nullptr) {
-				printf("delete WindowIF %p\n", this->windowIF_);
-				delete this->windowIF_;
-			}
-			if (this->eglCtx_ != EGL_NO_CONTEXT) {
-				printf("eglDestroyContext %p\n", this->eglCtx_);
-				eglDestroyContext(this->eglDpy_, this->eglCtx_);
-			}
-			if (this->eglWin_ != EGL_NO_SURFACE) {
-				printf("eglDestroySurface %p\n", this->eglWin_);
-				eglDestroySurface(this->eglDpy_, this->eglWin_);
-			}
-			if (this->eglDpy_ != EGL_NO_DISPLAY) {
-				printf("eglTerminate %p\n", this->eglDpy_);
-				eglTerminate(this->eglDpy_);
-			}
 			if (this->hWnd_ != nullptr) {
 				::DestroyWindow(this->hWnd_);
 			}
@@ -286,84 +290,23 @@ namespace {
 		{
 			printf("<winproc_create> hWnd:0x%p\n", hWnd);
 
-			int rc = -1;
-			EGLBoolean retEgl = EGL_FALSE;
-			EGLint numCfgs = 0;
-
 			//ウィンドウハンドルを保持
 			this->hWnd_ = hWnd;
 
-			//EGLディスプレイを取得
-			this->eglDpy_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-			if (this->eglDpy_ == EGL_NO_DISPLAY) {
-				//失敗
-				printf("[ERROR] %s:%d eglGetDisplay\n", __FUNCTION__, __LINE__);
-				goto END;
-			}
-			printf("eglGetDisplay %p\n", this->eglDpy_);
+			//レイヤー管理オブジェクト作成
+			this->layerManager_.createWindow(this->hWnd_);
 
-			//EGL初期化
-			EGLint major, minor;
-			retEgl = eglInitialize(this->eglDpy_, &major, &minor);
-			if (retEgl != EGL_TRUE) {
-				//失敗
-				printf("[ERROR] %s:%d eglInitialize\n", __FUNCTION__, __LINE__);
-				goto END;
-			}
-			printf("eglInitialize EGL%d.%d\n", major, minor);
+			//ウィンドウサイズを取得
+			RECT rect;
+			::GetClientRect(hWnd, &rect);
+			const std::int32_t width = rect.right - rect.left;
+			const std::int32_t height = rect.bottom - rect.top;
 
-			// EGLコンフィグを取得
-			retEgl = eglChooseConfig(this->eglDpy_, attr_config, &this->eglCfg_, 1, &numCfgs);
-			if ((retEgl != EGL_TRUE) || (numCfgs != 1)) {
-				//失敗
-				printf("[ERROR] %s:%d eglChooseConfig %d\n", __FUNCTION__, __LINE__, numCfgs);
-				goto END;
-			}
-			printf("eglChooseConfig %p %d\n", this->eglCfg_, numCfgs);
+			//レイヤー作成
+			window::LayerIF* layer = this->layerManager_.createLayer(width, height);
 
-			//EGLウィンドウサーフェイスを作成
-			this->eglWin_ = eglCreateWindowSurface(this->eglDpy_, this->eglCfg_, (NativeWindowType)this->hWnd_, nullptr);
-			if (this->eglWin_ == EGL_NO_SURFACE) {
-				//失敗
-				printf("[ERROR] %s:%d eglCreateWindowSurface\n", __FUNCTION__, __LINE__);
-				goto END;
-			}
-			printf("eglCreateWindowSurface %p\n", this->eglWin_);
-
-			//EGLPBufferサーフェイスを作成
-			EGLSurface pbuf = eglCreatePbufferSurface(this->eglDpy_, this->eglCfg_, attr_pbuffer);
-			if (pbuf == EGL_NO_SURFACE) {
-				//失敗
-				printf("[ERROR] %s:%d eglCreatePbufferSurface\n", __FUNCTION__, __LINE__);
-			}
-			printf("eglCreatePbufferSurface %p\n", pbuf);
-
-			//EGLコンテキストを作成
-			this->eglCtx_ = eglCreateContext(this->eglDpy_, this->eglCfg_, EGL_NO_CONTEXT, attr_context);
-			if (this->eglCtx_ == EGL_NO_CONTEXT) {
-				//失敗
-				printf("[ERROR] %s:%d eglCreateContext\n", __FUNCTION__, __LINE__);
-				goto END;
-			}
-			printf("eglCreateContext %p\n", this->eglCtx_);
-
-			//ウィンドウインターフェース作成
-			this->windowIF_ = new window::WindowIFWIN32(this->hWnd_, this->eglDpy_, this->eglWin_, this->eglCtx_);
-			printf("new WindowIFX %p\n", this->windowIF_);
-
-			//描画インターフェース作成(カレント状態が必須)
-			this->windowIF_->makeCurrent(true);
-			this->drawIF_ = new draw::DrawGL();
-			this->windowIF_->makeCurrent(false);
-			printf("new DrawGL %p\n", this->drawIF_);
-
-			//正常終了
-			rc = 0;
-
-		END:
-			if (rc < 0) {
-				this->destroy();
-			}
+			//画面作成
+			this->screen_.create(layer);
 		}
 
 		//WM_DESTROYイベント処理
@@ -380,7 +323,7 @@ namespace {
 			::EndPaint(this->hWnd_, &ps);
 
 			//サンプル描画
-			drawSample(this->windowIF_, this->drawIF_);
+			this->screen_.draw();
 		}
 
 		//WM_LBUTTONDOWNイベント処理

@@ -21,9 +21,6 @@
     <ClInclude Include="src\Type.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\WindowIF.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\DrawGL.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
@@ -33,7 +30,10 @@
     <ClInclude Include="src\ImageBMP.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\WindowIFWIN32.hpp">
+    <ClInclude Include="src\LayerIF.hpp">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LayerManager.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,7 +53,7 @@
     <ClCompile Include="src\main_win32.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\WindowIFWIN32.cpp">
+    <ClCompile Include="src\LayerManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
