@@ -39,6 +39,12 @@ namespace draw {
 		std::int32_t	xmax;
 		std::int32_t	ymax;
 	};
+	struct AreaF {
+		std::float32_t	xmin;
+		std::float32_t	ymin;
+		std::float32_t	xmax;
+		std::float32_t	ymax;
+	};
 
 	//ライン描画種別
 	enum EN_LineType {
@@ -82,6 +88,15 @@ namespace draw {
 		EN_BaseLoc		baseLoc;
 	};
 
+	//テキスト描画属性
+	struct TextAttr {
+		std::int32_t	size;
+		std::uint8_t	isBold;
+		std::uint8_t	isBorder;
+		ColorUB			bodyColor;
+		ColorUB			borderColor;
+	};
+
 	/**
 	 * 描画インターフェースクラス
 	 */
@@ -99,6 +114,8 @@ namespace draw {
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type) = 0;
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
+		//テキスト描画
+		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr) = 0;
 
 		//行列の転置
 		static MatrixF transMatrix(const MatrixF& m);

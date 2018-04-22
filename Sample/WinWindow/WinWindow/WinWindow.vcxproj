@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="src\DrawGL.hpp" />
     <ClInclude Include="src\DrawIF.hpp" />
+    <ClInclude Include="src\Font.hpp" />
     <ClInclude Include="src\ImageBMP.hpp" />
     <ClInclude Include="src\ImageDecorder.hpp" />
     <ClInclude Include="src\ImagePNG.hpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="src\DrawGL.cpp" />
     <ClCompile Include="src\DrawIF.cpp" />
+    <ClCompile Include="src\Font.cpp" />
     <ClCompile Include="src\ImageBMP.cpp" />
     <ClCompile Include="src\ImageDecorder.cpp" />
     <ClCompile Include="src\ImagePNG.cpp" />

@@ -2,6 +2,7 @@
 #define INCLUDED_DRAWGL_HPP
 
 #include "DrawIF.hpp"
+#include "Font.hpp"
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2.h>
 
@@ -12,6 +13,7 @@ namespace draw {
 		INVALID = -1,		//無効値
 		COLOR_RGBA,			//カラーRGBA
 		TEXTURE_RGBA,		//テクスチャRGBA
+		TEXTURE_A,			//テクスチャA
 		NUM,				//数
 	};
 
@@ -23,6 +25,7 @@ namespace draw {
 		GLint	attr_uv;		//attribute変数uv
 		GLint	unif_mvp;		//uniform変数mvp
 		GLint	unif_texture;	//uniform変数texture
+		GLint	unif_texcolor;	//uniform変数texcolor
 	};
 
 	/**
@@ -52,6 +55,8 @@ namespace draw {
 		void setPara_COLOR_RGBA();
 		//シェーダパラメータ設定(テクスチャRGBA用)
 		void setPara_TEXTURE_RGBA();
+		//シェーダパラメータ設定(テクスチャA用)
+		void setPara_TEXTURE_A();
 	};
 
 	/**
@@ -60,6 +65,7 @@ namespace draw {
 	class DrawGL : public DrawIF {
 		//メンバ変数
 		Shader			shader_[EN_ShaderType::NUM];
+		Font			font_;
 		EN_ShaderType	curShaderType_;
 		MatrixF			proj_;
 
@@ -78,11 +84,14 @@ namespace draw {
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr);
+		//テキスト描画
+		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr);
 
 	private:
 		//シェーダパラメータ使用開始
 		ShaderPara useShader_COLOR_RGBA();
 		ShaderPara useShader_TEXTURE_RGBA();
+		ShaderPara useShader_TEXTURE_A();
 	};
 };
 

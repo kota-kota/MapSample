@@ -100,6 +100,13 @@ namespace {
 	bool makeImg = false;
 	draw::ImageDecorder imgDecoder[imgFileNum];
 
+	//テキスト
+	const std::int32_t textNum = 1;
+	std::float32_t textPoint[textNum * 3] = {
+		500.0F, 100.0F, 0.0F,
+	};
+	const std::char8_t* text = "OpenGL";
+
 	//画面
 	class Screen {
 		window::LayerIF*	layer_;
@@ -158,6 +165,10 @@ namespace {
 				imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
 				drawIF->drawImage(&imgPoint[0], data, imgAttr);
 			}
+			draw::TextAttr textAttr = { 0 };
+			textAttr.size = 10;
+			textAttr.bodyColor = { 255, 255, 0, 255 };
+			drawIF->drawText(textPoint, text, textAttr);
 
 			//描画終了
 			this->layer_->endDraw();
