@@ -290,9 +290,8 @@ namespace draw {
 		//ビューポート
 		glViewport(area.xmin, area.ymin, width, height);
 
-		//プロジェクション行列生成(OpenGLは行と列が逆なので転置する)
+		//プロジェクション行列生成
 		this->proj_ = this->makeProjMatrix_Ortho(0.0F, widthF, 0.0F, heightF, -1.0F, 1.0F);
-		this->proj_ = this->transMatrix(this->proj_);
 	}
 
 	//クリア
@@ -313,8 +312,9 @@ namespace draw {
 		//カラーRRGBAシェーダを使用
 		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
 
-		//MVP変換行列をシェーダへ転送
-		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+		//MVP変換行列をシェーダへ転送(OpenGLは行と列が逆なので転置する)
+		MatrixF mvp = this->transposeMatrix(this->proj_);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
 
 		//頂点データ転送
 		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat*>(points));
@@ -339,7 +339,8 @@ namespace draw {
 		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
 
 		//MVP変換行列をシェーダへ転送
-		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+		MatrixF mvp = this->transposeMatrix(this->proj_);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
 
 		//頂点データ転送
 		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat*>(points));
@@ -356,13 +357,26 @@ namespace draw {
 	}
 
 	//画像描画
-	void DrawGL::drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr)
+	void DrawGL::drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr)
 	{
 		//テクスチャRGBAシェーダを使用
 		ShaderPara shaderPara = this->useShader_TEXTURE_RGBA();
 
+		//angle分回転させるモデル変換行列を生成
+		MatrixF model;
+		VectorF trans, rotate;
+		trans = { -point[0], -point[1], 0.0F };
+		model = this->translateMatrix(trans);
+		rotate = { 0.0F, 0.0F, angle };
+		model = this->multiplyMatrix(this->rotateMatrix(rotate), model);
+		trans = { point[0], point[1], 0.0F };
+		model = this->multiplyMatrix(this->translateMatrix(trans), model);
+
 		//MVP変換行列をシェーダへ転送
-		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+		MatrixF mvp;
+		mvp = this->multiplyMatrix(this->proj_, model);
+		mvp = this->transposeMatrix(mvp);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
 
 		//GL描画設定
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -431,7 +445,8 @@ namespace draw {
 		ShaderPara shaderPara = this->useShader_TEXTURE_A();
 
 		//MVP変換行列をシェーダへ転送
-		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&this->proj_.mat[0]));
+		MatrixF mvp = this->transposeMatrix(this->proj_);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
 
 		//テクスチャ色
 		GLfloat c[4];

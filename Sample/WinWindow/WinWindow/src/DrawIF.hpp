@@ -113,12 +113,28 @@ namespace draw {
 		//ポリゴン描画
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type) = 0;
 		//画像描画
-		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
+		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
 		//テキスト描画
 		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr) = 0;
 
+		//ラジアンから角度に変換
+		static inline std::float32_t convRadian2Degree(const std::float32_t rad);
+		//角度からラジアンに変換
+		static inline std::float32_t convDegree2Radian(const std::float32_t deg);
+		//単位行列の生成
+		static MatrixF identifyMatrixF();
+		//行列の積
+		static MatrixF multiplyMatrix(const MatrixF& m1, const MatrixF& m2);
 		//行列の転置
-		static MatrixF transMatrix(const MatrixF& m);
+		static MatrixF transposeMatrix(const MatrixF& m);
+		//平行移動行列の生成
+		static MatrixF translateMatrix(const VectorF& trans);
+		//回転行列の生成
+		static MatrixF rotateMatrix(const VectorF& rotate);
+		//拡大縮小行列の生成
+		static MatrixF scaleMatrix(const VectorF& scale);
+		//モデル変換行列の生成
+		static MatrixF modelMatrix(const VectorF& trans, const VectorF& rotate, const VectorF& scale);
 		//プロジェクション行列生成(orthogonal)
 		//垂直座標(左),垂直座標(右),水平座標(下),水平座標(上),Z位置(手前),Z位置(奥)
 		static MatrixF makeProjMatrix_Ortho(const std::float32_t left, const std::float32_t right, const std::float32_t bottom, const std::float32_t top, const std::float32_t znear, const std::float32_t zfar);

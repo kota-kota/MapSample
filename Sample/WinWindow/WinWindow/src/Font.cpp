@@ -39,18 +39,18 @@ namespace draw {
 	}
 
 	//ラスタライズ
-	void Font::rasterize(const wchar_t charCode, Character* const c)
+	void Font::rasterize(const std::char8_t charCode, Character* const c)
 	{
 		FT_Face face = this->ftFace;
 
-		FT_Set_Char_Size(face, 24 * 64, 24 * 64, 96, 96);
+		FT_Set_Char_Size(face, 20 * 64, 20 * 64, 96, 96);
 		//FT_Set_Pixel_Sizes(face, 32, 32);
 		FT_UInt glyphIndex = FT_Get_Char_Index(face, charCode);
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 
 		//装飾
-		FT_GlyphSlot_Embolden(face->glyph);	//太字
-		FT_GlyphSlot_Oblique(face->glyph);	//斜体
+		//FT_GlyphSlot_Embolden(face->glyph);	//太字
+		//FT_GlyphSlot_Oblique(face->glyph);	//斜体
 
 		FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 

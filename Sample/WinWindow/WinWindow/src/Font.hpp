@@ -40,7 +40,7 @@ namespace draw {
 		//デストラクタ
 		~Font();
 		//ラスタライズ
-		void rasterize(const wchar_t charCode, Character* const c);
+		void rasterize(const std::char8_t charCode, Character* const c);
 	};
 }
 

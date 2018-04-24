@@ -83,7 +83,7 @@ namespace draw {
 		//ポリゴン描画
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
 		//画像描画
-		virtual void drawImage(std::float32_t* const point, std::uint8_t* const image, const ImageAttr& imgAttr);
+		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr);
 		//テキスト描画
 		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr);
 

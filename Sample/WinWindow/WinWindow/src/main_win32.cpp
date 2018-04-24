@@ -84,6 +84,7 @@ namespace {
 	};
 
 	//画像
+	std::float32_t angle = 0.0F;
 	struct ImgFile {
 		std::string				filePath;
 		draw::EN_ImageFormat	format;
@@ -105,7 +106,7 @@ namespace {
 	std::float32_t textPoint[textNum * 3] = {
 		500.0F, 100.0F, 0.0F,
 	};
-	const std::char8_t* text = "OpenGL";
+	const std::char8_t* text = "OpenGL始めた。";
 
 	//画面
 	class Screen {
@@ -132,7 +133,7 @@ namespace {
 		//サンプル描画
 		void Screen::draw()
 		{
-			printf("<Screen::draw>\n");
+			printf("<Screen::draw> angle:%.2f\n", angle);
 
 			//描画インターフェースを取得
 			draw::DrawIF* drawIF = this->layer_->getDrawIF();
@@ -152,8 +153,6 @@ namespace {
 			//描画処理
 			drawIF->setup(area);
 			drawIF->clear(backColor);
-			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
-			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
 			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
 				std::int32_t dataSize, w, h;
 				std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
@@ -163,8 +162,10 @@ namespace {
 				imgAttr.height = h;
 				imgAttr.pixFormat = draw::EN_PixelFormat::RGBA;
 				imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
-				drawIF->drawImage(&imgPoint[0], data, imgAttr);
+				drawIF->drawImage(&imgPoint[0], angle, data, imgAttr);
 			}
+			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
+			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
 			draw::TextAttr textAttr = { 0 };
 			textAttr.size = 10;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
@@ -172,6 +173,11 @@ namespace {
 
 			//描画終了
 			this->layer_->endDraw();
+
+			angle += 10.0F;
+			if (angle >= 360.0F) {
+				angle = 0.0F;
+			}
 		}
 	};
 }
@@ -337,6 +343,10 @@ namespace {
 
 			//サンプル描画
 			this->screen_.draw();
+
+			RECT rect;
+			::GetClientRect(this->hWnd_, &rect);
+			::InvalidateRect(this->hWnd_, &rect, false);
 		}
 
 		//WM_LBUTTONDOWNイベント処理
