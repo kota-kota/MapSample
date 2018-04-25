@@ -260,7 +260,7 @@ namespace draw {
 
 	//コンストラクタ
 	DrawGL::DrawGL() :
-		shader_(), curShaderType_(EN_ShaderType::INVALID), proj_()
+		shader_(), font_(), curShaderType_(EN_ShaderType::INVALID), proj_()
 	{
 		printf("<DrawGL::DrawGL>\n");
 		printf("Vevdor: %s\n", glGetString(GL_VENDOR));

@@ -41,6 +41,12 @@ namespace draw {
 		~Font();
 		//ラスタライズ
 		void rasterize(const std::char8_t charCode, Character* const c);
+
+	private:
+		//コピーコンストラクタ(禁止)
+		Font(const Font& org) = delete;
+		//コピー代入演算子(禁止)
+		void operator=(const Font& org) = delete;
 	};
 }
 

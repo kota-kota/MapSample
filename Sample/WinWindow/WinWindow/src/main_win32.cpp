@@ -1,6 +1,7 @@
 ﻿#include "LayerManager.hpp"
 #include "DrawGL.hpp"
 #include "ImageDecorder.hpp"
+#include "Str.hpp"
 
 #include <Windows.h>
 #include <tchar.h>
@@ -170,6 +171,8 @@ namespace {
 			textAttr.size = 10;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
 			drawIF->drawText(textPoint, text, textAttr);
+
+			draw::Str str(text, strlen(text), draw::EN_CharCode::SJIS);
 
 			//描画終了
 			this->layer_->endDraw();

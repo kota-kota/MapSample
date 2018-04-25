@@ -1,4 +1,72 @@
 ﻿#include "Str.hpp"
+#include <memory>
+
+
+namespace {
+
+	//文字数を取得
+	std::int32_t getCharNum(const std::char8_t* const str, const std::int32_t size, const draw::EN_CharCode charCode)
+	{
+		std::int32_t charNum = 0;
+
+		if (charCode == draw::EN_CharCode::SJIS) {
+			//SJIS
+			std::int32_t rlen = 0;
+			while (rlen < size) {
+				const std::uint8_t c = std::uint8_t(str[rlen]);
+
+				//文字数加算
+				charNum++;
+
+				if (((c >= 0x81) && (c <= 0x9F)) || ((c >= 0xE0) && (c <= 0xFC))) {
+					//SJIS全角文字の1バイト目なら2バイト文字
+					rlen += 2;
+				}
+				else {
+					//SJIS半角文字なら1バイト文字
+					rlen += 1;
+				}
+			}
+		}
+		else {
+		}
+
+		return charNum;
+	}
+}
+
+namespace draw {
+
+	/**
+	* 文字列クラス
+	*/
+
+	//コンストラクタ
+	Str::Str(const std::char8_t* const str, const std::int32_t size, const EN_CharCode charCode) :
+		str_(), size_(0), num_(0), charCode_(UNKNOWN)
+	{
+		memset(&this->str_[0], '\0', STR_MAXSIZE);
+		if (str != nullptr) {
+			//終端文字分を考慮してサイズチェック
+			if (size < STR_MAXSIZE) {
+				//文字列をコピー
+				memcpy_s(&this->str_[0], STR_MAXSIZE, str, size);
+
+				//文字サイズ
+				this->size_ = size;
+				//文字数
+				this->num_ = getCharNum(str, size, charCode);
+				//文字コード
+				this->charCode_ = charCode;
+			}
+		}
+	}
+
+	//デストラクタ
+	Str::~Str()
+	{
+	}
+}
 
 #if 0
 namespace {

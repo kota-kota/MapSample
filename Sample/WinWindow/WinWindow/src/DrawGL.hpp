@@ -92,6 +92,11 @@ namespace draw {
 		ShaderPara useShader_COLOR_RGBA();
 		ShaderPara useShader_TEXTURE_RGBA();
 		ShaderPara useShader_TEXTURE_A();
+
+		//コピーコンストラクタ(禁止)
+		DrawGL(const DrawGL& org) = delete;
+		//コピー代入演算子(禁止)
+		void operator=(const DrawGL& org) = delete;
 	};
 };
 
