@@ -146,7 +146,6 @@
     <ClInclude Include="src\ImagePNG.hpp" />
     <ClInclude Include="src\LayerIF.hpp" />
     <ClInclude Include="src\LayerManager.hpp" />
-    <ClInclude Include="src\Str.hpp" />
     <ClInclude Include="src\Type.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,7 +157,6 @@
     <ClCompile Include="src\ImagePNG.cpp" />
     <ClCompile Include="src\LayerManager.cpp" />
     <ClCompile Include="src\main_win32.cpp" />
-    <ClCompile Include="src\Str.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
