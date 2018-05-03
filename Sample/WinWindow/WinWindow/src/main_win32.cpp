@@ -1,6 +1,7 @@
 ﻿#include "LayerManager.hpp"
 #include "DrawGL.hpp"
 #include "ImageDecorder.hpp"
+#include "Str.hpp"
 
 #include <Windows.h>
 #include <tchar.h>
@@ -53,7 +54,7 @@ namespace {
 namespace {
 
 	//背景色
-	draw::ColorUB backColor = { 125, 125, 125, 255 };
+	fw::ColorUB backColor = { 125, 125, 125, 255 };
 
 	//ライン
 	const std::int32_t linePointNum = 4;
@@ -87,30 +88,30 @@ namespace {
 	std::float32_t angle = 0.0F;
 	struct ImgFile {
 		std::string				filePath;
-		draw::EN_ImageFormat	format;
+		fw::EN_ImageFormat	format;
 	};
 	const std::int32_t imgFileNum = 2;
 	ImgFile imgFile[imgFileNum] = {
-		{ "./data/png/colorType2_depth8.png", draw::EN_ImageFormat::PNG },
-		{ "./data/bitmap/win-8.bmp", draw::EN_ImageFormat::BMP },
+		{ "./data/png/colorType2_depth8.png", fw::EN_ImageFormat::PNG },
+		{ "./data/bitmap/win-8.bmp", fw::EN_ImageFormat::BMP },
 	};
 	std::float32_t imgPoint[imgFileNum * 3] = {
 		500.0F, 100.0F, 0.0F,
 		500.0F, 300.0F, 0.0F,
 	};
 	bool makeImg = false;
-	draw::ImageDecorder imgDecoder[imgFileNum];
+	fw::ImageDecorder imgDecoder[imgFileNum];
 
 	//テキスト
 	const std::int32_t textNum = 1;
 	std::float32_t textPoint[textNum * 3] = {
-		500.0F, 100.0F, 0.0F,
+		300.0F, 100.0F, 0.0F,
 	};
-	const std::char8_t* text = "OpenGL始めた。";
+	const std::char8_t* textStr = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。";
 
 	//画面
 	class Screen {
-		window::LayerIF*	layer_;
+		fw::LayerIF*	layer_;
 
 	public:
 		//コンストラクタ
@@ -120,7 +121,7 @@ namespace {
 		}
 
 		//画面作成
-		void Screen::create(window::LayerIF* layer)
+		void Screen::create(fw::LayerIF* layer)
 		{
 			this->layer_ = layer;
 		}
@@ -136,7 +137,7 @@ namespace {
 			printf("<Screen::draw> angle:%.2f\n", angle);
 
 			//描画インターフェースを取得
-			draw::DrawIF* drawIF = this->layer_->getDrawIF();
+			fw::DrawIF* drawIF = this->layer_->getDrawIF();
 
 			if (!makeImg) {
 				for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
@@ -144,7 +145,7 @@ namespace {
 				}
 			}
 
-			draw::AreaI area = { 0, 0, 0, 0 };
+			fw::AreaI area = { 0, 0, 0, 0 };
 			this->layer_->getSize(&area.xmax, &area.ymax);
 
 			//描画開始
@@ -156,18 +157,19 @@ namespace {
 			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
 				std::int32_t dataSize, w, h;
 				std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
-				draw::ImageAttr imgAttr;
+				fw::ImageAttr imgAttr;
 				imgAttr.id = 0;
 				imgAttr.width = w;
 				imgAttr.height = h;
-				imgAttr.pixFormat = draw::EN_PixelFormat::RGBA;
-				imgAttr.baseLoc = draw::EN_BaseLoc::CENTER_CENTER;
+				imgAttr.pixFormat = fw::EN_PixelFormat::RGBA;
+				imgAttr.baseLoc = fw::EN_BaseLoc::CENTER_CENTER;
 				drawIF->drawImage(&imgPoint[0], angle, data, imgAttr);
 			}
-			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, draw::EN_LineType::LINE_STRIP);
-			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], draw::EN_PolygonType::TRIANGLE_STRIP);
-			draw::TextAttr textAttr = { 0 };
-			textAttr.size = 10;
+			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, fw::EN_LineType::LINE_STRIP);
+			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], fw::EN_PolygonType::TRIANGLE_STRIP);
+			fw::Str text(textStr, fw::EN_CharCode::SJIS);
+			fw::TextAttr textAttr = { 0 };
+			textAttr.size = 20;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
 			drawIF->drawText(textPoint, text, textAttr);
 
@@ -197,10 +199,10 @@ namespace {
 	 */
 	class Window {
 		//メンバ変数
-		HINSTANCE				hInstance_;
-		HWND					hWnd_;
-		window::LayerManager	layerManager_;
-		Screen					screen_;
+		HINSTANCE			hInstance_;
+		HWND				hWnd_;
+		fw::LayerManager	layerManager_;
+		Screen				screen_;
 
 	public:
 		//コンストラクタ
@@ -322,7 +324,7 @@ namespace {
 			const std::int32_t height = rect.bottom - rect.top;
 
 			//レイヤー作成
-			window::LayerIF* layer = this->layerManager_.createLayer(width, height);
+			fw::LayerIF* layer = this->layerManager_.createLayer(width, height);
 
 			//画面作成
 			this->screen_.create(layer);

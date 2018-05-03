@@ -4,7 +4,7 @@
 #include <fstream>
 
 
-namespace draw {
+namespace fw {
 
 	/**
 	 * 画像デコードクラス

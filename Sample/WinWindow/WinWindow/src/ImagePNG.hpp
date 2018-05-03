@@ -5,7 +5,7 @@
 #include <png.h>
 #include <pngstruct.h>
 
-namespace draw {
+namespace fw {
 
 	/**
 	 * 画像PNGクラス

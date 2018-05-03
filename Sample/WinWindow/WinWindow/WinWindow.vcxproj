@@ -140,23 +140,24 @@
   <ItemGroup>
     <ClInclude Include="src\DrawGL.hpp" />
     <ClInclude Include="src\DrawIF.hpp" />
-    <ClInclude Include="src\Font.hpp" />
     <ClInclude Include="src\ImageBMP.hpp" />
     <ClInclude Include="src\ImageDecorder.hpp" />
     <ClInclude Include="src\ImagePNG.hpp" />
     <ClInclude Include="src\LayerIF.hpp" />
     <ClInclude Include="src\LayerManager.hpp" />
+    <ClInclude Include="src\sjis2utf16be.hpp" />
+    <ClInclude Include="src\Str.hpp" />
     <ClInclude Include="src\Type.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DrawGL.cpp" />
     <ClCompile Include="src\DrawIF.cpp" />
-    <ClCompile Include="src\Font.cpp" />
     <ClCompile Include="src\ImageBMP.cpp" />
     <ClCompile Include="src\ImageDecorder.cpp" />
     <ClCompile Include="src\ImagePNG.cpp" />
     <ClCompile Include="src\LayerManager.cpp" />
     <ClCompile Include="src\main_win32.cpp" />
+    <ClCompile Include="src\Str.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES	//M_PI用
 #include <math.h>
 
-namespace draw {
+namespace fw {
 
 	//ラジアンから角度に変換
 	std::float32_t DrawIF::convRadian2Degree(const std::float32_t rad)

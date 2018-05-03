@@ -3,7 +3,7 @@
 
 #include "Type.hpp"
 
-namespace draw {
+namespace fw {
 
 	/**
 	 * 画像BMPクラス

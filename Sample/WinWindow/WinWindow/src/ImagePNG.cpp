@@ -23,7 +23,7 @@ namespace {
 
 
 
-namespace draw {
+namespace fw {
 
 	/**
 	 * 画像PNGクラス

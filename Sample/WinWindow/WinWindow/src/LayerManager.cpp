@@ -2,7 +2,7 @@
 #include "DrawGL.hpp"
 #include <cstdio>
 
-namespace window {
+namespace fw {
 
 	/**
 	* レイヤー操作クラス
@@ -15,7 +15,7 @@ namespace window {
 
 	public:
 		//コンストラクタ
-		Layer(EGLDisplay eglDpy, EGLSurface eglWin, EGLContext eglCtx, const int32_t width, const int32_t height, draw::DrawIF* const drawIF) :
+		Layer(EGLDisplay eglDpy, EGLSurface eglWin, EGLContext eglCtx, const int32_t width, const int32_t height, DrawIF* const drawIF) :
 			LayerIF(width, height, drawIF), eglDpy_(eglDpy), eglWin_(eglWin), eglCtx_(eglCtx)
 		{
 		}
@@ -139,7 +139,7 @@ namespace window {
 
 		//描画インターフェースを生成
 		(void)eglMakeCurrent(this->eglDpy_, this->eglWin_, this->eglWin_, this->eglCtx_);
-		this->drawIF_ = new draw::DrawGL();
+		this->drawIF_ = new DrawGL();
 		printf("new DrawGL %p\n", this->drawIF_);
 		(void)eglMakeCurrent(this->eglDpy_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 

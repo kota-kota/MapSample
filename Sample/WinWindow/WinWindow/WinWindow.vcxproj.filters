@@ -39,7 +39,10 @@
     <ClInclude Include="src\ImagePNG.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Font.hpp">
+    <ClInclude Include="src\Str.hpp">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sjis2utf16be.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,7 +68,7 @@
     <ClCompile Include="src\ImagePNG.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Font.cpp">
+    <ClCompile Include="src\Str.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

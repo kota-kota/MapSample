@@ -1,9 +1,23 @@
 ﻿#include "DrawGL.hpp"
-#include "Font.hpp"
+#include "Str.hpp"
 #include <cstdio>
 #include <vector>
 
 namespace {
+	//フォントファイル
+	const std::string fontFilePath = "./data/font/ipagp.ttf";
+
+	struct FontChar {
+		//メンバ変数
+		std::int32_t	ax;		//advance.x
+		std::int32_t	ay;		//advance.y
+		std::int32_t	bw;		//bitmap.width
+		std::int32_t	bh;		//bitmap.rows
+		std::int32_t	bl;		//bitmap_left
+		std::int32_t	bt;		//bitmap_top
+		std::uint8_t*	buffer;	//buffer
+	};
+
 	//カラーRGBA バーテックスシェーダ
 	const GLchar* color_rgba_vert = 
 		"#version 100\n"
@@ -67,7 +81,7 @@ namespace {
 		"}\n";
 }
 
-namespace draw {
+namespace fw {
 
 	/**
 	 * シェーダクラス
@@ -260,7 +274,7 @@ namespace draw {
 
 	//コンストラクタ
 	DrawGL::DrawGL() :
-		shader_(), font_(), curShaderType_(EN_ShaderType::INVALID), proj_()
+		shader_(), curShaderType_(EN_ShaderType::INVALID), proj_(), ftLibrary_(nullptr), ftFace_(nullptr)
 	{
 		printf("<DrawGL::DrawGL>\n");
 		printf("Vevdor: %s\n", glGetString(GL_VENDOR));
@@ -272,11 +286,18 @@ namespace draw {
 		this->shader_[EN_ShaderType::COLOR_RGBA].create(EN_ShaderType::COLOR_RGBA);
 		this->shader_[EN_ShaderType::TEXTURE_RGBA].create(EN_ShaderType::TEXTURE_RGBA);
 		this->shader_[EN_ShaderType::TEXTURE_A].create(EN_ShaderType::TEXTURE_A);
+
+		//FreeType初期化
+		FT_Init_FreeType(&this->ftLibrary_);
+		FT_New_Face(this->ftLibrary_, fontFilePath.c_str(), 0, &this->ftFace_);
 	}
 
 	//デストラクタ
 	DrawGL::~DrawGL()
 	{
+		//FreeType破棄
+		FT_Done_Face(this->ftFace_);
+		FT_Done_FreeType(this->ftLibrary_);
 	}
 
 	//セットアップ
@@ -439,7 +460,7 @@ namespace draw {
 	}
 
 	//テキスト描画
-	void DrawGL::drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr)
+	void DrawGL::drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr)
 	{
 		//テクスチャAシェーダを使用
 		ShaderPara shaderPara = this->useShader_TEXTURE_A();
@@ -449,37 +470,66 @@ namespace draw {
 		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
 
 		//テクスチャ色
-		GLfloat c[4];
-		c[0] = textAttr.bodyColor.r / 255.0F;
-		c[1] = textAttr.bodyColor.g / 255.0F;
-		c[2] = textAttr.bodyColor.b / 255.0F;
-		c[3] = textAttr.bodyColor.a / 255.0F;
-		glUniform4fv(shaderPara.unif_texcolor, 1, &c[0]);
+		GLfloat color[4];
+		color[0] = textAttr.bodyColor.r / 255.0F;
+		color[1] = textAttr.bodyColor.g / 255.0F;
+		color[2] = textAttr.bodyColor.b / 255.0F;
+		color[3] = textAttr.bodyColor.a / 255.0F;
+		glUniform4fv(shaderPara.unif_texcolor, 1, &color[0]);
+
+		//描画位置
+		fw::PointF dispPoint = { point[0], point[1], 0.0F };
 
 		//GL描画設定
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 		glEnable(GL_TEXTURE_2D);
 
-		std::int32_t textCnt = std::int32_t(strlen(text));
+		//文字列を変換
+		Str ctext;
+		text.convert(EN_CharCode::UTF16BE, &ctext);
 
-		std::vector<Character> charList;
-		charList.resize(textCnt);
+		//フォントサイズ設定
+		std::int32_t sizeX = textAttr.size * 64;
+		std::int32_t sizeY = textAttr.size * 64;
+		FT_Set_Char_Size(this->ftFace_, sizeX, sizeY, 96, 96);
 
-		draw::PointF dispPoint = { point[0], point[1], 0.0F };
-		for (std::int32_t i = 0; i < textCnt; i++) {
-			//ラスタライズ
-			this->font_.rasterize(text[i], &charList[i]);
+		//文字数分ループ
+		const std::int32_t strSize = ctext.size();
+		for (std::int32_t i = 0; i < strSize; i += 2) {
+			const std::uint8_t c1 = static_cast<std::uint8_t>(ctext[i]);
+			const std::uint8_t c2 = static_cast<std::uint8_t>(ctext[i + 1]);
+			const std::uint16_t c = (static_cast<std::uint16_t>(c1) << 8) | static_cast<std::uint16_t>(c2);
+
+			//グリフインデックスを取得
+			FT_UInt glyphIndex = FT_Get_Char_Index(this->ftFace_, c);
+
+			//グリフをロード
+			FT_Load_Glyph(this->ftFace_, glyphIndex, FT_LOAD_DEFAULT);
+
+			//グリフを描画
+			FT_Render_Glyph(this->ftFace_->glyph, FT_RENDER_MODE_NORMAL);
+
+			FontChar ftChar;
+			ftChar.ax = this->ftFace_->glyph->advance.x;
+			ftChar.ay = this->ftFace_->glyph->advance.y;
+			ftChar.bw = this->ftFace_->glyph->bitmap.width;
+			ftChar.bh = this->ftFace_->glyph->bitmap.rows;
+			ftChar.bl = this->ftFace_->glyph->bitmap_left;
+			ftChar.bt = this->ftFace_->glyph->bitmap_top;
+			std::int32_t bufSize = ftChar.bw * ftChar.bh;
+			ftChar.buffer = new std::uint8_t[bufSize];
+			memcpy_s(ftChar.buffer, bufSize, this->ftFace_->glyph->bitmap.buffer, bufSize);
 
 			AreaF area;
-			area.xmin = dispPoint.x + charList[i].bl;
-			area.xmax = dispPoint.x + charList[i].bw;
-			area.ymin = dispPoint.y - (charList[i].bh - charList[i].bt);
-			area.ymax = dispPoint.y + charList[i].bt;
+			area.xmin = dispPoint.x + ftChar.bl;
+			area.xmax = dispPoint.x + ftChar.bw;
+			area.ymin = dispPoint.y - (ftChar.bh - ftChar.bt);
+			area.ymax = dispPoint.y + ftChar.bt;
 
 			//次の文字位置
-			dispPoint.x += charList[i].ax >> 6;
-			dispPoint.y += charList[i].ay >> 6;
+			dispPoint.x += ftChar.ax >> 6;
+			dispPoint.y += ftChar.ay >> 6;
 
 			//テクスチャ生成
 			GLuint texId;
@@ -490,7 +540,9 @@ namespace draw {
 
 			//テクスチャロード
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, charList[i].bw, charList[i].bh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, charList[i].buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, ftChar.bw, ftChar.bh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, ftChar.buffer);
+
+			delete[] ftChar.buffer;
 
 			//テクスチャパラメータ設定
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

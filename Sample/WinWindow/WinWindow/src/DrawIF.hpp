@@ -3,7 +3,10 @@
 
 #include "Type.hpp"
 
-namespace draw {
+namespace fw {
+
+	//前方宣言
+	class Str;
 
 	//3次元ベクトル
 	struct VectorF {
@@ -115,7 +118,7 @@ namespace draw {
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
 		//テキスト描画
-		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr) = 0;
+		virtual void drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr) = 0;
 
 		//ラジアンから角度に変換
 		static inline std::float32_t convRadian2Degree(const std::float32_t rad);

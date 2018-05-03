@@ -4,7 +4,7 @@
 #include "Type.hpp"
 #include "DrawIF.hpp"
 
-namespace window {
+namespace fw {
 
 	//最新レイヤーID
 	static std::int32_t lastLayerId = 0;
@@ -16,11 +16,11 @@ namespace window {
 		std::int32_t	id_;
 		std::int32_t	width_;
 		std::int32_t	height_;
-		draw::DrawIF*	drawIF_;
+		DrawIF*			drawIF_;
 
 	public:
 		//コンストラクタ
-		LayerIF(const std::int32_t width, const std::int32_t height, draw::DrawIF* const drawIF)
+		LayerIF(const std::int32_t width, const std::int32_t height, DrawIF* const drawIF)
 			: id_(0), width_(width), height_(height), drawIF_(drawIF)
 		{
 			lastLayerId++;
@@ -42,7 +42,7 @@ namespace window {
 			if (height != nullptr) { *height = this->height_; }
 		}
 		//描画インターフェース取得
-		draw::DrawIF* getDrawIF()
+		DrawIF* getDrawIF()
 		{
 			return this->drawIF_;
 		}

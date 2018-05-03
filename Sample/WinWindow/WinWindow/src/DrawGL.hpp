@@ -2,11 +2,15 @@
 #define INCLUDED_DRAWGL_HPP
 
 #include "DrawIF.hpp"
-#include "Font.hpp"
+
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2.h>
 
-namespace draw {
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <freetype/ftsynth.h>
+
+namespace fw {
 
 	//シェーダ種別
 	enum EN_ShaderType {
@@ -65,9 +69,11 @@ namespace draw {
 	class DrawGL : public DrawIF {
 		//メンバ変数
 		Shader			shader_[EN_ShaderType::NUM];
-		Font			font_;
 		EN_ShaderType	curShaderType_;
 		MatrixF			proj_;
+
+		FT_Library	ftLibrary_;
+		FT_Face		ftFace_;
 
 	public:
 		//コンストラクタ
@@ -85,7 +91,7 @@ namespace draw {
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr);
 		//テキスト描画
-		virtual void drawText(std::float32_t* const point, const std::char8_t* const text, const TextAttr& textAttr);
+		virtual void drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr);
 
 	private:
 		//シェーダパラメータ使用開始

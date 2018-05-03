@@ -9,7 +9,7 @@
 
 #include <list>
 
-namespace window {
+namespace fw {
 
 	/**
 	 * レイヤー管理クラス
@@ -21,7 +21,7 @@ namespace window {
 		EGLConfig		eglCfg_;
 		EGLSurface		eglWin_;
 		EGLContext		eglCtx_;
-		draw::DrawIF*	drawIF_;
+		DrawIF*			drawIF_;
 		std::list<LayerIF*>	layerList_;
 
 	public:
