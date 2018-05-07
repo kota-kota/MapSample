@@ -459,8 +459,30 @@ namespace fw {
 		glDisable(GL_BLEND);
 	}
 
-	//テキスト描画
-	void DrawGL::drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr)
+	//テキスト描画(マルチバイト文字)
+	void DrawGL::drawText(std::float32_t* const point, const String& text, const TextAttr& textAttr)
+	{
+		//テキスト文字列をワイド文字(UTF16BE)に変換
+		WString utf16Text;
+		StringIF::convert(text, EN_CharCode::UTF16BE, &utf16Text);
+
+		//テキスト描画(UTF16BE)
+		this->drawText_UTF16BE(point, utf16Text, textAttr);
+	}
+
+	//テキスト描画(ワイド文字)
+	void DrawGL::drawText(std::float32_t* const point, const WString& wtext, const TextAttr& textAttr)
+	{
+		//テキスト文字列をワイド文字(UTF16BE)に変換
+		WString utf16Text;
+		StringIF::convert(wtext, EN_CharCode::UTF16BE, &utf16Text);
+
+		//テキスト描画(UTF16BE)
+		this->drawText_UTF16BE(point, utf16Text, textAttr);
+	}
+
+	//テキスト描画(UTF16BE)
+	void DrawGL::drawText_UTF16BE(std::float32_t* const point, const WString& utf16Text, const TextAttr& textAttr)
 	{
 		//テクスチャAシェーダを使用
 		ShaderPara shaderPara = this->useShader_TEXTURE_A();
@@ -485,21 +507,15 @@ namespace fw {
 		glEnable(GL_BLEND);
 		glEnable(GL_TEXTURE_2D);
 
-		//文字列を変換
-		Str ctext;
-		text.convert(EN_CharCode::UTF16BE, &ctext);
-
 		//フォントサイズ設定
 		std::int32_t sizeX = textAttr.size * 64;
 		std::int32_t sizeY = textAttr.size * 64;
 		FT_Set_Char_Size(this->ftFace_, sizeX, sizeY, 96, 96);
 
 		//文字数分ループ
-		const std::int32_t strSize = ctext.size();
-		for (std::int32_t i = 0; i < strSize; i += 2) {
-			const std::uint8_t c1 = static_cast<std::uint8_t>(ctext[i]);
-			const std::uint8_t c2 = static_cast<std::uint8_t>(ctext[i + 1]);
-			const std::uint16_t c = (static_cast<std::uint16_t>(c1) << 8) | static_cast<std::uint16_t>(c2);
+		const std::int32_t num = utf16Text.getNum();
+		for (std::int32_t i = 0; i < num; i++) {
+			const std::uint16_t c = static_cast<std::uint16_t>(utf16Text[i]);
 
 			//グリフインデックスを取得
 			FT_UInt glyphIndex = FT_Get_Char_Index(this->ftFace_, c);

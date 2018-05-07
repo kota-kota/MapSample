@@ -6,7 +6,8 @@
 namespace fw {
 
 	//前方宣言
-	class Str;
+	class String;
+	class WString;
 
 	//3次元ベクトル
 	struct VectorF {
@@ -117,8 +118,10 @@ namespace fw {
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type) = 0;
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr) = 0;
-		//テキスト描画
-		virtual void drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr) = 0;
+		//テキスト描画(マルチバイト文字)
+		virtual void drawText(std::float32_t* const point, const String& text, const TextAttr& textAttr) = 0;
+		//テキスト描画(ワイド文字)
+		virtual void drawText(std::float32_t* const point, const WString& wtext, const TextAttr& textAttr) = 0;
 
 		//ラジアンから角度に変換
 		static inline std::float32_t convRadian2Degree(const std::float32_t rad);

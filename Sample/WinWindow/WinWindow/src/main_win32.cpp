@@ -107,7 +107,8 @@ namespace {
 	std::float32_t textPoint[textNum * 3] = {
 		300.0F, 100.0F, 0.0F,
 	};
-	const std::char8_t* textStr = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。";
+	const fw::String sjisText("OpenGL<_^:^;> ｱｲｳｴ東京ドーム。", fw::EN_CharCode::SJIS);
+	//const std::char8_t* textStr = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。";
 
 	//画面
 	class Screen {
@@ -167,11 +168,19 @@ namespace {
 			}
 			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, fw::EN_LineType::LINE_STRIP);
 			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], fw::EN_PolygonType::TRIANGLE_STRIP);
-			fw::Str text(textStr, fw::EN_CharCode::SJIS);
+
 			fw::TextAttr textAttr = { 0 };
 			textAttr.size = 20;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
-			drawIF->drawText(textPoint, text, textAttr);
+			drawIF->drawText(textPoint, sjisText, textAttr);
+
+#if 1	//Debug
+			fw::String utf8Text;
+			fw::StringIF::convert(sjisText, fw::EN_CharCode::UTF8, &utf8Text);
+
+			fw::WString utf16Text;
+			fw::StringIF::convert(utf8Text, fw::EN_CharCode::UTF16BE, &utf16Text);
+#endif
 
 			//描画終了
 			this->layer_->endDraw();

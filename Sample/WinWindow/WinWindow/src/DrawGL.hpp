@@ -90,10 +90,14 @@ namespace fw {
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr);
-		//テキスト描画
-		virtual void drawText(std::float32_t* const point, const Str& text, const TextAttr& textAttr);
+		//テキスト描画(マルチバイト文字)
+		virtual void drawText(std::float32_t* const point, const String& text, const TextAttr& textAttr);
+		//テキスト描画(ワイド文字)
+		virtual void drawText(std::float32_t* const point, const WString& wtext, const TextAttr& textAttr);
 
 	private:
+		//テキスト描画(UTF16BE)
+		void drawText_UTF16BE(std::float32_t* const point, const WString& utf16Text, const TextAttr& textAttr);
 		//シェーダパラメータ使用開始
 		ShaderPara useShader_COLOR_RGBA();
 		ShaderPara useShader_TEXTURE_RGBA();
