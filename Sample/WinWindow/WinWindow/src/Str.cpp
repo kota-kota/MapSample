@@ -21,6 +21,12 @@ namespace fw {
 		//文字コード設定
 		this->setCode(code);
 	}
+	String::String(const std::char8_t* const s, const std::int32_t len, const EN_CharCode code) :
+		std::string(s, len), code_(UNKNOWN), num_(0)
+	{
+		//文字コード設定
+		this->setCode(code);
+	}
 
 	//コピーコンストラクタ
 	String::String(const String& str)
@@ -76,6 +82,12 @@ namespace fw {
 	}
 	WString::WString(const wchar_t* const s, const EN_CharCode code) :
 		std::wstring(s), code_(UNKNOWN), num_(0)
+	{
+		//文字コード設定
+		this->setCode(code);
+	}
+	WString::WString(const wchar_t* const s, const std::int32_t len, const EN_CharCode code) :
+		std::wstring(s, len), code_(UNKNOWN), num_(0)
 	{
 		//文字コード設定
 		this->setCode(code);
@@ -322,14 +334,6 @@ namespace fw {
 		const std::int32_t num = sjis.getNum();
 		const std::size_t sjisSize = sjis.size();
 
-#if 1
-		//デバッグ用
-		for (int32_t c = 0; c < sjisSize; c++) {
-			printf("0x%x,", std::uint8_t(sjis[c]));
-		}
-		printf("\n");
-#endif
-
 		//変換後(UTF16)は文字数*2バイト分なので事前に領域を確保
 		utf16->reserve(num * 2);
 
@@ -381,9 +385,7 @@ namespace fw {
 
 			if (u == 0x0000) {
 				printf("[ERROR] %s:%d SJIS:0x%04x UTF16BE:0x%04x\n", __FUNCTION__, __LINE__, s, u);
-			}
-			else {
-				printf("SJIS:0x%04x UTF16BE:0x%04x\n", s, u);
+				continue;
 			}
 
 			//UTF16を1バイトに分割して格納

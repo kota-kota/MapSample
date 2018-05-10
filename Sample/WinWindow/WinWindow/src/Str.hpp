@@ -36,6 +36,7 @@ namespace fw {
 		//コンストラクタ
 		String();
 		String(const std::char8_t* const s, const EN_CharCode code);
+		String(const std::char8_t* const s, const std::int32_t len, const EN_CharCode code);
 		//コピーコンストラクタ
 		String(const String& str);
 		//コピー代入演算子
@@ -61,6 +62,7 @@ namespace fw {
 		//コンストラクタ
 		WString();
 		WString(const wchar_t* const s, const EN_CharCode code);
+		WString(const wchar_t* const s, const std::int32_t len, const EN_CharCode code);
 		//コピーコンストラクタ
 		WString(const WString& str);
 		//コピー代入演算子
