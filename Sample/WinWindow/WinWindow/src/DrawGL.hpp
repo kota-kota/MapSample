@@ -9,6 +9,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <freetype/ftsynth.h>
+#include <freetype/ftglyph.h>
 
 namespace fw {
 
@@ -63,6 +64,18 @@ namespace fw {
 		void setPara_TEXTURE_A();
 	};
 
+	//フォント寸法情報
+	struct FontMetrics {
+		//メンバ変数
+		std::int32_t	width_;		//フォント幅[pixel]
+		std::int32_t	height_;	//フォント高さ[pixel]
+		std::int32_t	offsetX_;	//グリフ原点(0,0)からグリフイメージの左端までの水平方向オフセット[pixel]
+		std::int32_t	offsetY_;	//グリフ原点(0,0)からグリフイメージの上端までの垂直方向オフセット[pixel]
+		std::int32_t	nextX_;		//次グリフへの水平方向オフセット[pixel]
+		std::int32_t	nextY_;		//次グリフへの垂直方向オフセット[pixel]
+		std::uint8_t*	buffer_;	//buffer
+	};
+
 	/**
 	 * OpenGL描画インターフェースクラス
 	 */
@@ -74,6 +87,7 @@ namespace fw {
 
 		FT_Library	ftLibrary_;
 		FT_Face		ftFace_;
+		FT_Bool		ftIsKerning_;
 
 	public:
 		//コンストラクタ

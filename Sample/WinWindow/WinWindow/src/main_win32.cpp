@@ -144,6 +144,7 @@ namespace {
 				for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
 					imgDecoder[iImg].decode_RGBA8888(imgFile[iImg].filePath.c_str(), imgFile[iImg].format);
 				}
+				makeImg = true;
 			}
 
 			fw::AreaI area = { 0, 0, 0, 0 };
@@ -154,6 +155,7 @@ namespace {
 
 			//描画処理
 			drawIF->setup(area);
+
 			drawIF->clear(backColor);
 			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
 				std::int32_t dataSize, w, h;
@@ -173,14 +175,6 @@ namespace {
 			textAttr.size = 20;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
 			drawIF->drawText(textPoint, sjisText, textAttr);
-
-#if 1	//Debug
-			fw::String utf8Text;
-			fw::StringIF::convert(sjisText, fw::EN_CharCode::UTF8, &utf8Text);
-
-			fw::WString utf16Text;
-			fw::StringIF::convert(utf8Text, fw::EN_CharCode::UTF16BE, &utf16Text);
-#endif
 
 			//描画終了
 			this->layer_->endDraw();

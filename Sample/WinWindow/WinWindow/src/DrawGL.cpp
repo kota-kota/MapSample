@@ -6,17 +6,8 @@
 namespace {
 	//フォントファイル
 	const std::string fontFilePath = "./data/font/ipagp.ttf";
-
-	struct FontChar {
-		//メンバ変数
-		std::int32_t	ax;		//advance.x
-		std::int32_t	ay;		//advance.y
-		std::int32_t	bw;		//bitmap.width
-		std::int32_t	bh;		//bitmap.rows
-		std::int32_t	bl;		//bitmap_left
-		std::int32_t	bt;		//bitmap_top
-		std::uint8_t*	buffer;	//buffer
-	};
+	//const std::string fontFilePath = "C:\\Windows\\Fonts\\meiryo.ttc";
+	//const std::string fontFilePath = "C:\\Windows\\Fonts\\msgothic.ttc";
 
 	//カラーRGBA バーテックスシェーダ
 	const GLchar* color_rgba_vert = 
@@ -274,7 +265,7 @@ namespace fw {
 
 	//コンストラクタ
 	DrawGL::DrawGL() :
-		shader_(), curShaderType_(EN_ShaderType::INVALID), proj_(), ftLibrary_(nullptr), ftFace_(nullptr)
+		shader_(), curShaderType_(EN_ShaderType::INVALID), proj_(), ftLibrary_(nullptr), ftFace_(nullptr), ftIsKerning_(0)
 	{
 		printf("<DrawGL::DrawGL>\n");
 		printf("Vevdor: %s\n", glGetString(GL_VENDOR));
@@ -290,6 +281,7 @@ namespace fw {
 		//FreeType初期化
 		FT_Init_FreeType(&this->ftLibrary_);
 		FT_New_Face(this->ftLibrary_, fontFilePath.c_str(), 0, &this->ftFace_);
+		this->ftIsKerning_ = FT_HAS_KERNING(this->ftFace_);
 	}
 
 	//デストラクタ
@@ -524,28 +516,33 @@ namespace fw {
 			FT_Load_Glyph(this->ftFace_, glyphIndex, FT_LOAD_DEFAULT);
 
 			//グリフを描画
-			FT_Render_Glyph(this->ftFace_->glyph, FT_RENDER_MODE_NORMAL);
+			FT_Glyph image;
+			FT_Get_Glyph(this->ftFace_->glyph, &image);
+			FT_Glyph_To_Bitmap(&image, FT_RENDER_MODE_NORMAL, nullptr, 1);
+			FT_BitmapGlyph bit = (FT_BitmapGlyph)image;
 
-			FontChar ftChar;
-			ftChar.ax = this->ftFace_->glyph->advance.x;
-			ftChar.ay = this->ftFace_->glyph->advance.y;
-			ftChar.bw = this->ftFace_->glyph->bitmap.width;
-			ftChar.bh = this->ftFace_->glyph->bitmap.rows;
-			ftChar.bl = this->ftFace_->glyph->bitmap_left;
-			ftChar.bt = this->ftFace_->glyph->bitmap_top;
-			std::int32_t bufSize = ftChar.bw * ftChar.bh;
-			ftChar.buffer = new std::uint8_t[bufSize];
-			memcpy_s(ftChar.buffer, bufSize, this->ftFace_->glyph->bitmap.buffer, bufSize);
+			FontMetrics metrics;
+			metrics.width_ = bit->bitmap.width;
+			metrics.height_ = bit->bitmap.rows;
+			metrics.offsetX_ = bit->left;
+			metrics.offsetY_ = bit->top;
+			metrics.nextX_ = this->ftFace_->glyph->advance.x >> 6;
+			metrics.nextY_ = this->ftFace_->glyph->advance.y >> 6;
+			std::int32_t bufSize = metrics.width_ * metrics.height_;
+			metrics.buffer_ = new std::uint8_t[bufSize];
+			memcpy_s(metrics.buffer_, bufSize, bit->bitmap.buffer, bufSize);
+
+			FT_Done_Glyph(image);
 
 			AreaF area;
-			area.xmin = dispPoint.x + ftChar.bl;
-			area.xmax = dispPoint.x + ftChar.bw;
-			area.ymin = dispPoint.y - (ftChar.bh - ftChar.bt);
-			area.ymax = dispPoint.y + ftChar.bt;
+			area.xmin = dispPoint.x + metrics.offsetX_;
+			area.xmax = dispPoint.x + metrics.offsetX_ + metrics.width_;
+			area.ymin = dispPoint.y + metrics.offsetY_ - metrics.height_;
+			area.ymax = dispPoint.y + metrics.offsetY_;
 
 			//次の文字位置
-			dispPoint.x += ftChar.ax >> 6;
-			dispPoint.y += ftChar.ay >> 6;
+			dispPoint.x += metrics.nextX_;
+			dispPoint.y += metrics.nextY_;
 
 			//テクスチャ生成
 			GLuint texId;
@@ -556,9 +553,9 @@ namespace fw {
 
 			//テクスチャロード
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, ftChar.bw, ftChar.bh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, ftChar.buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, metrics.width_, metrics.height_, 0, GL_ALPHA, GL_UNSIGNED_BYTE, metrics.buffer_);
 
-			delete[] ftChar.buffer;
+			delete[] metrics.buffer_;
 
 			//テクスチャパラメータ設定
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
