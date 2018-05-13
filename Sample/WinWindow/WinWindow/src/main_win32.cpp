@@ -97,7 +97,7 @@ namespace {
 	};
 	std::float32_t imgPoint[imgFileNum * 3] = {
 		500.0F, 100.0F, 0.0F,
-		500.0F, 300.0F, 0.0F,
+		500.0F, 100.0F, 0.0F,
 	};
 	bool makeImg = false;
 	fw::ImageDecorder imgDecoder[imgFileNum];
@@ -105,9 +105,9 @@ namespace {
 	//テキスト
 	const std::int32_t textNum = 1;
 	std::float32_t textPoint[textNum * 3] = {
-		300.0F, 100.0F, 0.0F,
+		500.0F, 100.0F, 0.0F,
 	};
-	const fw::String sjisText("OpenGL<_^:^;> ｱｲｳｴ東京ドーム。", fw::EN_CharCode::SJIS);
+	const fw::String sjisText("OpenGL<_^:^;> ｱｲｳｴ東京ドーム。compass.", fw::EN_CharCode::SJIS);
 	//const std::char8_t* textStr = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。";
 
 	//画面
@@ -166,7 +166,7 @@ namespace {
 				imgAttr.height = h;
 				imgAttr.pixFormat = fw::EN_PixelFormat::RGBA;
 				imgAttr.baseLoc = fw::EN_BaseLoc::CENTER_CENTER;
-				drawIF->drawImage(&imgPoint[0], angle, data, imgAttr);
+				drawIF->drawImage(&imgPoint[iImg * 3], angle, data, imgAttr);
 			}
 			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, fw::EN_LineType::LINE_STRIP);
 			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], fw::EN_PolygonType::TRIANGLE_STRIP);
@@ -349,6 +349,7 @@ namespace {
 			//サンプル描画
 			this->screen_.draw();
 
+			//次フレーム描画のため、WM_PAINTイベントを発行
 			RECT rect;
 			::GetClientRect(this->hWnd_, &rect);
 			::InvalidateRect(this->hWnd_, &rect, false);

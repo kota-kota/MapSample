@@ -73,7 +73,15 @@ namespace fw {
 		std::int32_t	offsetY_;	//グリフ原点(0,0)からグリフイメージの上端までの垂直方向オフセット[pixel]
 		std::int32_t	nextX_;		//次グリフへの水平方向オフセット[pixel]
 		std::int32_t	nextY_;		//次グリフへの垂直方向オフセット[pixel]
-		std::uint8_t*	buffer_;	//buffer
+		std::int32_t	kerningX_;	//水平方向カーニング
+		std::int32_t	kerningY_;	//垂直方向カーニング
+	};
+
+	//フォントグリフ
+	struct FontGlyph {
+		FT_UInt			index_;		//グリフインデックス
+		FT_Glyph		image_;		//グリフイメージ
+		FontMetrics		metrics_;	//寸法情報
 	};
 
 	/**
@@ -98,6 +106,8 @@ namespace fw {
 		virtual void setup(const AreaI& area);
 		//クリア
 		virtual void clear(const ColorUB& color);
+		//点描画
+		virtual void drawPoints(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors);
 		//ライン描画
 		virtual void drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type);
 		//ポリゴン描画

@@ -112,6 +112,8 @@ namespace fw {
 		virtual void setup(const AreaI& area) = 0;
 		//クリア
 		virtual void clear(const ColorUB& color) = 0;
+		//点描画
+		virtual void drawPoints(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors) = 0;
 		//ライン描画
 		virtual void drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type) = 0;
 		//ポリゴン描画

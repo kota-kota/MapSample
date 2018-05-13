@@ -5,9 +5,9 @@
 
 namespace {
 	//フォントファイル
-	const std::string fontFilePath = "./data/font/ipagp.ttf";
+	//const std::string fontFilePath = "./data/font/ipagp.ttf";
 	//const std::string fontFilePath = "C:\\Windows\\Fonts\\meiryo.ttc";
-	//const std::string fontFilePath = "C:\\Windows\\Fonts\\msgothic.ttc";
+	const std::string fontFilePath = "C:\\Windows\\Fonts\\msgothic.ttc";
 
 	//カラーRGBA バーテックスシェーダ
 	const GLchar* color_rgba_vert = 
@@ -319,6 +319,26 @@ namespace fw {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	//点描画
+	void DrawGL::drawPoints(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors)
+	{
+#if 0	/*再考する。点の大きさとか、「■点」「○点」とか、別途シェーダ書く必要がありそう。*/
+		//カラーRRGBAシェーダを使用
+		ShaderPara shaderPara = this->useShader_COLOR_RGBA();
+
+		//MVP変換行列をシェーダへ転送(OpenGLは行と列が逆なので転置する)
+		MatrixF mvp = this->transposeMatrix(this->proj_);
+		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
+
+		//頂点データ転送
+		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat*>(points));
+		glVertexAttribPointer(shaderPara.attr_color, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, static_cast<GLubyte*>(colors));
+
+		//描画
+		glDrawArrays(GL_POINTS, 0, pointNum);
+#endif
+	}
+
 	//ライン描画
 	void DrawGL::drawLines(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const std::float32_t width, const EN_LineType type)
 	{
@@ -476,12 +496,156 @@ namespace fw {
 	//テキスト描画(UTF16BE)
 	void DrawGL::drawText_UTF16BE(std::float32_t* const point, const WString& utf16Text, const TextAttr& textAttr)
 	{
+		//テキスト文字列のフォントグリフ保持用
+		const std::int32_t MAX_GLYPHS = 32;
+		FontGlyph glyphs[MAX_GLYPHS];
+		std::int32_t numGlyphs = 0;
+
+		//前回のグリフインデックス
+		FT_UInt preGlyphIndex = 0;
+
+		//文字列のバウンディングボックス
+		FT_BBox stringBBox;
+		stringBBox.xMin = stringBBox.yMin = 32000;
+		stringBBox.xMax = stringBBox.yMax = -32000;
+
+		//フォントサイズ設定
+		FT_Set_Char_Size(this->ftFace_, textAttr.size * 64, 0, 96, 0);
+
+		//文字数分ループ
+		const std::int32_t num = utf16Text.getNum();
+		for (std::int32_t i = 0; i < num; i++) {
+			//処理対象文字
+			const std::uint16_t c = static_cast<std::uint16_t>(utf16Text[i]);
+
+			//処理対象文字のグリフ格納用
+			FontGlyph* glyph = &glyphs[numGlyphs];
+
+			//グリフインデックスを取得
+			glyph->index_ = FT_Get_Char_Index(this->ftFace_, c);
+
+			//カーニング
+			//TODO:現状未使用
+			if ((this->ftIsKerning_ != 0) && (preGlyphIndex != 0) && (glyph->index_ != 0)) {
+				//カーニングを取得
+				FT_Vector delta;
+				FT_Get_Kerning(this->ftFace_, preGlyphIndex, glyph->index_, FT_KERNING_DEFAULT, &delta);
+
+				glyph->metrics_.kerningX_ = delta.x >> 6;
+				glyph->metrics_.kerningY_ = delta.y >> 6;
+			}
+
+			//グリフをロード
+			FT_Load_Glyph(this->ftFace_, glyph->index_, FT_LOAD_DEFAULT);
+
+			//グリフを描画
+			FT_Get_Glyph(this->ftFace_->glyph, &glyph->image_);
+			FT_Glyph_To_Bitmap(&glyph->image_, FT_RENDER_MODE_NORMAL, nullptr, 1);
+
+			//寸法情報を取得
+			FT_BitmapGlyph bit = (FT_BitmapGlyph)glyph->image_;
+			glyph->metrics_.width_ = bit->bitmap.width;
+			glyph->metrics_.height_ = bit->bitmap.rows;
+			glyph->metrics_.offsetX_ = bit->left;
+			glyph->metrics_.offsetY_ = bit->top;
+			glyph->metrics_.nextX_ = this->ftFace_->glyph->advance.x >> 6;
+			glyph->metrics_.nextY_ = this->ftFace_->glyph->advance.y >> 6;
+
+			//処理対象文字のバウンディングボックスを取得
+			FT_BBox bbox;
+			FT_Glyph_Get_CBox(glyph->image_, ft_glyph_bbox_pixels, &bbox);
+
+			if (i == 0) {
+				stringBBox.xMin = 0;
+				stringBBox.xMax = glyph->metrics_.nextX_;
+				stringBBox.yMin = bbox.yMin;
+				stringBBox.yMax = bbox.yMax;
+			}
+			else {
+				stringBBox.xMin = 0;
+				stringBBox.xMax += glyph->metrics_.nextX_;
+				if (bbox.yMin < stringBBox.yMin) { stringBBox.yMin = bbox.yMin; }
+				if (bbox.yMax > stringBBox.yMax) { stringBBox.yMax = bbox.yMax; }
+			}
+			
+			//次文字へ
+			numGlyphs++;
+		}
+
+		//文字列の幅高さ
+		std::int32_t stringW = stringBBox.xMax - stringBBox.xMin;
+		std::int32_t stringH = stringBBox.yMax - stringBBox.yMin;
+
 		//テクスチャAシェーダを使用
 		ShaderPara shaderPara = this->useShader_TEXTURE_A();
 
 		//MVP変換行列をシェーダへ転送
 		MatrixF mvp = this->transposeMatrix(this->proj_);
 		glUniformMatrix4fv(shaderPara.unif_mvp, 1, GL_FALSE, static_cast<GLfloat*>(&mvp.mat[0]));
+
+		//GL描画設定
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+
+		//テクスチャ生成
+		GLuint texId;
+		glGenTextures(1, &texId);
+
+		//テクスチャバインド
+		glBindTexture(GL_TEXTURE_2D, texId);
+
+		//テクスチャロード
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, stringW, stringH, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
+
+		FT_Vector pen = { 0, stringBBox.yMax };
+		for (std::int32_t i = 0; i < numGlyphs; i++) {
+			//処理対象文字のグリフ格納用
+			FontGlyph* glyph = &glyphs[i];
+
+			FT_BitmapGlyph bit = (FT_BitmapGlyph)glyph->image_;
+
+			const std::int32_t xoffset = pen.x + glyph->metrics_.offsetX_;
+			const std::int32_t yoffset = pen.y - glyph->metrics_.offsetY_;
+			glTexSubImage2D(GL_TEXTURE_2D, 0, xoffset, yoffset, glyph->metrics_.width_, glyph->metrics_.height_, GL_ALPHA, GL_UNSIGNED_BYTE, bit->bitmap.buffer);
+
+			pen.x += glyph->metrics_.nextX_;
+
+			//グリフイメージ破棄
+			FT_Done_Glyph(glyph->image_);
+		}
+
+		//テクスチャパラメータ設定
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		//テクスチャユニット0を指定
+		glUniform1i(shaderPara.unif_texture, 0);
+
+		const std::float32_t xmin = point[0] - (static_cast<std::float32_t>(stringW) / 2.0F);
+		const std::float32_t ymin = point[1] - (static_cast<std::float32_t>(stringH) / 2.0F);
+		const std::float32_t xmax = point[0] + (static_cast<std::float32_t>(stringW) / 2.0F);
+		const std::float32_t ymax = point[1] + (static_cast<std::float32_t>(stringH) / 2.0F);
+
+		//頂点座標
+		const GLint pointNum = 4;
+		GLfloat p[pointNum * 3] = {
+			xmin, ymax, 0.0F,
+			xmax, ymax, 0.0F,
+			xmin, ymin, 0.0F,
+			xmax, ymin, 0.0F,
+		};
+
+		//UV座標
+		GLfloat uv[pointNum * 2] = {
+			0.0F, 0.0F,
+			1.0F, 0.0F,
+			0.0F, 1.0F,
+			1.0F, 1.0F,
+		};
 
 		//テクスチャ色
 		GLfloat color[4];
@@ -491,111 +655,18 @@ namespace fw {
 		color[3] = textAttr.bodyColor.a / 255.0F;
 		glUniform4fv(shaderPara.unif_texcolor, 1, &color[0]);
 
-		//描画位置
-		fw::PointF dispPoint = { point[0], point[1], 0.0F };
+		//頂点データ転送
+		glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&p[0]);
+		glVertexAttribPointer(shaderPara.attr_uv, 2, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&uv[0]);
 
-		//GL描画設定
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-		glEnable(GL_TEXTURE_2D);
+		//描画
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, pointNum);
 
-		//フォントサイズ設定
-		std::int32_t sizeX = textAttr.size * 64;
-		std::int32_t sizeY = textAttr.size * 64;
-		FT_Set_Char_Size(this->ftFace_, sizeX, sizeY, 96, 96);
+		//テクスチャアンバインド
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-		//文字数分ループ
-		const std::int32_t num = utf16Text.getNum();
-		for (std::int32_t i = 0; i < num; i++) {
-			const std::uint16_t c = static_cast<std::uint16_t>(utf16Text[i]);
-
-			//グリフインデックスを取得
-			FT_UInt glyphIndex = FT_Get_Char_Index(this->ftFace_, c);
-
-			//グリフをロード
-			FT_Load_Glyph(this->ftFace_, glyphIndex, FT_LOAD_DEFAULT);
-
-			//グリフを描画
-			FT_Glyph image;
-			FT_Get_Glyph(this->ftFace_->glyph, &image);
-			FT_Glyph_To_Bitmap(&image, FT_RENDER_MODE_NORMAL, nullptr, 1);
-			FT_BitmapGlyph bit = (FT_BitmapGlyph)image;
-
-			FontMetrics metrics;
-			metrics.width_ = bit->bitmap.width;
-			metrics.height_ = bit->bitmap.rows;
-			metrics.offsetX_ = bit->left;
-			metrics.offsetY_ = bit->top;
-			metrics.nextX_ = this->ftFace_->glyph->advance.x >> 6;
-			metrics.nextY_ = this->ftFace_->glyph->advance.y >> 6;
-			std::int32_t bufSize = metrics.width_ * metrics.height_;
-			metrics.buffer_ = new std::uint8_t[bufSize];
-			memcpy_s(metrics.buffer_, bufSize, bit->bitmap.buffer, bufSize);
-
-			FT_Done_Glyph(image);
-
-			AreaF area;
-			area.xmin = dispPoint.x + metrics.offsetX_;
-			area.xmax = dispPoint.x + metrics.offsetX_ + metrics.width_;
-			area.ymin = dispPoint.y + metrics.offsetY_ - metrics.height_;
-			area.ymax = dispPoint.y + metrics.offsetY_;
-
-			//次の文字位置
-			dispPoint.x += metrics.nextX_;
-			dispPoint.y += metrics.nextY_;
-
-			//テクスチャ生成
-			GLuint texId;
-			glGenTextures(1, &texId);
-
-			//テクスチャバインド
-			glBindTexture(GL_TEXTURE_2D, texId);
-
-			//テクスチャロード
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, metrics.width_, metrics.height_, 0, GL_ALPHA, GL_UNSIGNED_BYTE, metrics.buffer_);
-
-			delete[] metrics.buffer_;
-
-			//テクスチャパラメータ設定
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-			//テクスチャユニット0を指定
-			glUniform1i(shaderPara.unif_texture, 0);
-
-			//頂点座標
-			const GLint pointNum = 4;
-			GLfloat p[pointNum * 3] = {
-				area.xmin, area.ymax, 0.0F,
-				area.xmax, area.ymax, 0.0F,
-				area.xmin, area.ymin, 0.0F,
-				area.xmax, area.ymin, 0.0F,
-			};
-
-			//UV座標
-			GLfloat uv[pointNum * 2] = {
-				0.0F, 0.0F,
-				1.0F, 0.0F,
-				0.0F, 1.0F,
-				1.0F, 1.0F,
-			};
-
-			//頂点データ転送
-			glVertexAttribPointer(shaderPara.attr_point, 3, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&p[0]);
-			glVertexAttribPointer(shaderPara.attr_uv, 2, GL_FLOAT, GL_FALSE, 0, (GLfloat*)&uv[0]);
-
-			//描画
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, pointNum);
-
-			//テクスチャアンバインド
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			//テクスチャ破棄
-			glDeleteTextures(1, &texId);
-		}
+		//テクスチャ破棄
+		glDeleteTextures(1, &texId);
 
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
