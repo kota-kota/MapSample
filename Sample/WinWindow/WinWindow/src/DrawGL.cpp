@@ -506,8 +506,6 @@ namespace fw {
 
 		//文字列のバウンディングボックス
 		FT_BBox stringBBox;
-		stringBBox.xMin = stringBBox.yMin = 32000;
-		stringBBox.xMax = stringBBox.yMax = -32000;
 
 		//フォントサイズ設定
 		FT_Set_Char_Size(this->ftFace_, textAttr.size * 64, 0, 96, 0);
