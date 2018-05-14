@@ -107,8 +107,8 @@ namespace {
 	std::float32_t textPoint[textNum * 3] = {
 		500.0F, 100.0F, 0.0F,
 	};
-	const fw::String sjisText("OpenGL<_^:^;> ｱｲｳｴ東京ドーム。compass.", fw::EN_CharCode::SJIS);
-	//const std::char8_t* textStr = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。";
+	std::char8_t* sjis = "OpenGL<_^:^;> ｱｲｳｴ東京ドーム。compass.";
+	const fw::StringU8 sjisText(sjis, static_cast<std::int32_t>(strlen(sjis)), fw::EN_CharCode::SJIS);
 
 	//画面
 	class Screen {

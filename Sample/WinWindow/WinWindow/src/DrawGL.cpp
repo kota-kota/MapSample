@@ -259,6 +259,28 @@ namespace fw {
 	}
 
 
+
+	/**
+	* フォントクラス
+	*/
+
+	//コンストラクタ
+	Font::Font(const std::string fontFilePath) :
+		ftLibrary_(nullptr), ftFace_(nullptr), ftIsKerning_(0)
+	{
+		FT_Init_FreeType(&this->ftLibrary_);
+		FT_New_Face(this->ftLibrary_, fontFilePath.c_str(), 0, &this->ftFace_);
+		this->ftIsKerning_ = FT_HAS_KERNING(this->ftFace_);
+	}
+
+	//デストラクタ
+	Font::~Font()
+	{
+		FT_Done_Face(this->ftFace_);
+		FT_Done_FreeType(this->ftLibrary_);
+	}
+
+
 	/**
 	 * OpenGL描画インターフェースクラス
 	 */
@@ -471,30 +493,30 @@ namespace fw {
 		glDisable(GL_BLEND);
 	}
 
-	//テキスト描画(マルチバイト文字)
-	void DrawGL::drawText(std::float32_t* const point, const String& text, const TextAttr& textAttr)
+	//テキスト描画(1バイト文字)
+	void DrawGL::drawText(std::float32_t* const point, const StringU8& text, const TextAttr& textAttr)
 	{
 		//テキスト文字列をワイド文字(UTF16BE)に変換
-		WString utf16Text;
+		StringU16 utf16Text;
 		StringIF::convert(text, EN_CharCode::UTF16BE, &utf16Text);
 
 		//テキスト描画(UTF16BE)
 		this->drawText_UTF16BE(point, utf16Text, textAttr);
 	}
 
-	//テキスト描画(ワイド文字)
-	void DrawGL::drawText(std::float32_t* const point, const WString& wtext, const TextAttr& textAttr)
+	//テキスト描画(2バイト文字)
+	void DrawGL::drawText(std::float32_t* const point, const StringU16& text, const TextAttr& textAttr)
 	{
 		//テキスト文字列をワイド文字(UTF16BE)に変換
-		WString utf16Text;
-		StringIF::convert(wtext, EN_CharCode::UTF16BE, &utf16Text);
+		StringU16 utf16Text;
+		StringIF::convert(text, EN_CharCode::UTF16BE, &utf16Text);
 
 		//テキスト描画(UTF16BE)
 		this->drawText_UTF16BE(point, utf16Text, textAttr);
 	}
 
 	//テキスト描画(UTF16BE)
-	void DrawGL::drawText_UTF16BE(std::float32_t* const point, const WString& utf16Text, const TextAttr& textAttr)
+	void DrawGL::drawText_UTF16BE(std::float32_t* const point, const StringU16& utf16Text, const TextAttr& textAttr)
 	{
 		//テキスト文字列のフォントグリフ保持用
 		const std::int32_t MAX_GLYPHS = 32;
@@ -510,9 +532,9 @@ namespace fw {
 		//フォントサイズ設定
 		FT_Set_Char_Size(this->ftFace_, textAttr.size * 64, 0, 96, 0);
 
-		//文字数分ループ
-		const std::int32_t num = utf16Text.getNum();
-		for (std::int32_t i = 0; i < num; i++) {
+		//文字列の長さ分ループ
+		const std::int32_t len = utf16Text.getLen();
+		for (std::int32_t i = 0; i < len; i++) {
 			//処理対象文字
 			const std::uint16_t c = static_cast<std::uint16_t>(utf16Text[i]);
 

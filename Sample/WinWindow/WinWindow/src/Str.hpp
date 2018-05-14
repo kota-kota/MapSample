@@ -22,56 +22,74 @@ namespace fw {
 		LITTLE,
 	};
 
+	//文字最大数
+	static const std::int32_t MAX_STRNUM = 128;
 
 
 	/**
-	* マルチバイト文字クラス
+	* 1バイト文字クラス
 	*/
-	class String : public std::string {
+	class StringU8 {
 		//メンバ変数
-		EN_CharCode		code_;	//文字コード
-		std::int32_t	num_;	//文字数
+		EN_CharCode		code_;				//文字コード
+		std::int32_t	len_;				//文字列の長さ
+		std::int32_t	num_;				//1バイト文字の並びの数
+		std::char8_t	str_[MAX_STRNUM];	//1バイト文字の並び
 
 	public:
 		//コンストラクタ
-		String();
-		String(const std::char8_t* const s, const EN_CharCode code);
-		String(const std::char8_t* const s, const std::int32_t len, const EN_CharCode code);
+		StringU8();
+		StringU8(const std::char8_t* const s, const std::int32_t num, const EN_CharCode code);
 		//コピーコンストラクタ
-		String(const String& str);
+		StringU8(const StringU8& str);
 		//コピー代入演算子
-		String& operator=(const String& str);
+		StringU8& operator=(const StringU8& str);
+		//添え字演算子
+		const std::char8_t& operator[](const std::int32_t index) const;
+		std::char8_t& operator[](const std::int32_t index);
+		//文字追加
+		void push_back(const std::char8_t s);
 		//文字コードを設定
 		void setCode(const EN_CharCode code);
 		//文字コードを取得
 		EN_CharCode getCode() const;
-		//文字数を取得
+		//文字列の長さを取得
+		std::int32_t getLen() const;
+		//1バイト文字の並びの数を取得
 		std::int32_t getNum() const;
 	};
 
 
 	/**
-	* ワイド文字クラス
+	* 2バイト文字クラス
 	*/
-	class WString : public std::wstring {
+	class StringU16 {
 		//メンバ変数
-		EN_CharCode		code_;	//文字コード
-		std::int32_t	num_;	//文字数
+		EN_CharCode		code_;				//文字コード
+		std::int32_t	len_;				//文字列の長さ
+		std::int32_t	num_;				//2バイト文字の並びの数
+		char16_t		str_[MAX_STRNUM];	//2バイト文字の並び
 
 	public:
 		//コンストラクタ
-		WString();
-		WString(const wchar_t* const s, const EN_CharCode code);
-		WString(const wchar_t* const s, const std::int32_t len, const EN_CharCode code);
+		StringU16();
+		StringU16(const char16_t* const s, const std::int32_t num, const EN_CharCode code);
 		//コピーコンストラクタ
-		WString(const WString& str);
+		StringU16(const StringU16& str);
 		//コピー代入演算子
-		WString& operator=(const WString& str);
+		StringU16& operator=(const StringU16& str);
+		//添え字演算子
+		const char16_t& operator[](const std::int32_t index) const;
+		char16_t& operator[](const std::int32_t index);
+		//文字追加
+		void push_back(const char16_t s);
 		//文字コードを設定
 		void setCode(const EN_CharCode code);
 		//文字コードを取得
 		EN_CharCode getCode() const;
-		//文字数を取得
+		//文字列の長さを取得
+		std::int32_t getLen() const;
+		//2バイト文字の並びの数を取得
 		std::int32_t getNum() const;
 	};
 
@@ -81,32 +99,32 @@ namespace fw {
 	*/
 	class StringIF {
 	public:
-		//文字数カウント(マルチバイト文字)
-		static std::int32_t countNum(const String& str);
-		//文字数カウント(ワイド文字)
-		static std::int32_t countNum(const WString& wstr);
-		//文字コード変換(マルチバイト文字->マルチバイト文字)
-		static void convert(const String& str, EN_CharCode convCode, String* const convStr);
-		//文字コード変換(ワイド文字->ワイド文字)
-		static void convert(const WString& wstr, EN_CharCode convCode, WString* const convWStr);
-		//文字コード変換(マルチバイト文字->ワイド文字)
-		static void convert(const String& str, EN_CharCode convCode, WString* const convWStr);
-		//文字コード変換(ワイド文字->マルチバイト文字)
-		static void convert(const WString& wstr, EN_CharCode convCode, String* const convStr);
+		//文字列の長さをカウント(1バイト文字)
+		static std::int32_t countLength(const StringU8& str);
+		//文字列の長さをカウント(2バイト文字)
+		static std::int32_t countLength(const StringU16& wstr);
+		//文字コード変換(1バイト文字->1バイト文字)
+		static void convert(const StringU8& str, EN_CharCode convCode, StringU8* const convStr);
+		//文字コード変換(2バイト文字->2バイト文字)
+		static void convert(const StringU16& str, EN_CharCode convCode, StringU16* const convStr);
+		//文字コード変換(1バイト文字->2バイト文字)
+		static void convert(const StringU8& str, EN_CharCode convCode, StringU16* const convStr);
+		//文字コード変換(2バイト文字->1バイト文字)
+		static void convert(const StringU16& str, EN_CharCode convCode, StringU8* const convStr);
 
 	private:
-		//文字数カウント(SJIS)
-		static std::int32_t countNum_SJIS(const String& sjis);
-		//文字数カウント(UTF16)
-		static std::int32_t countNum_UTF16(const WString& utf16);
-		//文字数カウント(UTF8)
-		static std::int32_t countNum_UTF8(const String& utf8);
+		//文字列の長さをカウント(SJIS)
+		static std::int32_t countLength_SJIS(const StringU8& sjis);
+		//文字列の長さをカウント(UTF16)
+		static std::int32_t countLength_UTF16(const StringU16& utf16);
+		//文字列の長さをカウント(UTF8)
+		static std::int32_t countLength_UTF8(const StringU8& utf8);
 		//文字コード変換(SJIS->UTF16)
-		static void convert_SJIS_to_UTF16(const String& sjis, WString* const utf16, const EN_WCharEndian endian);
+		static void convert_SJIS_to_UTF16(const StringU8& sjis, StringU16* const utf16, const EN_WCharEndian endian);
 		//文字コード変換(SJIS->UTF8)
-		static void convert_SJIS_to_UTF8(const String& sjis, String* const utf8);
+		static void convert_SJIS_to_UTF8(const StringU8& sjis, StringU8* const utf8);
 		//文字コード変換(UTF8->UTF16)
-		static void convert_UTF8_to_UTF16(const String& utf8, WString* const utf16, const EN_WCharEndian endian);
+		static void convert_UTF8_to_UTF16(const StringU8& utf8, StringU16* const utf16, const EN_WCharEndian endian);
 	};
 }
 

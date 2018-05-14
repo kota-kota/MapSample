@@ -11,6 +11,8 @@
 #include <freetype/ftsynth.h>
 #include <freetype/ftglyph.h>
 
+#include <string>
+
 namespace fw {
 
 	//シェーダ種別
@@ -84,6 +86,41 @@ namespace fw {
 		FontMetrics		metrics_;	//寸法情報
 	};
 
+	//フォントキャッシュキー
+	struct FontCacheKey {
+		std::uint32_t	texId_;		//テクスチャID
+		std::int32_t	texW_;		//テクスチャ幅
+		std::int32_t	texH_;		//テクスチャ高さ
+	};
+
+	/**
+	* フォントクラス
+	*/
+	class Font {
+		//フォント文字構造体
+		struct FontChar {
+			FT_UInt			index_;		//グリフインデックス
+			FT_Glyph		image_;		//グリフイメージ
+			std::int32_t	nextX_;		//次グリフへの水平方向オフセット[pixel]
+			std::int32_t	nextY_;		//次グリフへの垂直方向オフセット[pixel]
+			std::int32_t	kerningX_;	//水平方向カーニング
+			std::int32_t	kerningY_;	//垂直方向カーニング
+		};
+		static const std::int32_t MAX_GLYPHS_ = 32;
+
+		FT_Library		ftLibrary_;
+		FT_Face			ftFace_;
+		FT_Bool			ftIsKerning_;
+		FontGlyph		glyphs[MAX_GLYPHS_];
+		std::int32_t	numGlyphs = 0;
+
+	public:
+		//コンストラクタ
+		Font(const std::string fontFilePath);
+		//デストラクタ
+		~Font();
+	};
+
 	/**
 	 * OpenGL描画インターフェースクラス
 	 */
@@ -114,14 +151,14 @@ namespace fw {
 		virtual void drawPolygons(const std::int32_t pointNum, std::float32_t* const points, std::uint8_t* colors, const EN_PolygonType type);
 		//画像描画
 		virtual void drawImage(std::float32_t* const point, const std::float32_t angle, std::uint8_t* const image, const ImageAttr& imgAttr);
-		//テキスト描画(マルチバイト文字)
-		virtual void drawText(std::float32_t* const point, const String& text, const TextAttr& textAttr);
-		//テキスト描画(ワイド文字)
-		virtual void drawText(std::float32_t* const point, const WString& wtext, const TextAttr& textAttr);
+		//テキスト描画(1バイト文字)
+		virtual void drawText(std::float32_t* const point, const StringU8& text, const TextAttr& textAttr);
+		//テキスト描画(2バイト文字)
+		virtual void drawText(std::float32_t* const point, const StringU16& text, const TextAttr& textAttr);
 
 	private:
 		//テキスト描画(UTF16BE)
-		void drawText_UTF16BE(std::float32_t* const point, const WString& utf16Text, const TextAttr& textAttr);
+		void drawText_UTF16BE(std::float32_t* const point, const StringU16& utf16Text, const TextAttr& textAttr);
 		//シェーダパラメータ使用開始
 		ShaderPara useShader_COLOR_RGBA();
 		ShaderPara useShader_TEXTURE_RGBA();
