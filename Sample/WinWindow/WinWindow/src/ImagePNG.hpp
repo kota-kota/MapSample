@@ -41,7 +41,7 @@ namespace fw {
 		//グレーPNG画像からRGBA8888画像へデコード
 		std::int32_t decodeGrayScalePng_RGBA8888(std::uint8_t** const decData, const png_bytepp png);
 		//トゥルーカラーPNG画像からRGBA8888画像へデコード
-		std::int32_t decodeTrueColorPng_RGBA8888(std::uint8_t** const decData, const png_bytepp png);
+		std::int32_t decodeTrueColorPng_RGBA8888(std::uint8_t** const decData, const png_bytepp png, const bool isAlpha);
 		//パレットPNG画像からRGBA8888画像へデコード
 		std::int32_t decodePalletePng_RGBA8888(std::uint8_t** const decData, const png_bytepp png);
 

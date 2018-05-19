@@ -126,7 +126,7 @@ namespace fw {
 				rc = this->decodeGrayScalePng_RGBA8888(decData, png);
 				break;
 			case PNG_COLOR_TYPE_RGB:		//2:トゥルーカラー
-				rc = this->decodeTrueColorPng_RGBA8888(decData, png);
+				rc = this->decodeTrueColorPng_RGBA8888(decData, png, false);
 				break;
 			case PNG_COLOR_TYPE_PALETTE:	//3:パレット
 				rc = this->decodePalletePng_RGBA8888(decData, png);
@@ -134,6 +134,7 @@ namespace fw {
 			case PNG_COLOR_TYPE_GRAY_ALPHA:	//4:グレー+アルファ
 				break;
 			case PNG_COLOR_TYPE_RGB_ALPHA:	//6:トゥルーカラー+アルファ
+				rc = this->decodeTrueColorPng_RGBA8888(decData, png, true);
 				break;
 			default:
 				break;
@@ -212,7 +213,7 @@ namespace fw {
 	}
 
 	//トゥルーカラーPNG画像からRGBA8888画像へデコード
-	std::int32_t ImagePNG::decodeTrueColorPng_RGBA8888(std::uint8_t** const decData, const png_bytepp png)
+	std::int32_t ImagePNG::decodeTrueColorPng_RGBA8888(std::uint8_t** const decData, const png_bytepp png, const bool isAlpha)
 	{
 		std::int32_t rc = 0;
 
@@ -233,11 +234,11 @@ namespace fw {
 					*((*decData) + writeOffset + 0) = wp[readOffset + 0];
 					*((*decData) + writeOffset + 1) = wp[readOffset + 1];
 					*((*decData) + writeOffset + 2) = wp[readOffset + 2];
-					*((*decData) + writeOffset + 3) = 255;
+					*((*decData) + writeOffset + 3) = (isAlpha) ? wp[readOffset + 3] : 255;
 
 					//書き込み位置を更新
 					writeOffset += BYTE_PER_PIXEL_RGBA8888;
-					readOffset += 3;
+					readOffset += (isAlpha) ? 4 : 3;
 				}
 			}
 		}

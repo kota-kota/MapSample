@@ -53,6 +53,9 @@ namespace {
 //サンプル描画
 namespace {
 
+	//画像ファイルトップパス
+	const std::string imagePath = "./data/image/";
+
 	//背景色
 	fw::ColorUB backColor = { 125, 125, 125, 255 };
 
@@ -86,21 +89,26 @@ namespace {
 
 	//画像
 	std::float32_t angle = 0.0F;
-	struct ImgFile {
-		std::string				filePath;
-		fw::EN_ImageFormat	format;
+	struct ImageFile {
+		std::uint32_t		id_;
+		std::string			bodyFile_;
+		std::string			blendFile_;
+		std::string			shadowFile_;
+		fw::EN_ImageFormat	format_;
 	};
-	const std::int32_t imgFileNum = 2;
-	ImgFile imgFile[imgFileNum] = {
-		{ "./data/png/colorType2_depth8.png", fw::EN_ImageFormat::PNG },
-		{ "./data/bitmap/win-8.bmp", fw::EN_ImageFormat::BMP },
+	ImageFile tblImageFile[] = {
+		{ 0x01, "mountain.bmp", "blend_star.bmp", "", fw::EN_ImageFormat::BMP },
+		{ 0x02, "cat.png", "", "", fw::EN_ImageFormat::PNG },
+		{ 0x03, "flower.png", "", "", fw::EN_ImageFormat::PNG },
+		{ 0x04, "droidkun.png", "", "", fw::EN_ImageFormat::PNG },
 	};
-	std::float32_t imgPoint[imgFileNum * 3] = {
-		500.0F, 100.0F, 0.0F,
-		500.0F, 100.0F, 0.0F,
+	const std::int32_t imageFileNum = sizeof(tblImageFile) / sizeof(tblImageFile[0]);
+	std::float32_t imgPoint[imageFileNum * 3] = {
+		200.0F, 300.0F, 0.0F,
+		300.0F, 300.0F, 0.0F,
+		400.0F, 300.0F, 0.0F,
+		500.0F, 300.0F, 0.0F,
 	};
-	bool makeImg = false;
-	fw::ImageDecorder imgDecoder[imgFileNum];
 
 	//テキスト
 	const std::int32_t textNum = 1;
@@ -112,7 +120,8 @@ namespace {
 
 	//画面
 	class Screen {
-		fw::LayerIF*	layer_;
+		fw::LayerIF*		layer_;
+		fw::ImageDecorder	imgDecoder_[imageFileNum];
 
 	public:
 		//コンストラクタ
@@ -125,6 +134,13 @@ namespace {
 		void Screen::create(fw::LayerIF* layer)
 		{
 			this->layer_ = layer;
+
+			//画像デコード
+			for (std::int32_t iImage = 0; iImage < imageFileNum; iImage++) {
+				ImageFile* imageFile = &tblImageFile[iImage];
+				const std::string filePath = imagePath + imageFile->bodyFile_;
+				this->imgDecoder_[iImage].decode_RGBA8888(filePath.c_str(), imageFile->format_);
+			}
 		}
 
 		//画面破棄
@@ -140,13 +156,6 @@ namespace {
 			//描画インターフェースを取得
 			fw::DrawIF* drawIF = this->layer_->getDrawIF();
 
-			if (!makeImg) {
-				for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
-					imgDecoder[iImg].decode_RGBA8888(imgFile[iImg].filePath.c_str(), imgFile[iImg].format);
-				}
-				makeImg = true;
-			}
-
 			fw::AreaI area = { 0, 0, 0, 0 };
 			this->layer_->getSize(&area.xmax, &area.ymax);
 
@@ -156,21 +165,30 @@ namespace {
 			//描画処理
 			drawIF->setup(area);
 
+			//画面クリア
 			drawIF->clear(backColor);
-			for (std::int32_t iImg = 0; iImg < imgFileNum; iImg++) {
+
+			//画像描画
+			for (std::int32_t iImage = 0; iImage < imageFileNum; iImage++) {
 				std::int32_t dataSize, w, h;
-				std::uint8_t* data = imgDecoder[iImg].getDecodeData(&dataSize, &w, &h);
+				std::uint8_t* data = this->imgDecoder_[iImage].getDecodeData(&dataSize, &w, &h);
+
 				fw::ImageAttr imgAttr;
 				imgAttr.id = 0;
 				imgAttr.width = w;
 				imgAttr.height = h;
 				imgAttr.pixFormat = fw::EN_PixelFormat::RGBA;
 				imgAttr.baseLoc = fw::EN_BaseLoc::CENTER_CENTER;
-				drawIF->drawImage(&imgPoint[iImg * 3], angle, data, imgAttr);
+				drawIF->drawImage(&imgPoint[iImage * 3], angle, data, imgAttr);
 			}
+
+			//ライン描画
 			drawIF->drawLines(linePointNum, &linePoints[0], &lineColors[0], 10.0F, fw::EN_LineType::LINE_STRIP);
+
+			//ポリゴン描画
 			drawIF->drawPolygons(polygonPointNum, &polygonPoints[0], &polygonColors[0], fw::EN_PolygonType::TRIANGLE_STRIP);
 
+			//テキスト描画
 			fw::TextAttr textAttr = { 0 };
 			textAttr.size = 20;
 			textAttr.bodyColor = { 255, 255, 0, 255 };
