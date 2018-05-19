@@ -93,14 +93,13 @@ namespace {
 		std::uint32_t		id_;
 		std::string			bodyFile_;
 		std::string			blendFile_;
-		std::string			shadowFile_;
 		fw::EN_ImageFormat	format_;
 	};
 	ImageFile tblImageFile[] = {
-		{ 0x01, "mountain.bmp", "blend_star.bmp", "", fw::EN_ImageFormat::BMP },
-		{ 0x02, "cat.png", "", "", fw::EN_ImageFormat::PNG },
-		{ 0x03, "flower.png", "", "", fw::EN_ImageFormat::PNG },
-		{ 0x04, "droidkun.png", "", "", fw::EN_ImageFormat::PNG },
+		{ 0x01, "mountain.bmp", "blend_star.bmp", fw::EN_ImageFormat::BMP },
+		{ 0x02, "cat.png", "", fw::EN_ImageFormat::PNG },
+		{ 0x03, "flower.png", "", fw::EN_ImageFormat::PNG },
+		{ 0x04, "droidkun.png", "", fw::EN_ImageFormat::PNG },
 	};
 	const std::int32_t imageFileNum = sizeof(tblImageFile) / sizeof(tblImageFile[0]);
 	std::float32_t imgPoint[imageFileNum * 3] = {
@@ -138,8 +137,17 @@ namespace {
 			//画像デコード
 			for (std::int32_t iImage = 0; iImage < imageFileNum; iImage++) {
 				ImageFile* imageFile = &tblImageFile[iImage];
-				const std::string filePath = imagePath + imageFile->bodyFile_;
-				this->imgDecoder_[iImage].decode_RGBA8888(filePath.c_str(), imageFile->format_);
+				if (imageFile->bodyFile_.empty()) {
+					continue;
+				}
+				const std::string bodyFilePath = imagePath + imageFile->bodyFile_;
+				if (imageFile->blendFile_.empty()) {
+					this->imgDecoder_[iImage].decode_RGBA8888(bodyFilePath.c_str(), nullptr, imageFile->format_);
+				}
+				else {
+					const std::string blendFilePath = imagePath + imageFile->blendFile_;
+					this->imgDecoder_[iImage].decode_RGBA8888(bodyFilePath.c_str(), blendFilePath.c_str(), imageFile->format_);
+				}
 			}
 		}
 
