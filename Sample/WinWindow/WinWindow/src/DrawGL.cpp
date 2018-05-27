@@ -593,8 +593,36 @@ namespace fw {
 		}
 
 		//文字列の幅高さ
-		std::int32_t stringW = stringBBox.xMax - stringBBox.xMin;
-		std::int32_t stringH = stringBBox.yMax - stringBBox.yMin;
+		const std::int32_t stringW = stringBBox.xMax - stringBBox.xMin;
+		const std::int32_t stringH = stringBBox.yMax - stringBBox.yMin;
+		const std::int32_t stringSize = stringW * stringH;
+
+		//文字列画像の領域を確保
+		std::uint8_t* tex = new std::uint8_t[stringSize];
+		memset(tex, 0, stringSize);
+
+		//文字列画像を生成
+		FT_Vector pen = { 0, stringBBox.yMax };
+		for (std::int32_t i = 0; i < numGlyphs; i++) {
+			//処理対象文字のグリフを取得
+			FontGlyph* glyph = &glyphs[i];
+			FT_BitmapGlyph bit = (FT_BitmapGlyph)glyph->image_;
+
+			const std::int32_t xoffset = pen.x + glyph->metrics_.offsetX_;
+			const std::int32_t yoffset = pen.y - glyph->metrics_.offsetY_;
+			std::int32_t readOffset = 0;
+			std::int32_t writeOffset = xoffset + (yoffset * stringW);
+			for (std::int32_t h = 0; h < glyph->metrics_.height_; h++) {
+				memcpy_s(tex + writeOffset, stringW, bit->bitmap.buffer + readOffset, glyph->metrics_.width_);
+				readOffset += glyph->metrics_.width_;
+				writeOffset += stringW;
+			}
+
+			pen.x += glyph->metrics_.nextX_;
+
+			//グリフイメージ破棄
+			FT_Done_Glyph(glyph->image_);
+		}
 
 		//テクスチャAシェーダを使用
 		ShaderPara shaderPara = this->useShader_TEXTURE_A();
@@ -617,24 +645,10 @@ namespace fw {
 
 		//テクスチャロード
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, stringW, stringH, 0, GL_ALPHA, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, stringW, stringH, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
 
-		FT_Vector pen = { 0, stringBBox.yMax };
-		for (std::int32_t i = 0; i < numGlyphs; i++) {
-			//処理対象文字のグリフ格納用
-			FontGlyph* glyph = &glyphs[i];
-
-			FT_BitmapGlyph bit = (FT_BitmapGlyph)glyph->image_;
-
-			const std::int32_t xoffset = pen.x + glyph->metrics_.offsetX_;
-			const std::int32_t yoffset = pen.y - glyph->metrics_.offsetY_;
-			glTexSubImage2D(GL_TEXTURE_2D, 0, xoffset, yoffset, glyph->metrics_.width_, glyph->metrics_.height_, GL_ALPHA, GL_UNSIGNED_BYTE, bit->bitmap.buffer);
-
-			pen.x += glyph->metrics_.nextX_;
-
-			//グリフイメージ破棄
-			FT_Done_Glyph(glyph->image_);
-		}
+		//文字列画像の領域を解放
+		delete[] tex;
 
 		//テクスチャパラメータ設定
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
