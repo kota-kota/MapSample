@@ -1,4 +1,4 @@
-#include <jni.h>
+﻿#include <jni.h>
 #include <string>
 
 extern "C" JNIEXPORT jstring
@@ -9,4 +9,12 @@ Java_com_example_kyohei_androidwindow_MainActivity_stringFromJNI(
         jobject /* this */) {
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_kyohei_androidwindow_MainActivity_nativeSurfaceCreated(
+        JNIEnv* jenv,
+        jobject obj,
+        jobject surface) {
 }
