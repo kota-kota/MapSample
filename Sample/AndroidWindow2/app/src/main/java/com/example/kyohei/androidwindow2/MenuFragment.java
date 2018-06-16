@@ -1,31 +1,30 @@
 package com.example.kyohei.androidwindow2;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-public class MainFragment extends Fragment {
+public class MenuFragment extends Fragment {
 
     private final static String LOG_TAG = "AndroidWindow";
 
     private MainActivity myParent;
+    private MenuFragment myFragment;
 
     //コンストラクタ
-    public MainFragment() {
+    public MenuFragment() {
         //何もしない
     }
 
-    //MainFragmentのインスタンスを生成
-    public static MainFragment newInstance() {
-        Log.i(LOG_TAG, "MainFragment:newInstance");
+    //MenuFragment
+    public static MenuFragment newInstance() {
+        Log.i(LOG_TAG, "MenuFragment:newInstance");
         //インスタンスを生成
-        MainFragment fragment = new MainFragment();
+        MenuFragment fragment = new MenuFragment();
 
         //Fragmentに渡す値をBundleに格納してFragmentにセットする
         //TODO:渡す値があればこの仕組みを使う
@@ -37,7 +36,7 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "MainFragment:onCreate");
+        Log.i(LOG_TAG, "MenuFragment:onCreate");
         super.onCreate(savedInstanceState);
 
         //Bundleを取得し、あれば値を受け取る
@@ -48,30 +47,32 @@ public class MainFragment extends Fragment {
 
         //親Activityを取得
         myParent = (MainActivity)getActivity();
+        //自身を保持
+        myFragment = this;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "MainFragment:onCreateView");
+        Log.i(LOG_TAG, "MenuFragment:onCreateView");
         //レイアウトをViewとして作成
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_menu, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "MainFragment:onViewCreated");
+        Log.i(LOG_TAG, "MenuFragment:onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 
-        //メニューボタン
-        ImageButton buttonMenu = view.findViewById(R.id.btMenu);
-        buttonMenu.setOnClickListener(new View.OnClickListener() {
+        //戻るボタン
+        ImageButton buttonBack = view.findViewById(R.id.btBack);
+        buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(LOG_TAG, "MainFragment:onClick [MENU]");
+                Log.i(LOG_TAG, "MenuFragment:onClick [BACK]");
 
-                //メニュー画面を表示
-                myParent.onShowMenuScreen();
+                //非表示にする
+                myParent.onHide(myFragment);
             }
         });
     }

@@ -1,9 +1,11 @@
 package com.example.kyohei.androidwindow2;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.Window;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,15 +27,39 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // 画面がはじめて作成された時ににだけ、Fragmentを追加する
+        // 画面がはじめて作成された時、初期画面に遷移
         if(savedInstanceState == null) {
-            //Fragmentを変更するため、Transactionを取得
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-            //MainFragmentを作成して追加
-            transaction.add(R.id.actMain, MainFragment.newInstance());
-            transaction.commit();
+            onShowInitScreen();
         }
+    }
+
+    //初期画面表示
+    public void onShowInitScreen() {
+        //Fragmentを変更するため、Transactionを取得
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //MainFragmentを作成して追加
+        transaction.add(R.id.actMain, MainFragment.newInstance());
+        transaction.commit();
+    }
+
+    //メニュー画面表示
+    public void onShowMenuScreen() {
+        //Fragmentを変更するため、Transactionを取得
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //MenuFragmentを作成して追加
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.add(R.id.actMain, MenuFragment.newInstance());
+        transaction.commit();
+    }
+
+    //指定画面を非表示
+    public void onHide(Fragment fragment) {
+        //Fragmentを変更するため、Transactionを取得
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+        //指定Fragmentを削除
+        transaction.remove(fragment);
+        transaction.commit();
     }
 
     /**
