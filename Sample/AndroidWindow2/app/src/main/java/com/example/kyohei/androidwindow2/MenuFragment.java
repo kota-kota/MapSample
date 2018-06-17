@@ -1,5 +1,8 @@
 package com.example.kyohei.androidwindow2;
 
+import android.app.Activity;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -10,10 +13,13 @@ import android.widget.ImageButton;
 
 public class MenuFragment extends Fragment {
 
-    private final static String LOG_TAG = "AndroidWindow";
+    public interface MenuFragmentListener {
+        void onClickHideMenuEvent(Fragment fragment);
+    }
 
-    private MainActivity myParent;
-    private MenuFragment myFragment;
+    private final static String LOG_TAG = "AndroidWindow";
+    private MenuFragmentListener mListener = null;
+    private Fragment mMyFragment = null;
 
     //コンストラクタ
     public MenuFragment() {
@@ -35,6 +41,34 @@ public class MenuFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        Log.i(LOG_TAG, "MenuFragment:onAttach");
+        super.onAttach(activity);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            //API 23(Android6.0)以上なら何もしない
+            return;
+        }
+        if (activity instanceof MenuFragment.MenuFragmentListener) {
+            mListener = (MenuFragment.MenuFragmentListener)activity;
+        } else {
+            throw new RuntimeException(activity.toString()
+                    + " must implement MenuFragmentListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        Log.i(LOG_TAG, "MainFragment:onAttach");
+        super.onAttach(context);
+        if (context instanceof MenuFragment.MenuFragmentListener) {
+            mListener = (MenuFragment.MenuFragmentListener)context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement MenuFragmentListener");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG, "MenuFragment:onCreate");
         super.onCreate(savedInstanceState);
@@ -45,10 +79,8 @@ public class MenuFragment extends Fragment {
             //TODO:受け取る値があればここで受け取る
         }
 
-        //親Activityを取得
-        myParent = (MainActivity)getActivity();
         //自身を保持
-        myFragment = this;
+        mMyFragment = this;
     }
 
     @Override
@@ -70,9 +102,10 @@ public class MenuFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.i(LOG_TAG, "MenuFragment:onClick [BACK]");
-
-                //非表示にする
-                myParent.onHide(myFragment);
+                if(mListener != null) {
+                    //Activityにメニュー非表示イベントを通知
+                    mListener.onClickHideMenuEvent(mMyFragment);
+                }
             }
         });
     }

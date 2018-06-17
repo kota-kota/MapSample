@@ -8,7 +8,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.Window;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements MainFragment.MainFragmentListener, MenuFragment.MenuFragmentListener {
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -33,17 +34,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //初期画面表示
-    public void onShowInitScreen() {
-        //Fragmentを変更するため、Transactionを取得
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        //MainFragmentを作成して追加
-        transaction.add(R.id.actMain, MainFragment.newInstance());
-        transaction.commit();
-    }
-
-    //メニュー画面表示
-    public void onShowMenuScreen() {
+    //MainFragmentからメニュー表示イベントが通知された時の処理
+    @Override
+    public void onClickShowMenuEvent() {
         //Fragmentを変更するため、Transactionを取得
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         //MenuFragmentを作成して追加
@@ -52,13 +45,23 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    //指定画面を非表示
-    public void onHide(Fragment fragment) {
+    //MenuFragmentからメニュー非表示イベントが通知された時の処理
+    @Override
+    public void onClickHideMenuEvent(Fragment fragment) {
         //Fragmentを変更するため、Transactionを取得
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
         //指定Fragmentを削除
         transaction.remove(fragment);
+        transaction.commit();
+    }
+
+    //初期画面表示
+    public void onShowInitScreen() {
+        //Fragmentを変更するため、Transactionを取得
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //MainFragmentを作成して追加
+        transaction.add(R.id.actMain, MainFragment.newInstance());
         transaction.commit();
     }
 

@@ -1,9 +1,10 @@
 package com.example.kyohei.androidwindow2;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,9 +13,12 @@ import android.widget.ImageButton;
 
 public class MainFragment extends Fragment {
 
-    private final static String LOG_TAG = "AndroidWindow";
+    public interface MainFragmentListener {
+        void onClickShowMenuEvent();
+    }
 
-    private MainActivity myParent;
+    private final static String LOG_TAG = "AndroidWindow";
+    private MainFragmentListener mListener = null;
 
     //コンストラクタ
     public MainFragment() {
@@ -36,6 +40,34 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        Log.i(LOG_TAG, "MainFragment:onAttach");
+        super.onAttach(activity);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            //API 23(Android6.0)以上なら何もしない
+            return;
+        }
+        if (activity instanceof MainFragmentListener) {
+            mListener = (MainFragmentListener)activity;
+        } else {
+            throw new RuntimeException(activity.toString()
+                    + " must implement MainFragmentListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        Log.i(LOG_TAG, "MainFragment:onAttach");
+        super.onAttach(context);
+        if (context instanceof MainFragmentListener) {
+            mListener = (MainFragmentListener)context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement MainFragmentListener");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG, "MainFragment:onCreate");
         super.onCreate(savedInstanceState);
@@ -45,9 +77,6 @@ public class MainFragment extends Fragment {
         if (args != null) {
             //TODO:受け取る値があればここで受け取る
         }
-
-        //親Activityを取得
-        myParent = (MainActivity)getActivity();
     }
 
     @Override
@@ -69,9 +98,10 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.i(LOG_TAG, "MainFragment:onClick [MENU]");
-
-                //メニュー画面を表示
-                myParent.onShowMenuScreen();
+                if(mListener != null) {
+                    //Activityにメニュー表示イベントを通知
+                    mListener.onClickShowMenuEvent();
+                }
             }
         });
     }
