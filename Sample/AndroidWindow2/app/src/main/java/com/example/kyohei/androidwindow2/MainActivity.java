@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity
         implements MainFragment.MainFragmentListener, MenuFragment.MenuFragmentListener {
@@ -23,45 +26,63 @@ public class MainActivity extends AppCompatActivity
         Log.i(LOG_TAG, "MainActivity:onCreate");
         super.onCreate(savedInstanceState);
 
-        //タイトルバーを非表示にする
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //フルスクリーン表示
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_main);
+        //NativeViewをセット
+        setContentView(new NativeView(this));
+
+        //activity_mainレイアウトのViewをセット
+        View view = this.getLayoutInflater().inflate(R.layout.activity_main, null);
+        ViewGroup.LayoutParams param = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        addContentView(view, param);
 
         // 画面がはじめて作成された時、初期画面に遷移
         if(savedInstanceState == null) {
-            onShowInitScreen();
+            Fragment fragment;
+
+            //Fragmentを変更するため、Transactionを取得
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            //MainFragmentを作成して追加
+            fragment = MainFragment.newInstance();
+            transaction.replace(R.id.actMain, fragment, MainFragment.TAG);
+
+            //MenuFragmentを作成して追加して非表示にしておく
+            fragment = MenuFragment.newInstance();
+            transaction.add(R.id.actMain, fragment, MenuFragment.TAG);
+            transaction.hide(fragment);
+
+            //Fragmentの変更を反映
+            transaction.commit();
         }
     }
 
     //MainFragmentからメニュー表示イベントが通知された時の処理
     @Override
     public void onClickShowMenuEvent() {
+        Log.i(LOG_TAG, "MainActivity:onClickShowMenuEvent");
         //Fragmentを変更するため、Transactionを取得
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        //MenuFragmentを作成して追加
+        //アニメーションを設定
         transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        transaction.add(R.id.actMain, MenuFragment.newInstance());
+        //MenuFragmentを表示
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(MenuFragment.TAG);
+        transaction.show(fragment);
         transaction.commit();
     }
 
     //MenuFragmentからメニュー非表示イベントが通知された時の処理
     @Override
-    public void onClickHideMenuEvent(Fragment fragment) {
+    public void onClickHideMenuEvent() {
+        Log.i(LOG_TAG, "MainActivity:onClickHideMenuEvent");
         //Fragmentを変更するため、Transactionを取得
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //アニメーションを設定
         transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
-        //指定Fragmentを削除
-        transaction.remove(fragment);
-        transaction.commit();
-    }
-
-    //初期画面表示
-    public void onShowInitScreen() {
-        //Fragmentを変更するため、Transactionを取得
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        //MainFragmentを作成して追加
-        transaction.add(R.id.actMain, MainFragment.newInstance());
+        //MenuFragmentを非表示
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(MenuFragment.TAG);
+        transaction.hide(fragment);
         transaction.commit();
     }
 

@@ -13,13 +13,13 @@ import android.widget.ImageButton;
 
 public class MenuFragment extends Fragment {
 
+    public static final String TAG = "MenuFragment";
     public interface MenuFragmentListener {
-        void onClickHideMenuEvent(Fragment fragment);
+        void onClickHideMenuEvent();
     }
 
     private final static String LOG_TAG = "AndroidWindow";
     private MenuFragmentListener mListener = null;
-    private Fragment mMyFragment = null;
 
     //コンストラクタ
     public MenuFragment() {
@@ -78,9 +78,6 @@ public class MenuFragment extends Fragment {
         if (args != null) {
             //TODO:受け取る値があればここで受け取る
         }
-
-        //自身を保持
-        mMyFragment = this;
     }
 
     @Override
@@ -104,7 +101,7 @@ public class MenuFragment extends Fragment {
                 Log.i(LOG_TAG, "MenuFragment:onClick [BACK]");
                 if(mListener != null) {
                     //Activityにメニュー非表示イベントを通知
-                    mListener.onClickHideMenuEvent(mMyFragment);
+                    mListener.onClickHideMenuEvent();
                 }
             }
         });

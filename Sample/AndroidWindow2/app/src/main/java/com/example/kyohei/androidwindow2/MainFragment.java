@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 
 public class MainFragment extends Fragment {
 
+    public static final String TAG = "MainFragment";
     public interface MainFragmentListener {
         void onClickShowMenuEvent();
     }
