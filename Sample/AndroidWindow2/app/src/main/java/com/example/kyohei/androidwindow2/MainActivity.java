@@ -1,15 +1,14 @@
 package com.example.kyohei.androidwindow2;
 
+import android.graphics.Point;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity
         implements MainFragment.MainFragmentListener, MenuFragment.MenuFragmentListener {
@@ -26,8 +25,13 @@ public class MainActivity extends AppCompatActivity
         Log.i(LOG_TAG, "MainActivity:onCreate");
         super.onCreate(savedInstanceState);
 
-        //フルスクリーン表示
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //ナビゲーションバー非表示、フルスクリーン
+        int visibility = 0;
+        visibility |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;  //ナビゲーションバー非表示
+        visibility |= View.SYSTEM_UI_FLAG_FULLSCREEN;        //フルスクリーン
+        visibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY; //システムUI表示後も自動で戻る
+        View decor = getWindow().getDecorView();
+        decor.setSystemUiVisibility(visibility);
 
         //NativeViewをセット
         setContentView(new NativeView(this));
@@ -56,6 +60,14 @@ public class MainActivity extends AppCompatActivity
             //Fragmentの変更を反映
             transaction.commit();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(LOG_TAG, "MainActivity:onStart");
+        super.onStart();
+
+        nativeStart();
     }
 
     //MainFragmentからメニュー表示イベントが通知された時の処理
@@ -90,5 +102,5 @@ public class MainActivity extends AppCompatActivity
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native String stringFromJNI();
+    public native void nativeStart();
 }
