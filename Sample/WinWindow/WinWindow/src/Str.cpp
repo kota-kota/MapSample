@@ -1,5 +1,5 @@
 ﻿#include "Str.hpp"
-#include "sjis2utf16be.hpp"
+#include "StrCodeTable_sjis2utf16be.hpp"
 #include <memory>
 
 
