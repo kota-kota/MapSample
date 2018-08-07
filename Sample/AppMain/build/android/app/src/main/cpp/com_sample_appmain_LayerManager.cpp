@@ -18,7 +18,7 @@ void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1start
     if (surface != 0) {
         //ウィンドウ作成
         ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
-        LOGI("com_sample_appmain_LayerManager_LayerManager_start (0x%p,%d,%d)", window, w, h);
+        LOGI("com_sample_appmain_LayerManager_LayerManager_start native:%p w:%d h:%d", window, w, h);
         ui::LayerManager* p = ui::LayerManager::getInstance();
         p->start((void*)window);
     }
@@ -29,7 +29,7 @@ void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1stop
 {
     ui::LayerManager* p = ui::LayerManager::getInstance();
     ANativeWindow* window = (ANativeWindow*)p->stop();
-    LOGI("com_sample_appmain_LayerManager_LayerManager_stop (0x%p)", window);
+    LOGI("com_sample_appmain_LayerManager_LayerManager_stop native:%p", window);
     if(window != nullptr) {
         ANativeWindow_release(window);
     }

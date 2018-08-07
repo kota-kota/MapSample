@@ -32,54 +32,45 @@ namespace ui {
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglWin_(EGL_NO_SURFACE), eglCtx_(EGL_NO_CONTEXT)
     {
         LOGI("%s\n", __FUNCTION__);
-        //EGL資源作成
-        {
-            EGLBoolean retEgl = EGL_FALSE;
-            EGLint major = 0, minor = 0, numConfigs = 0;
 
-            //EGLディスプレイを取得
-            this->eglDpy_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-            if (this->eglDpy_ == EGL_NO_DISPLAY) {
-                LOGE("%s eglGetDisplay (err:0x%x)\n", __FUNCTION__, eglGetError());
-                goto END;
-            }
-            LOGI("%s eglGetDisplay (%p)\n", __FUNCTION__, this->eglDpy_);
+        //EGLディスプレイを取得
+        this->eglDpy_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        LOGI("%s eglGetDisplay dpy:%p (err:0x%x)\n", __FUNCTION__, this->eglDpy_, eglGetError());
 
-            //EGL初期化
-            retEgl = eglInitialize(this->eglDpy_, &major, &minor);
-            if (retEgl != EGL_TRUE) {
-                LOGE("%s eglInitialize (err:0x%x)\n", __FUNCTION__, eglGetError());
-                goto END;
-            }
-            LOGI("%s eglInitialize (EGL%d.%d)\n", __FUNCTION__, major, minor);
+        //EGL初期化
+        EGLint major = 0, minor = 0;
+        (void)eglInitialize(this->eglDpy_, &major, &minor);
+        LOGI("%s eglInitialize egl:%d.%d (err:0x%x)\n", __FUNCTION__, major, minor, eglGetError());
 
-            //EGLコンフィグを取得
-            retEgl = eglChooseConfig(this->eglDpy_, attr_config, &this->eglCfg_, 1, &numConfigs);
-            if ((retEgl != EGL_TRUE) || (numConfigs != 1)) {
-                LOGE("%s eglChooseConfig (num:%d) (err:0x%x)\n", __FUNCTION__, numConfigs, eglGetError());
-                goto END;
-            }
-            LOGI("%s eglChooseConfig (%p) (num:%d)\n", __FUNCTION__, this->eglCfg_, numConfigs);
-        }
+        //EGLコンフィグを取得
+        EGLint numConfigs = 0;
+        (void)eglChooseConfig(this->eglDpy_, attr_config, &this->eglCfg_, 1, &numConfigs);
+        LOGI("%s eglChooseConfig cfg:%p num:%d (err:0x%x)\n", __FUNCTION__, this->eglCfg_, numConfigs, eglGetError());
+
+        //EGLコンテキストを作成
+        this->eglCtx_ = eglCreateContext(this->eglDpy_, this->eglCfg_, EGL_NO_CONTEXT, attr_context);
+        LOGI("%s eglCreateContext ctx:%p (err:0x%x)\n", __FUNCTION__, this->eglCtx_, eglGetError());
 
         //スレッド作成
-        {
-            this->th_ = std::thread(&LayerManager::mainTask, this);
-        }
-
-        END:
-        return;
+        this->th_ = std::thread(&LayerManager::mainTask, this);
     }
 
     //デストラクタ
     LayerManager::~LayerManager()
     {
         LOGI("%s\n", __FUNCTION__);
+
+        //タスク終了
         this->isTask_ = false;
         this->th_.join();
 
+        if (this->eglCtx_ != EGL_NO_CONTEXT) {
+            LOGI("%s eglDestroyContext ctx:%p\n", __FUNCTION__, this->eglCtx_);
+            eglDestroyContext(this->eglDpy_, this->eglCtx_);
+            this->eglCtx_ = EGL_NO_CONTEXT;
+        }
         if (this->eglDpy_ != EGL_NO_DISPLAY) {
-            LOGI("%s eglTerminate (%p)\n", __FUNCTION__, this->eglDpy_);
+            LOGI("%s eglTerminate dpy:%p\n", __FUNCTION__, this->eglDpy_);
             //TODO: eglTerminate(this->eglDpy_);
             this->eglDpy_ = EGL_NO_DISPLAY;
         }
@@ -122,27 +113,11 @@ namespace ui {
                 //資源を生成する
                 //EGLウィンドウサーフェイスを作成
                 this->eglWin_ = eglCreateWindowSurface(this->eglDpy_, this->eglCfg_, (NativeWindowType)native, nullptr);
-                if (this->eglWin_ == EGL_NO_SURFACE) {
-                    LOGE("%s eglCreateWindowSurface (err:0x%x)\n", __FUNCTION__, eglGetError());
-                    continue;
-                }
-                LOGI("%s eglCreateWindowSurface (%p)\n", __FUNCTION__, this->eglWin_);
-
-                //EGLコンテキストを作成
-                this->eglCtx_ = eglCreateContext(this->eglDpy_, this->eglCfg_, EGL_NO_CONTEXT, attr_context);
-                if (this->eglCtx_ == EGL_NO_CONTEXT) {
-                    LOGE("%s eglCreateContext (err:0x%x)\n", __FUNCTION__, eglGetError());
-                    continue;
-                }
-                LOGI("%s eglCreateContext (%p)\n", __FUNCTION__, this->eglCtx_);
+                LOGI("%s eglCreateWindowSurface win:%p (err:0x%x)\n", __FUNCTION__, this->eglWin_, eglGetError());
 
                 //カレント
-                retEgl = eglMakeCurrent(this->eglDpy_, this->eglWin_, this->eglWin_, this->eglCtx_);
-                if (retEgl != EGL_TRUE) {
-                    LOGE("%s eglMakeCurrent (err:0x%x)\n", __FUNCTION__, eglGetError());
-                    continue;
-                }
-                LOGI("%s eglMakeCurrent\n", __FUNCTION__);
+                (void)eglMakeCurrent(this->eglDpy_, this->eglWin_, this->eglWin_, this->eglCtx_);
+                LOGI("%s eglMakeCurrent bind (err:0x%x)\n", __FUNCTION__, eglGetError());
 
                 //表示更新停止を終了し、表示更新実施中にする
                 LOGI("%s PAUSE -> RUN\n", __FUNCTION__);
@@ -155,13 +130,9 @@ namespace ui {
 
                     //資源を破棄する
                     (void)eglMakeCurrent(this->eglDpy_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-                    if (this->eglCtx_ != EGL_NO_CONTEXT) {
-                        LOGI("%s eglDestroyContext %p\n", __FUNCTION__, this->eglCtx_);
-                        eglDestroyContext(this->eglDpy_, this->eglCtx_);
-                        this->eglCtx_ = EGL_NO_CONTEXT;
-                    }
+                    LOGI("%s eglMakeCurrent unbind (err:0x%x)\n", __FUNCTION__, eglGetError());
                     if (this->eglWin_ != EGL_NO_SURFACE) {
-                        LOGI("%s eglDestroySurface %p\n", __FUNCTION__, this->eglWin_);
+                        LOGI("%s eglDestroySurface win:%p\n", __FUNCTION__, this->eglWin_);
                         eglDestroySurface(this->eglDpy_, this->eglWin_);
                         this->eglWin_ = EGL_NO_SURFACE;
                     }
@@ -195,13 +166,9 @@ namespace ui {
 
         //資源を破棄
         (void)eglMakeCurrent(this->eglDpy_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        if (this->eglCtx_ != EGL_NO_CONTEXT) {
-            LOGI("%s eglDestroyContext %p\n", __FUNCTION__, this->eglCtx_);
-            eglDestroyContext(this->eglDpy_, this->eglCtx_);
-            this->eglCtx_ = EGL_NO_CONTEXT;
-        }
+        LOGI("%s eglMakeCurrent unbind (err:0x%x)\n", __FUNCTION__, eglGetError());
         if (this->eglWin_ != EGL_NO_SURFACE) {
-            LOGI("%s eglDestroySurface %p\n", __FUNCTION__, this->eglWin_);
+            LOGI("%s eglDestroySurface win:%p\n", __FUNCTION__, this->eglWin_);
             eglDestroySurface(this->eglDpy_, this->eglWin_);
             this->eglCtx_ = EGL_NO_SURFACE;
         }
@@ -230,7 +197,7 @@ namespace ui {
     //表示更新開始
     void LayerManager::start(void* native)
     {
-        LOGI("%s native:0xp\n", __FUNCTION__, native);
+        LOGI("%s native:%p\n", __FUNCTION__, native);
         this->mtx_.lock();
         this->native_ = native;
         this->mtx_.unlock();
@@ -239,7 +206,7 @@ namespace ui {
     //表示更新停止
     void* LayerManager::stop()
     {
-        LOGI("%s native:0x%p\n", __FUNCTION__, this->native_);
+        LOGI("%s native:%p\n", __FUNCTION__, this->native_);
         this->mtx_.lock();
         void* ret = this->native_;
         this->native_ = nullptr;
