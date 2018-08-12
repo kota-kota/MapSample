@@ -5,6 +5,9 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+set( JNI_PATH src/main/cpp )
+set( NATIVE_PATH src/main/cpp )
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -17,8 +20,10 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/com_sample_appmain_LayerManager.cpp
-             src/main/cpp/LayerManager.cpp
+             ${JNI_PATH}/com_sample_appmain_LayerManager.cpp
+             ${NATIVE_PATH}/LayerManager.cpp
+             ${NATIVE_PATH}/Egl.cpp
+             ${NATIVE_PATH}/Shader.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

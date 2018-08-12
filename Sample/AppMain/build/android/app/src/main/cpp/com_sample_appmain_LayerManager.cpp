@@ -5,11 +5,13 @@
 #include "LayerManager.hpp"
 #include "Logger.hpp"
 
+using LayerManager = app::LayerManager;
+
 void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1create
         (JNIEnv* env, jobject obj)
 {
     LOGI("com_sample_appmain_LayerManager_LayerManager_create");
-    ui::LayerManager* p = ui::LayerManager::getInstance();
+    LayerManager* p = LayerManager::getInstance();
 }
 
 void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1start
@@ -19,15 +21,15 @@ void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1start
         //ウィンドウ作成
         ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
         LOGI("com_sample_appmain_LayerManager_LayerManager_start native:%p w:%d h:%d", window, w, h);
-        ui::LayerManager* p = ui::LayerManager::getInstance();
-        p->start((void*)window);
+        LayerManager* p = LayerManager::getInstance();
+        p->start((void*)window, w, h);
     }
 }
 
 void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1stop
         (JNIEnv* env, jobject obj)
 {
-    ui::LayerManager* p = ui::LayerManager::getInstance();
+    LayerManager* p = LayerManager::getInstance();
     ANativeWindow* window = (ANativeWindow*)p->stop();
     LOGI("com_sample_appmain_LayerManager_LayerManager_stop native:%p", window);
     if(window != nullptr) {
@@ -39,5 +41,5 @@ void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1destroy
         (JNIEnv* env, jobject obj)
 {
     LOGI("com_sample_appmain_LayerManager_LayerManager_destroy");
-    ui::LayerManager::delInstance();
+    LayerManager::delInstance();
 }
