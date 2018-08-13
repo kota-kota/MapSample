@@ -14,8 +14,12 @@ namespace app {
         Shader();
         //デストラクタ
         ~Shader();
+        //シェーダ作成チェック
+        bool isCreated();
         //シェーダを作成する
         ReturnCode create(const Char8* const vertex, const Char8* const fragment);
+        //シェーダを破棄する
+        void destroy();
         //プログラムIDを取得する
         UInt32 getProgramId();
         //Attribute変数を取得する

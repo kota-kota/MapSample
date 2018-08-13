@@ -22,7 +22,6 @@ add_library( # Sets the name of the library.
              # Provides a relative path to your source file(s).
              ${JNI_PATH}/com_sample_appmain_LayerManager.cpp
              ${NATIVE_PATH}/LayerManager.cpp
-             ${NATIVE_PATH}/Egl.cpp
              ${NATIVE_PATH}/Shader.cpp
              )
 

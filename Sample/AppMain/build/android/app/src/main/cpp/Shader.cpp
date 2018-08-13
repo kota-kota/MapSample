@@ -15,10 +15,16 @@ namespace app {
     //デストラクタ
     Shader::~Shader()
     {
-        LOGI("%s programId:%d\n", __FUNCTION__, this->programId_);
-        if (this->programId_ != 0) {
-            glDeleteProgram(this->programId_);
-        }
+        LOGI("%s\n", __FUNCTION__);
+        this->destroy();
+    }
+
+    //シェーダ作成チェック
+    bool Shader::isCreated()
+    {
+        bool ret = false;
+        if (this->programId_ != 0) { ret = true; }
+        return ret;
     }
 
     //シェーダを作成する
@@ -79,6 +85,15 @@ namespace app {
             glDeleteProgram(programId);
         }
         return retCode;
+    }
+
+    //シェーダを破棄する
+    void Shader::destroy()
+    {
+        LOGI("%s programId:%d\n", __FUNCTION__, this->programId_);
+        if (this->programId_ != 0) {
+            glDeleteProgram(this->programId_);
+        }
     }
 
     //プログラムIDを取得する
