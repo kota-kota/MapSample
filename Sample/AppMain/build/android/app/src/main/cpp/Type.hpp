@@ -36,6 +36,8 @@ namespace app {
         //コンストラクタ
         Pos2D();
         Pos2D(const T x, const T y);
+        //座標設定
+        inline void set(const T x, const T y);
         //X座標取得・設定
         inline T getX() const;
         inline void setX(const T x);
@@ -56,6 +58,8 @@ namespace app {
         //コンストラクタ
         Pos3D();
         Pos3D(const T x, const T y, const T z);
+        //座標設定
+        inline void set(const T x, const T y, const T z);
         //X座標取得・設定
         inline T getX() const;
         inline void setX(const T x);
@@ -78,6 +82,8 @@ namespace app {
         //コンストラクタ
         Size();
         Size(const T width, const T height);
+        //サイズ設定
+        inline void set(const T width, const T height);
         //幅取得・設定
         inline T getWidth() const;
         inline void setWidth(const T width);
@@ -87,11 +93,32 @@ namespace app {
     };
 
     //エリア
-    struct Area {
-        Int32 xmin;
-        Int32 ymin;
-        Int32 xmax;
-        Int32 ymax;
+    template <typename T>
+    class Area {
+        //メンバ変数
+        T xmin_;
+        T ymin_;
+        T xmax_;
+        T ymax_;
+
+    public:
+        //コンストラクタ
+        Area();
+        Area(const T xmin, const T ymin, const T xmax, const T ymax);
+        //エリア設定
+        inline void set(const T xmin, const T ymin, const T xmax, const T ymax);
+        //xmin取得・設定
+        inline T getXMin() const;
+        inline void setXMin(const T xmin);
+        //ymin取得・設定
+        inline T getYMin() const;
+        inline void setYMin(const T ymin);
+        //xmax取得・設定
+        inline T getXMax() const;
+        inline void setXMax(const T xmax);
+        //ymax取得・設定
+        inline T getYMax() const;
+        inline void setYMax(const T ymax);
     };
 }
 

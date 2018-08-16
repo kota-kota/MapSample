@@ -106,14 +106,14 @@ namespace app {
         this->size_ = size;
 
         //描画エリアを計算
-        const Area drawArea = this->calcDrawArea();
+        const Area<Float> drawArea = this->calcDrawArea();
 
         //座標
         Float coords[] = {
-                static_cast<Float>(drawArea.xmin), static_cast<Float>(drawArea.ymin),
-                static_cast<Float>(drawArea.xmax), static_cast<Float>(drawArea.ymin),
-                static_cast<Float>(drawArea.xmin), static_cast<Float>(drawArea.ymax),
-                static_cast<Float>(drawArea.xmax), static_cast<Float>(drawArea.ymax),
+                drawArea.getXMin(), drawArea.getYMin(),
+                drawArea.getXMax(), drawArea.getYMin(),
+                drawArea.getXMin(), drawArea.getYMax(),
+                drawArea.getXMax(), drawArea.getYMax(),
         };
         const Int32 szCoords = 4 * 2 * sizeof(Float);
 
@@ -221,14 +221,13 @@ namespace app {
     }
 
     //描画エリアを計算
-    Area Layer::calcDrawArea() const
+    Area<Float> Layer::calcDrawArea() const
     {
-        Area area;
-        area.xmin = this->pos_.getX();
-        area.ymin = this->pos_.getY();
-        area.xmax = area.xmin + this->size_.getWidth();
-        area.ymax = area.ymin + this->size_.getHeight();
-        return area;
+        Float xmin = static_cast<Float>(this->pos_.getX());
+        Float ymin = static_cast<Float>(this->pos_.getY());
+        Float xmax = xmin + static_cast<Float>(this->size_.getWidth());
+        Float ymax = ymin + static_cast<Float>(this->size_.getHeight());
+        return Area<Float>(xmin, ymin, xmax, ymax);
     }
 
 

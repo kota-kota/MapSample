@@ -60,7 +60,7 @@ namespace app {
 
     private:
         //描画エリアを計算
-        Area calcDrawArea() const;
+        Area<Float> calcDrawArea() const;
     };
 
     class LayerManager {
