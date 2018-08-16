@@ -17,9 +17,11 @@ namespace app {
         Int32 y_;
         Int32 w_;
         Int32 h_;
-        UInt32 fb_;
-        UInt32 cb_;
-        UInt32 rb_;
+        UInt32 fbo_;
+        UInt32 color_tex_;
+        UInt32 depth_rb_;
+        Float coords[8];
+        Float uv[8];
 
     public:
         //コンストラクタ
@@ -31,7 +33,7 @@ namespace app {
         //レイヤー作成チェック
         bool isCreated();
         //レイヤー作成
-        ReturnCode create(Int32 w, Int32 h);
+        ReturnCode create(Int32 x, Int32 y, Int32 w, Int32 h);
         //レイヤー破棄
         void destroy();
         //レイヤーに対する描画開始
@@ -40,6 +42,10 @@ namespace app {
         void endDraw();
         //レイヤー画面位置移動
         void movePosition(Int32 x, Int32 y);
+        //頂点データ取得
+        Float* getCoords();
+        //UVデータ取得
+        Float* getUV();
     };
 
     class LayerManager {

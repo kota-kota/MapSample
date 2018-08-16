@@ -23,6 +23,7 @@ add_library( # Sets the name of the library.
              ${JNI_PATH}/com_sample_appmain_LayerManager.cpp
              ${NATIVE_PATH}/LayerManager.cpp
              ${NATIVE_PATH}/Shader.cpp
+             ${NATIVE_PATH}/Math.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

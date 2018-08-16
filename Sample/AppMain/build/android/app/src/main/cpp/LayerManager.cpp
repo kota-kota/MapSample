@@ -1,4 +1,5 @@
 #include "LayerManager.hpp"
+#include "Math.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -51,9 +52,19 @@ namespace app {
 
     //コンストラクタ
     Layer::Layer() :
-            x_(0), y_(0), w_(0), h_(0), fb_(0), cb_(0), rb_(0)
+            x_(0), y_(0), w_(0), h_(0), fbo_(0), color_tex_(0), depth_rb_(0), coords(), uv()
     {
         LOGI("%s\n", __FUNCTION__);
+        //頂点データ
+        this->coords[0] = -1.0F; this->coords[1] = -1.0F;
+        this->coords[2] = 0.0F;  this->coords[3] = -1.0F;
+        this->coords[4] = -1.0F; this->coords[5] = 0.0F;
+        this->coords[6] = 0.0F;  this->coords[7] = 0.0F;
+        //UVデータ
+        this->uv[0] = 0.0F; this->uv[1] = 0.0F;
+        this->uv[2] = 1.0F; this->uv[3] = 0.0F;
+        this->uv[4] = 0.0F; this->uv[5] = 1.0F;
+        this->uv[6] = 1.0F; this->uv[7] = 1.0F;
     }
 
     //デストラクタ
@@ -66,47 +77,60 @@ namespace app {
     //レイヤーID取得
     UInt32 Layer::getLayerID()
     {
-        return this->cb_;
+        return this->color_tex_;
     }
 
     //レイヤー作成チェック
     bool Layer::isCreated()
     {
         bool ret = false;
-        if (this->fb_ != 0) { ret = true; }
+        if (this->fbo_ != 0) { ret = true; }
         return ret;
     }
 
     //レイヤー作成
-    ReturnCode Layer::create(Int32 w, Int32 h)
+    ReturnCode Layer::create(Int32 x, Int32 y, Int32 w, Int32 h)
     {
         LOGI("%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
 
+        if(x == 10) {
+            this->coords[0] = -1.0F;
+            this->coords[1] = 0.0F;
+            this->coords[2] = 0.0F;
+            this->coords[3] = 0.0F;
+            this->coords[4] = -1.0F;
+            this->coords[5] = 1.0F;
+            this->coords[6] = 0.0F;
+            this->coords[7] = 1.0F;
+        }
+
+        this->x_ = x;
+        this->y_ = y;
         this->w_ = w;
         this->h_ = h;
 
         //カラーバッファ用のテクスチャを用意する
-        glGenTextures(1, &this->cb_);
-        glBindTexture(GL_TEXTURE_2D, this->cb_);
+        glGenTextures(1, &this->color_tex_);
+        glBindTexture(GL_TEXTURE_2D, this->color_tex_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->w_, this->h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //デプスバッファ用のレンダーバッファを用意する
-        glGenRenderbuffers(1, &this->rb_);
-        glBindRenderbuffer(GL_RENDERBUFFER, this->rb_);
+        glGenRenderbuffers(1, &this->depth_rb_);
+        glBindRenderbuffer(GL_RENDERBUFFER, this->depth_rb_);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->w_, this->h_);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         //フレームバッファオブジェクトを作成する
-        glGenFramebuffers(1, &this->fb_);
-        glBindFramebuffer(GL_FRAMEBUFFER, this->fb_);
+        glGenFramebuffers(1, &this->fbo_);
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_);
 
         //フレームバッファオブジェクトにカラーバッファとしてテクスチャを結合する
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->cb_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->color_tex_, 0);
 
         //フレームバッファオブジェクトにデプスバッファとしてレンダーバッファを結合する
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rb_);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->depth_rb_);
 
         //フレームバッファが正常に作成できたかチェックする
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -114,7 +138,7 @@ namespace app {
         //フレームバッファオブジェクトの結合を解除する
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        LOGI("%s fb:%d cb:%d rb:%d status:0x%x\n", __FUNCTION__, this->fb_, this->cb_, this->rb_, status);
+        LOGI("%s fbo:%d color_tex:%d depth_rb:%d status:0x%x\n", __FUNCTION__, this->fbo_, this->color_tex_, this->depth_rb_, status);
         if(status != GL_FRAMEBUFFER_COMPLETE) { goto END; }
 
         retCode = OK;
@@ -129,17 +153,17 @@ namespace app {
     //レイヤー破棄
     void Layer::destroy()
     {
-        LOGI("%s fb:%d cb:%d rb:%d\n", __FUNCTION__, this->fb_, this->cb_, this->rb_);
-        glDeleteTextures(1, &this->cb_);
-        glDeleteRenderbuffers(1, &this->rb_);
-        glDeleteFramebuffers(1, &this->fb_);
+        LOGI("%s fbo:%d color_tex:%d depath_rb:%d\n", __FUNCTION__, this->fbo_, this->color_tex_, this->depth_rb_);
+        glDeleteTextures(1, &this->color_tex_);
+        glDeleteRenderbuffers(1, &this->depth_rb_);
+        glDeleteFramebuffers(1, &this->fbo_);
     }
 
     //レイヤーに対する描画開始
     void Layer::beginDraw()
     {
         //フレームバッファオブジェクトを結合する
-        glBindFramebuffer(GL_FRAMEBUFFER, this->fb_);
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_);
     }
 
     //レイヤーに対する描画終了
@@ -152,7 +176,20 @@ namespace app {
     //レイヤー画面位置移動
     void Layer::movePosition(Int32 x, Int32 y)
     {
+        this->x_ = x;
+        this->y_ = y;
+    }
 
+    //頂点データ取得
+    Float* Layer::getCoords()
+    {
+        return &this->coords[0];
+    }
+
+    //UVデータ取得
+    Float* Layer::getUV()
+    {
+        return &this->uv[0];
     }
 
 
@@ -204,11 +241,15 @@ namespace app {
 
     //コンストラクタ
     LayerManager::LayerManager() :
-            isTask_(false), isPause_(false), th_(), mtx_(), w_(0), h_(0), native_(nullptr),
+            isTask_(false), isPause_(false), th_(), mtx_(), w_(0),
+            h_(0), native_(nullptr),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
             shader_(), layerNum_(0), layerList_()
     {
         LOGI("%s\n", __FUNCTION__);
+
+        //Mathクラスのテスト関数
+        app::test_Math();
 
         //スレッド作成
         this->th_ = std::thread(&LayerManager::mainTask, this);
@@ -229,7 +270,8 @@ namespace app {
     {
         LOGI("%s START\n", __FUNCTION__);
         ReturnCode retCode;
-        GLfloat color = 0.0F;
+        GLfloat red = 0.0F;
+        GLfloat blue = 0.0F;
 
         //EGL資源の作成
         retCode = this->createEGL();
@@ -295,28 +337,45 @@ namespace app {
                 this->shader_.create(vertex_fbo, fragment_fbo);
             }
 
-            for(Int32 iLayer = 0; iLayer < this->maxLayerNum_; ++iLayer) {
-                Layer& layer = this->layerList_[iLayer];
-                if (!layer.isCreated()) {
-                    //描画レイヤー作成
-                    layer.create(this->w_, this->h_);
-                    this->layerNum_++;
-                }
-
-                //FBOに描画
-                layer.beginDraw();
-                glClearColor(color / 255.0F, color / 255.0F, color / 255.0F, 1.0F);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glFlush();
-                layer.endDraw();
+            Layer* layer;
+            layer = &this->layerList_[0];
+            if (!layer->isCreated()) {
+                //描画レイヤー作成
+                layer->create(0, 0, this->w_, this->h_);
+                this->layerNum_++;
             }
+
+            //FBOに描画
+            layer->beginDraw();
+            glClearColor(red / 255.0F, 0.0F, 0.0F, 1.0F);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glFlush();
+            layer->endDraw();
+
+            layer = &this->layerList_[1];
+            if (!layer->isCreated()) {
+                //描画レイヤー作成
+                layer->create(10, 10, this->w_, this->h_);
+                this->layerNum_++;
+            }
+
+            //FBOに描画
+            layer->beginDraw();
+            glClearColor(0.0F, 0.0F, blue / 255.0F, 1.0F);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glFlush();
+            layer->endDraw();
 
             //レイヤー表示更新
             this->updateLayers();
 
-            color += 1.0F;
-            if(color > 255.0F) {
-                color = 0.0F;
+            red += 1.0F;
+            if(red > 255.0F) {
+                red = 0.0F;
+            }
+            blue += 1.0F;
+            if(blue > 255.0F) {
+                blue = 0.0F;
             }
 
             //待ち
@@ -458,20 +517,8 @@ namespace app {
             glUniform1i(unif_texture, 0);
 
             //頂点データ転送
-            GLfloat p[] = {
-                    -1.0f, -1.0f,
-                    0.0f, -1.0f,
-                    -1.0f, 0.0f,
-                    0.0f, 0.0f,
-            };
-            GLfloat uv[] = {
-                    0.0f, 0.0f,
-                    1.0f, 0.0f,
-                    0.0f, 1.0f,
-                    1.0f, 1.0f,
-            };
-            glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, &p[0]);
-            glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, &uv[0]);
+            glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, layer.getCoords());
+            glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, layer.getUV());
 
             //描画
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

@@ -5,19 +5,19 @@
 
 namespace app {
     //型定義
-    using Char8 = char;
-    using Char16 = char16_t;
-    using Char32 = char32_t;
-    using Int8 = std::int8_t;
-    using UInt8 = std::uint8_t;
-    using Int16 = std::int16_t;
-    using UInt16 = std::uint16_t;
-    using Int32 = std::int32_t;
-    using UInt32 = std::uint32_t;
-    using Int64 = std::int64_t;
-    using UInt64 = std::uint64_t;
-    using Float = float;
-    using Double = double;
+    typedef char Char8;
+    typedef char16_t Char16;
+    typedef char32_t Char32;
+    typedef std::int8_t Int8;
+    typedef std::uint8_t UInt8;
+    typedef std::int16_t Int16;
+    typedef std::uint16_t UInt16;
+    typedef std::int32_t Int32;
+    typedef std::uint32_t UInt32;
+    typedef std::int64_t Int64;
+    typedef std::uint64_t UInt64;
+    typedef float Float;
+    typedef double Double;
 
     //リターンコード
     enum ReturnCode : Int8 {
