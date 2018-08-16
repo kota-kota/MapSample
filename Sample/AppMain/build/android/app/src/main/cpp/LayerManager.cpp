@@ -52,19 +52,15 @@ namespace app {
 
     //コンストラクタ
     Layer::Layer() :
-            x_(0), y_(0), w_(0), h_(0), fbo_(0), color_tex_(0), depth_rb_(0), coords(), uv()
+            x_(0), y_(0), w_(0), h_(0), fbo_(), vbo_()
     {
         LOGI("%s\n", __FUNCTION__);
-        //頂点データ
-        this->coords[0] = -1.0F; this->coords[1] = -1.0F;
-        this->coords[2] = 0.0F;  this->coords[3] = -1.0F;
-        this->coords[4] = -1.0F; this->coords[5] = 0.0F;
-        this->coords[6] = 0.0F;  this->coords[7] = 0.0F;
-        //UVデータ
-        this->uv[0] = 0.0F; this->uv[1] = 0.0F;
-        this->uv[2] = 1.0F; this->uv[3] = 0.0F;
-        this->uv[4] = 0.0F; this->uv[5] = 1.0F;
-        this->uv[6] = 1.0F; this->uv[7] = 1.0F;
+        for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
+            this->fbo_[i] = 0U;
+        }
+        for(Int32 i = 0; i < VboType::VBO_MAX; i++) {
+            this->vbo_[i] = 0U;
+        }
     }
 
     //デストラクタ
@@ -74,17 +70,29 @@ namespace app {
         this->destroy();
     }
 
-    //レイヤーID取得
-    UInt32 Layer::getLayerID()
+    //テクスチャID取得
+    UInt32 Layer::getTextureID()
     {
-        return this->color_tex_;
+        return this->fbo_[FboType::FBO_COLOR];
+    }
+
+    //座標頂点データID取得
+    UInt32 Layer::getCoordVetexID()
+    {
+        return this->vbo_[VboType::VBO_COORD];
+    }
+
+    //テクスチャ座標頂点データID取得
+    UInt32 Layer::getTexCoordVetexID()
+    {
+        return this->vbo_[VboType::VBO_TEXCOORD];
     }
 
     //レイヤー作成チェック
     bool Layer::isCreated()
     {
         bool ret = false;
-        if (this->fbo_ != 0) { ret = true; }
+        if (this->fbo_[FboType::FBO] != 0) { ret = true; }
         return ret;
     }
 
@@ -94,43 +102,32 @@ namespace app {
         LOGI("%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
 
-        if(x == 10) {
-            this->coords[0] = -1.0F;
-            this->coords[1] = 0.0F;
-            this->coords[2] = 0.0F;
-            this->coords[3] = 0.0F;
-            this->coords[4] = -1.0F;
-            this->coords[5] = 1.0F;
-            this->coords[6] = 0.0F;
-            this->coords[7] = 1.0F;
-        }
-
         this->x_ = x;
         this->y_ = y;
         this->w_ = w;
         this->h_ = h;
 
         //カラーバッファ用のテクスチャを用意する
-        glGenTextures(1, &this->color_tex_);
-        glBindTexture(GL_TEXTURE_2D, this->color_tex_);
+        glGenTextures(1, &this->fbo_[FboType::FBO_COLOR]);
+        glBindTexture(GL_TEXTURE_2D, this->fbo_[FboType::FBO_COLOR]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->w_, this->h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //デプスバッファ用のレンダーバッファを用意する
-        glGenRenderbuffers(1, &this->depth_rb_);
-        glBindRenderbuffer(GL_RENDERBUFFER, this->depth_rb_);
+        glGenRenderbuffers(1, &this->fbo_[FboType::FBO_DEPTH]);
+        glBindRenderbuffer(GL_RENDERBUFFER, this->fbo_[FboType::FBO_DEPTH]);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->w_, this->h_);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         //フレームバッファオブジェクトを作成する
-        glGenFramebuffers(1, &this->fbo_);
-        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_);
+        glGenFramebuffers(1, &this->fbo_[FboType::FBO]);
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_[FboType::FBO]);
 
         //フレームバッファオブジェクトにカラーバッファとしてテクスチャを結合する
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->color_tex_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->fbo_[FboType::FBO_COLOR], 0);
 
         //フレームバッファオブジェクトにデプスバッファとしてレンダーバッファを結合する
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->depth_rb_);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->fbo_[FboType::FBO_DEPTH]);
 
         //フレームバッファが正常に作成できたかチェックする
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -138,8 +135,55 @@ namespace app {
         //フレームバッファオブジェクトの結合を解除する
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        LOGI("%s fbo:%d color_tex:%d depth_rb:%d status:0x%x\n", __FUNCTION__, this->fbo_, this->color_tex_, this->depth_rb_, status);
+        LOGI("%s fbo:%d color:%d depth:%d status:0x%x\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH], status);
         if(status != GL_FRAMEBUFFER_COMPLETE) { goto END; }
+
+        //バーテックスバッファオブジェクトを作成する
+        glGenBuffers(VboType::VBO_MAX, &this->vbo_[0]);
+
+        //座標格納用バーテックスバッファオブジェクトをGL_ARRAY_BUFFERでバインド
+        glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_COORD]);
+        //座標を転送
+        Float coords[8];
+        if(x == 10) {
+            coords[0] = -1.0F;
+            coords[1] = 0.0F;
+            coords[2] = 0.0F;
+            coords[3] = 0.0F;
+            coords[4] = -1.0F;
+            coords[5] = 1.0F;
+            coords[6] = 0.0F;
+            coords[7] = 1.0F;
+        }
+        else {
+            coords[0] = -1.0F;
+            coords[1] = -1.0F;
+            coords[2] = 0.0F;
+            coords[3] = -1.0F;
+            coords[4] = -1.0F;
+            coords[5] = 0.0F;
+            coords[6] = 0.0F;
+            coords[7] = 0.0F;
+        }
+        glBufferData(GL_ARRAY_BUFFER, sizeof(coords), coords, GL_STATIC_DRAW);
+
+        //テクスチャ座標格納用バーテックスバッファオブジェクトをGL_ARRAY_BUFFERでバインド
+        glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_TEXCOORD]);
+        //テクスチャ座標を転送
+        Float texcoords[8];
+        texcoords[0] = 0.0F;
+        texcoords[1] = 0.0F;
+        texcoords[2] = 1.0F;
+        texcoords[3] = 0.0F;
+        texcoords[4] = 0.0F;
+        texcoords[5] = 1.0F;
+        texcoords[6] = 1.0F;
+        texcoords[7] = 1.0F;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+
+        //GL_ARRAY_BUFFERでのバインドを解除
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        LOGI("%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
 
         retCode = OK;
 
@@ -153,17 +197,19 @@ namespace app {
     //レイヤー破棄
     void Layer::destroy()
     {
-        LOGI("%s fbo:%d color_tex:%d depath_rb:%d\n", __FUNCTION__, this->fbo_, this->color_tex_, this->depth_rb_);
-        glDeleteTextures(1, &this->color_tex_);
-        glDeleteRenderbuffers(1, &this->depth_rb_);
-        glDeleteFramebuffers(1, &this->fbo_);
+        LOGI("%s fbo:%d color:%d depth:%d\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH]);
+        glDeleteTextures(1, &this->fbo_[FboType::FBO_COLOR]);
+        glDeleteRenderbuffers(1, &this->fbo_[FboType::FBO_DEPTH]);
+        glDeleteFramebuffers(1, &this->fbo_[FboType::FBO]);
+        LOGI("%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
+        glDeleteBuffers(VboType::VBO_MAX, &this->vbo_[0]);
     }
 
     //レイヤーに対する描画開始
     void Layer::beginDraw()
     {
         //フレームバッファオブジェクトを結合する
-        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_);
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo_[FboType::FBO]);
     }
 
     //レイヤーに対する描画終了
@@ -178,18 +224,6 @@ namespace app {
     {
         this->x_ = x;
         this->y_ = y;
-    }
-
-    //頂点データ取得
-    Float* Layer::getCoords()
-    {
-        return &this->coords[0];
-    }
-
-    //UVデータ取得
-    Float* Layer::getUV()
-    {
-        return &this->uv[0];
     }
 
 
@@ -506,7 +540,7 @@ namespace app {
         for(Int32 iLayer = 0; iLayer < this->layerNum_; ++iLayer) {
             Layer& layer = this->layerList_[iLayer];
 
-            glBindTexture(GL_TEXTURE_2D, layer.getLayerID());
+            glBindTexture(GL_TEXTURE_2D, layer.getTextureID());
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -517,8 +551,11 @@ namespace app {
             glUniform1i(unif_texture, 0);
 
             //頂点データ転送
-            glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, layer.getCoords());
-            glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, layer.getUV());
+            glBindBuffer(GL_ARRAY_BUFFER, layer.getCoordVetexID());
+            glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, layer.getTexCoordVetexID());
+            glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             //描画
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

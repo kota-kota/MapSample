@@ -12,24 +12,37 @@
 namespace app {
 
     class Layer {
+        enum FboType {
+            FBO,
+            FBO_COLOR,
+            FBO_DEPTH,
+            FBO_MAX,
+        };
+        enum VboType {
+            VBO_COORD,
+            VBO_TEXCOORD,
+            VBO_MAX,
+        };
+
         //メンバ変数
         Int32 x_;
         Int32 y_;
         Int32 w_;
         Int32 h_;
-        UInt32 fbo_;
-        UInt32 color_tex_;
-        UInt32 depth_rb_;
-        Float coords[8];
-        Float uv[8];
+        UInt32 fbo_[FBO_MAX];
+        UInt32 vbo_[VBO_MAX];
 
     public:
         //コンストラクタ
         Layer();
         //デストラクタ
         ~Layer();
-        //レイヤーID取得
-        UInt32 getLayerID();
+        //テクスチャID取得
+        UInt32 getTextureID();
+        //座標頂点データID取得
+        UInt32 getCoordVetexID();
+        //テクスチャ座標頂点データID取得
+        UInt32 getTexCoordVetexID();
         //レイヤー作成チェック
         bool isCreated();
         //レイヤー作成
@@ -42,10 +55,6 @@ namespace app {
         void endDraw();
         //レイヤー画面位置移動
         void movePosition(Int32 x, Int32 y);
-        //頂点データ取得
-        Float* getCoords();
-        //UVデータ取得
-        Float* getUV();
     };
 
     class LayerManager {
