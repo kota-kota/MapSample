@@ -24,6 +24,75 @@ namespace app {
         NG_ERROR = -1,
         OK = 0,
     };
+
+    //位置(2D)
+    template <typename T>
+    class Pos2D {
+        //メンバ変数
+        T x_;
+        T y_;
+
+    public:
+        //コンストラクタ
+        Pos2D();
+        Pos2D(const T x, const T y);
+        //X座標取得・設定
+        inline T getX() const;
+        inline void setX(const T x);
+        //Y座標取得・設定
+        inline T getY() const;
+        inline void setY(const T y);
+    };
+
+    //位置(3D)
+    template <typename T>
+    class Pos3D {
+        //メンバ変数
+        T x_;
+        T y_;
+        T z_;
+
+    public:
+        //コンストラクタ
+        Pos3D();
+        Pos3D(const T x, const T y, const T z);
+        //X座標取得・設定
+        inline T getX() const;
+        inline void setX(const T x);
+        //Y座標取得・設定
+        inline T getY() const;
+        inline void setY(const T y);
+        //Z座標取得・設定
+        inline T getZ() const;
+        inline void setZ(const T z);
+    };
+
+    //サイズ
+    template <typename T>
+    class Size {
+        //メンバ変数
+        T width_;
+        T height_;
+
+    public:
+        //コンストラクタ
+        Size();
+        Size(const T width, const T height);
+        //幅取得・設定
+        inline T getWidth() const;
+        inline void setWidth(const T width);
+        //高さ取得・設定
+        inline T getHeight() const;
+        inline void setHeight(const T height);
+    };
+
+    //エリア
+    struct Area {
+        Int32 xmin;
+        Int32 ymin;
+        Int32 xmax;
+        Int32 ymax;
+    };
 }
 
 #endif //INCLUDED_TYPE_HPP

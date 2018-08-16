@@ -1,7 +1,9 @@
 #ifndef INCLUDED_LAYERMANAGER_HPP
 #define INCLUDED_LAYERMANAGER_HPP
 
+#include "Type.hpp"
 #include "Shader.hpp"
+#include "Math.hpp"
 
 #include <list>
 #include <thread>
@@ -25,10 +27,8 @@ namespace app {
         };
 
         //メンバ変数
-        Int32 x_;
-        Int32 y_;
-        Int32 w_;
-        Int32 h_;
+        Pos2D<Int32> pos_;
+        Size<Int32> size_;
         UInt32 fbo_[FBO_MAX];
         UInt32 vbo_[VBO_MAX];
 
@@ -46,15 +46,21 @@ namespace app {
         //レイヤー作成チェック
         bool isCreated();
         //レイヤー作成
-        ReturnCode create(Int32 x, Int32 y, Int32 w, Int32 h);
+        ReturnCode create(Pos2D<Int32> pos, Size<Int32> size);
         //レイヤー破棄
         void destroy();
         //レイヤーに対する描画開始
         void beginDraw();
         //レイヤーに対する描画終了
         void endDraw();
-        //レイヤー画面位置移動
-        void movePosition(Int32 x, Int32 y);
+        //画面上位置取得
+        Pos2D<Int32> getPos() const;
+        //画面上位置更新
+        void updatePos(const Pos2D<Int32> pos);
+
+    private:
+        //描画エリアを計算
+        Area calcDrawArea() const;
     };
 
     class LayerManager {
@@ -64,9 +70,9 @@ namespace app {
         std::thread th_;
         std::mutex mtx_;
 
-        Int32 w_;
-        Int32 h_;
+        Size<Int32> windowSize_;
         void* native_;
+        Matrix4F projMat_;
         EGLDisplay eglDpy_;
         EGLConfig  eglCfg_;
         EGLContext eglCtx_;

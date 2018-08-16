@@ -1,5 +1,4 @@
 #include "LayerManager.hpp"
-#include "Math.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -29,9 +28,10 @@ namespace {
             "#version 100\n"
             "attribute highp vec3 attr_point;\n"
             "attribute lowp vec2 attr_uv;\n"
+            "uniform highp mat4 unif_mvp;\n"
             "varying lowp vec2 vary_uv;\n"
             "void main() {\n"
-            "    gl_Position = vec4( attr_point, 1.0 );\n"
+            "    gl_Position = unif_mvp * vec4( attr_point, 1.0 );\n"
             "    vary_uv = attr_uv;\n"
             "}\n";
 
@@ -52,7 +52,7 @@ namespace app {
 
     //コンストラクタ
     Layer::Layer() :
-            x_(0), y_(0), w_(0), h_(0), fbo_(), vbo_()
+            pos_(), size_(), fbo_(), vbo_()
     {
         LOGI("%s\n", __FUNCTION__);
         for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
@@ -97,26 +97,45 @@ namespace app {
     }
 
     //レイヤー作成
-    ReturnCode Layer::create(Int32 x, Int32 y, Int32 w, Int32 h)
+    ReturnCode Layer::create(Pos2D<Int32> pos, Size<Int32> size)
     {
         LOGI("%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
 
-        this->x_ = x;
-        this->y_ = y;
-        this->w_ = w;
-        this->h_ = h;
+        this->pos_ = pos;
+        this->size_ = size;
+
+        //描画エリアを計算
+        const Area drawArea = this->calcDrawArea();
+
+        //座標
+        Float coords[] = {
+                static_cast<Float>(drawArea.xmin), static_cast<Float>(drawArea.ymin),
+                static_cast<Float>(drawArea.xmax), static_cast<Float>(drawArea.ymin),
+                static_cast<Float>(drawArea.xmin), static_cast<Float>(drawArea.ymax),
+                static_cast<Float>(drawArea.xmax), static_cast<Float>(drawArea.ymax),
+        };
+        const Int32 szCoords = 4 * 2 * sizeof(Float);
+
+        //テクスチャ座標
+        Float texcoords[] = {
+                0.0F, 0.0F,
+                1.0F, 0.0F,
+                0.0F, 1.0F,
+                1.0F, 1.0F,
+        };
+        const Int32 szTexCoords = 4 * 2 * sizeof(Float);
 
         //カラーバッファ用のテクスチャを用意する
         glGenTextures(1, &this->fbo_[FboType::FBO_COLOR]);
         glBindTexture(GL_TEXTURE_2D, this->fbo_[FboType::FBO_COLOR]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->w_, this->h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->size_.getWidth(), this->size_.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //デプスバッファ用のレンダーバッファを用意する
         glGenRenderbuffers(1, &this->fbo_[FboType::FBO_DEPTH]);
         glBindRenderbuffer(GL_RENDERBUFFER, this->fbo_[FboType::FBO_DEPTH]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->w_, this->h_);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->size_.getWidth(), this->size_.getHeight());
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         //フレームバッファオブジェクトを作成する
@@ -144,42 +163,12 @@ namespace app {
         //座標格納用バーテックスバッファオブジェクトをGL_ARRAY_BUFFERでバインド
         glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_COORD]);
         //座標を転送
-        Float coords[8];
-        if(x == 10) {
-            coords[0] = -1.0F;
-            coords[1] = 0.0F;
-            coords[2] = 0.0F;
-            coords[3] = 0.0F;
-            coords[4] = -1.0F;
-            coords[5] = 1.0F;
-            coords[6] = 0.0F;
-            coords[7] = 1.0F;
-        }
-        else {
-            coords[0] = -1.0F;
-            coords[1] = -1.0F;
-            coords[2] = 0.0F;
-            coords[3] = -1.0F;
-            coords[4] = -1.0F;
-            coords[5] = 0.0F;
-            coords[6] = 0.0F;
-            coords[7] = 0.0F;
-        }
-        glBufferData(GL_ARRAY_BUFFER, sizeof(coords), coords, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, szCoords, coords, GL_STATIC_DRAW);
 
         //テクスチャ座標格納用バーテックスバッファオブジェクトをGL_ARRAY_BUFFERでバインド
         glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_TEXCOORD]);
         //テクスチャ座標を転送
-        Float texcoords[8];
-        texcoords[0] = 0.0F;
-        texcoords[1] = 0.0F;
-        texcoords[2] = 1.0F;
-        texcoords[3] = 0.0F;
-        texcoords[4] = 0.0F;
-        texcoords[5] = 1.0F;
-        texcoords[6] = 1.0F;
-        texcoords[7] = 1.0F;
-        glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, szTexCoords, texcoords, GL_STATIC_DRAW);
 
         //GL_ARRAY_BUFFERでのバインドを解除
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -219,11 +208,27 @@ namespace app {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    //レイヤー画面位置移動
-    void Layer::movePosition(Int32 x, Int32 y)
+    //画面上位置取得
+    Pos2D<Int32> Layer::getPos() const
     {
-        this->x_ = x;
-        this->y_ = y;
+        return this->pos_;
+    }
+
+    //画面上位置更新
+    void Layer::updatePos(const Pos2D<Int32> pos)
+    {
+        this->pos_ = pos;
+    }
+
+    //描画エリアを計算
+    Area Layer::calcDrawArea() const
+    {
+        Area area;
+        area.xmin = this->pos_.getX();
+        area.ymin = this->pos_.getY();
+        area.xmax = area.xmin + this->size_.getWidth();
+        area.ymax = area.ymin + this->size_.getHeight();
+        return area;
     }
 
 
@@ -252,11 +257,19 @@ namespace app {
     //表示更新開始
     void LayerManager::start(void* native, Int32 w, Int32 h)
     {
-        LOGI("%s native:%p\n", __FUNCTION__, native);
+        LOGI("%s native:%p w:%d h:%d\n", __FUNCTION__, native, w, h);
+
         this->mtx_.lock();
+
+        //表示資源の設定
         this->native_ = native;
-        this->w_ = w;
-        this->h_ = h;
+        this->windowSize_.setWidth(w);
+        this->windowSize_.setHeight(h);
+
+        //画面幅高さに対応した正射影行列を生成する
+        this->projMat_.orthogonal(0.0F, static_cast<Float>(w), static_cast<Float>(h), 0.0F, -1.0F, 1.0F);
+        this->projMat_.transpose();
+
         this->mtx_.unlock();
     }
 
@@ -264,19 +277,22 @@ namespace app {
     void* LayerManager::stop()
     {
         LOGI("%s native:%p\n", __FUNCTION__, this->native_);
+
         this->mtx_.lock();
+
+        //表示資源のリセット
         void* ret = this->native_;
         this->native_ = nullptr;
-        this->w_ = 0;
-        this->h_ = 0;
+        this->windowSize_.setWidth(0);
+        this->windowSize_.setHeight(0);
+
         this->mtx_.unlock();
         return ret;
     }
 
     //コンストラクタ
     LayerManager::LayerManager() :
-            isTask_(false), isPause_(false), th_(), mtx_(), w_(0),
-            h_(0), native_(nullptr),
+            isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
             shader_(), layerNum_(0), layerList_()
     {
@@ -375,7 +391,7 @@ namespace app {
             layer = &this->layerList_[0];
             if (!layer->isCreated()) {
                 //描画レイヤー作成
-                layer->create(0, 0, this->w_, this->h_);
+                layer->create(Pos2D<Int32>(0, 0), this->windowSize_);
                 this->layerNum_++;
             }
 
@@ -389,7 +405,7 @@ namespace app {
             layer = &this->layerList_[1];
             if (!layer->isCreated()) {
                 //描画レイヤー作成
-                layer->create(10, 10, this->w_, this->h_);
+                layer->create(Pos2D<Int32>(50, 50), Size<Int32>(500, 500));
                 this->layerNum_++;
             }
 
@@ -524,13 +540,17 @@ namespace app {
         GLuint program = this->shader_.getProgramId();
         GLuint attr_point = this->shader_.getAttrLocation("attr_point");
         GLuint attr_uv = this->shader_.getAttrLocation("attr_uv");
+        GLuint unif_mvp = this->shader_.getUniformLocation("unif_mvp");
         GLuint unif_texture = this->shader_.getUniformLocation("unif_texture");
 
         //ビューポート設定
-        glViewport(0, 0, this->w_, this->h_);
+        glViewport(0, 0, this->windowSize_.getWidth(), this->windowSize_.getHeight());
 
         //使用するシェーダを指定
         glUseProgram(program);
+
+        //MVP変換行列をシェーダへ転送
+        glUniformMatrix4fv(unif_mvp, 1, GL_FALSE, this->projMat_[0]);
 
         //テクスチャマッピングを有効にする
         glEnable(GL_TEXTURE_2D);
