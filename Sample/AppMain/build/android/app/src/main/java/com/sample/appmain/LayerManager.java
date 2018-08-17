@@ -24,6 +24,17 @@ public class LayerManager {
         LayerManager_stop();
     }
 
+    //タッチイベント
+    public void procTouchEvent_ON(float x, float y) {
+        LayerManager_procTouchEvent_ON(x, y);
+    }
+    public void procTouchEvent_OFF(float x, float y) {
+        LayerManager_procTouchEvent_OFF(x, y);
+    }
+    public void procTouchEvent_MOVE(float x, float y) {
+        LayerManager_procTouchEvent_MOVE(x, y);
+    }
+
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
@@ -32,4 +43,7 @@ public class LayerManager {
     public native void LayerManager_start(Surface surface, int w, int h);
     public native void LayerManager_stop();
     public native void LayerManager_destroy();
+    public native void LayerManager_procTouchEvent_ON(float x, float y);
+    public native void LayerManager_procTouchEvent_OFF(float x, float y);
+    public native void LayerManager_procTouchEvent_MOVE(float x, float y);
 }

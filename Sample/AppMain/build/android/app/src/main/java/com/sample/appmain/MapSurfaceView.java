@@ -73,6 +73,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 pointerId1 = pointerId;
                 pointerId2 = -1;
                 Log.i(LOG_TAG, "ACTION_DOWN id:" + pointerId + " (" + x + "," + y + ")");
+                layerManager.procTouchEvent_ON(x, y);
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
@@ -105,6 +106,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 // ジェスチャー処理
                 if ((pointerId1 >= 0) && (pointerId2 == -1)) {
                     Log.i(LOG_TAG, "ACTION_MOVE<1> (" + x1 + "," + y1 + ")");
+                    layerManager.procTouchEvent_MOVE(x1, y1);
                 } else if ((pointerId1 == -1) && (pointerId2 >= 0)) {
                     Log.i(LOG_TAG, "ACTION_MOVE<2>  (" + x2 + "," + y2 + ")");
                 } else if ((pointerId1 >= 0) && (pointerId2 >= 0)) {
@@ -116,6 +118,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 pointerId1 = -1;
                 pointerId2 = -1;
                 Log.i(LOG_TAG, "ACTION_UP id:" + pointerId);
+                layerManager.procTouchEvent_OFF(0.0f, 0.0f);
                 break;
             case MotionEvent.ACTION_POINTER_UP: {
                 if (pointerId1 == pointerId) {

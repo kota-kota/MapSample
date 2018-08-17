@@ -43,6 +43,8 @@ namespace app {
         UInt32 getCoordVetexID();
         //テクスチャ座標頂点データID取得
         UInt32 getTexCoordVetexID();
+        //モデルビュー変換行列を取得
+        Matrix4F getModelViewMatrix();
         //レイヤー作成チェック
         bool isCreated();
         //レイヤー作成
@@ -57,6 +59,8 @@ namespace app {
         Pos2D<Int32> getPos() const;
         //画面上位置更新
         void updatePos(const Pos2D<Int32> pos);
+        //当たり判定
+        bool isCollision(const Float x, const Float y);
 
     private:
         //描画エリアを計算
@@ -64,6 +68,14 @@ namespace app {
     };
 
     class LayerManager {
+    public:
+        enum TouchEvent {
+            TOUCH_ON,
+            TOUCH_OFF,
+            TOUCH_MOVE,
+        };
+
+    private:
         //メンバ変数
         bool isTask_;
         bool isPause_;
@@ -83,6 +95,8 @@ namespace app {
         static const Int32 maxLayerNum_ = 2;
         Int32 layerNum_;
         Layer layerList_[maxLayerNum_];
+        Int32 touchLayer_;
+        Pos2D<Int32> touchPos_;
 
     public:
         //インスタンス取得
@@ -93,6 +107,8 @@ namespace app {
         void start(void* native, Int32 w, Int32 h);
         //表示更新停止
         void* stop();
+        //タッチイベント
+        void procTouchEvent(TouchEvent ev, Float x, Float y);
 
     private:
         //コンストラクタ

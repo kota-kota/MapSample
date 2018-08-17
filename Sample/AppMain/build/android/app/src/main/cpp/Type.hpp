@@ -38,12 +38,14 @@ namespace app {
         Pos2D(const T x, const T y);
         //座標設定
         inline void set(const T x, const T y);
-        //X座標取得・設定
+        //X座標取得・設定・移動
         inline T getX() const;
         inline void setX(const T x);
-        //Y座標取得・設定
+        inline void moveX(const T xofs);
+        //Y座標取得・設定・移動
         inline T getY() const;
         inline void setY(const T y);
+        inline void moveY(const T yofs);
     };
 
     //位置(3D)
@@ -60,15 +62,18 @@ namespace app {
         Pos3D(const T x, const T y, const T z);
         //座標設定
         inline void set(const T x, const T y, const T z);
-        //X座標取得・設定
+        //X座標取得・設定・移動
         inline T getX() const;
         inline void setX(const T x);
-        //Y座標取得・設定
+        inline void moveX(const T xofs);
+        //Y座標取得・設定・移動
         inline T getY() const;
         inline void setY(const T y);
-        //Z座標取得・設定
+        inline void moveY(const T yofs);
+        //Z座標取得・設定・移動
         inline T getZ() const;
         inline void setZ(const T z);
+        inline void moveZ(const T zofs);
     };
 
     //サイズ

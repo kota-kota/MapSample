@@ -28,10 +28,11 @@ namespace {
             "#version 100\n"
             "attribute highp vec3 attr_point;\n"
             "attribute lowp vec2 attr_uv;\n"
-            "uniform highp mat4 unif_mvp;\n"
+            "uniform highp mat4 unif_proj;\n"
+            "uniform highp mat4 unif_mv;\n"
             "varying lowp vec2 vary_uv;\n"
             "void main() {\n"
-            "    gl_Position = unif_mvp * vec4( attr_point, 1.0 );\n"
+            "    gl_Position = unif_proj * unif_mv * vec4( attr_point, 1.0 );\n"
             "    vary_uv = attr_uv;\n"
             "}\n";
 
@@ -88,6 +89,16 @@ namespace app {
         return this->vbo_[VboType::VBO_TEXCOORD];
     }
 
+    //モデルビュー変換行列を取得
+    Matrix4F Layer::getModelViewMatrix()
+    {
+        Matrix4F mv;
+        mv.identify();
+        mv.translate(static_cast<Float>(this->pos_.getX()), static_cast<Float>(this->pos_.getY()), 0.0F);
+        mv.transpose();
+        return mv;
+    }
+
     //レイヤー作成チェック
     bool Layer::isCreated()
     {
@@ -105,15 +116,16 @@ namespace app {
         this->pos_ = pos;
         this->size_ = size;
 
-        //描画エリアを計算
-        const Area<Float> drawArea = this->calcDrawArea();
-
         //座標
+        Float xmin = 0.0F;
+        Float ymin = 0.0F;
+        Float xmax = static_cast<Float>(this->size_.getWidth());
+        Float ymax = static_cast<Float>(this->size_.getHeight());
         Float coords[] = {
-                drawArea.getXMin(), drawArea.getYMin(),
-                drawArea.getXMax(), drawArea.getYMin(),
-                drawArea.getXMin(), drawArea.getYMax(),
-                drawArea.getXMax(), drawArea.getYMax(),
+                xmin, ymin,
+                xmax, ymin,
+                xmin, ymax,
+                xmax, ymax,
         };
         const Int32 szCoords = 4 * 2 * sizeof(Float);
 
@@ -220,6 +232,22 @@ namespace app {
         this->pos_ = pos;
     }
 
+    //当たり判定
+    bool Layer::isCollision(const Float x, const Float y)
+    {
+        bool ret = false;
+
+        Area<Float> area = this->calcDrawArea();
+        if((area.getXMin() <= x) && (x <= area.getXMax()) &&
+           (area.getYMin() <= y) && (y <= area.getYMax()))
+        {
+            //当たり
+            ret = true;
+        }
+
+        return ret;
+    }
+
     //描画エリアを計算
     Area<Float> Layer::calcDrawArea() const
     {
@@ -289,11 +317,51 @@ namespace app {
         return ret;
     }
 
+    //タッチイベント
+    void LayerManager::procTouchEvent(TouchEvent ev, Float x, Float y)
+    {
+        Pos2D<Int32> touchPos(static_cast<Int32>(x), static_cast<Int32>(y));
+        switch(ev) {
+            case TOUCH_ON: {
+                LOGI("%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
+                for(Int32 iLayer = this->layerNum_ - 1; iLayer >= 0; iLayer--) {
+                    Layer &layer = this->layerList_[iLayer];
+                    if(layer.isCollision(x, y)) {
+                        this->touchLayer_ = iLayer;
+                        break;
+                    }
+                }
+                this->touchPos_ = touchPos;
+                break;
+            }
+            case TOUCH_OFF: {
+                LOGI("%s TOUCH_OFF (%f,%f)\n", __FUNCTION__, x, y);
+                this->touchLayer_ = -1;
+                break;
+            }
+            case TOUCH_MOVE: {
+                LOGI("%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
+                if(this->touchLayer_ >= 0) {
+                    Layer &layer = this->layerList_[this->touchLayer_];
+                    Pos2D<Int32> layerPos = layer.getPos();
+                    layerPos.moveX(touchPos.getX() - this->touchPos_.getX());
+                    layerPos.moveY(touchPos.getY() - this->touchPos_.getY());
+                    layer.updatePos(layerPos);
+
+                    this->touchPos_ = touchPos;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     //コンストラクタ
     LayerManager::LayerManager() :
             isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
-            shader_(), layerNum_(0), layerList_()
+            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_()
     {
         LOGI("%s\n", __FUNCTION__);
 
@@ -539,17 +607,22 @@ namespace app {
         GLuint program = this->shader_.getProgramId();
         GLuint attr_point = this->shader_.getAttrLocation("attr_point");
         GLuint attr_uv = this->shader_.getAttrLocation("attr_uv");
-        GLuint unif_mvp = this->shader_.getUniformLocation("unif_mvp");
+        GLuint unif_proj = this->shader_.getUniformLocation("unif_proj");
+        GLuint unif_mv = this->shader_.getUniformLocation("unif_mv");
         GLuint unif_texture = this->shader_.getUniformLocation("unif_texture");
 
         //ビューポート設定
         glViewport(0, 0, this->windowSize_.getWidth(), this->windowSize_.getHeight());
 
+        //画面クリア
+        glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         //使用するシェーダを指定
         glUseProgram(program);
 
-        //MVP変換行列をシェーダへ転送
-        glUniformMatrix4fv(unif_mvp, 1, GL_FALSE, this->projMat_[0]);
+        //プロジェクション変換行列をシェーダへ転送
+        glUniformMatrix4fv(unif_proj, 1, GL_FALSE, this->projMat_[0]);
 
         //テクスチャマッピングを有効にする
         glEnable(GL_TEXTURE_2D);
@@ -568,6 +641,10 @@ namespace app {
 
             //テクスチャユニット0を指定
             glUniform1i(unif_texture, 0);
+
+            //モデルビュー変換行列をシェーダへ転送
+            Matrix4F mv = layer.getModelViewMatrix();
+            glUniformMatrix4fv(unif_mv, 1, GL_FALSE, mv[0]);
 
             //頂点データ転送
             glBindBuffer(GL_ARRAY_BUFFER, layer.getCoordVetexID());

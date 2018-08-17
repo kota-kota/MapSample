@@ -19,17 +19,21 @@ namespace app {
         this->y_ = y;
     }
 
-    //X座標取得・設定
+    //X座標取得・設定・移動
     template <typename T>
     inline T Pos2D<T>::getX() const { return this->x_; }
     template <typename T>
     inline void Pos2D<T>::setX(const T x) { this->x_ = x; }
+    template <typename T>
+    inline void Pos2D<T>::moveX(const T xofs) { this->x_ += xofs; }
 
-    //Y座標取得・設定
+    //Y座標取得・設定・移動
     template <typename T>
     inline T Pos2D<T>::getY() const { return this->y_; }
     template <typename T>
     inline void Pos2D<T>::setY(const T y) { this->y_ = y; }
+    template <typename T>
+    inline void Pos2D<T>::moveY(const T yofs) { this->y_ += yofs; }
 
 
 
@@ -51,23 +55,29 @@ namespace app {
         this->z_ = z;
     }
 
-    //X座標取得・設定
+    //X座標取得・設定・移動
     template <typename T>
     inline T Pos3D<T>::getX() const { return this->x_; }
     template <typename T>
     inline void Pos3D<T>::setX(const T x) { this->x_ = x; }
+    template <typename T>
+    inline void Pos3D<T>::moveX(const T xofs) { this->x_ += xofs; }
 
-    //Y座標取得・設定
+    //Y座標取得・設定・移動
     template <typename T>
     inline T Pos3D<T>::getY() const { return this->y_; }
     template <typename T>
     inline void Pos3D<T>::setY(const T y) { this->y_ = y; }
+    template <typename T>
+    inline void Pos3D<T>::moveY(const T yofs) { this->y_ += yofs; }
 
-    //Z座標取得・設定
+    //Z座標取得・設定・移動
     template <typename T>
     inline T Pos3D<T>::getZ() const { return this->z_; }
     template <typename T>
     inline void Pos3D<T>::setZ(const T z) { this->z_ = z; }
+    template <typename T>
+    inline void Pos3D<T>::moveZ(const T zofs) { this->z_ += zofs; }
 
 
     //------------------------------------------------------------------------------------

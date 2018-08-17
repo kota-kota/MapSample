@@ -16,6 +16,15 @@ JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1stop
 JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1destroy
         (JNIEnv* env, jobject obj);
 
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1ON
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y);
+
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1OFF
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y);
+
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1MOVE
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y);
+
 #ifdef __cplusplus
 }
 #endif

@@ -43,3 +43,27 @@ void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1destroy
     LOGI("com_sample_appmain_LayerManager_LayerManager_destroy");
     LayerManager::delInstance();
 }
+
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1ON
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y)
+{
+    LOGI("com_sample_appmain_LayerManager_LayerManager_procTouchEvent_ON x:%f y:%f", x, y);
+    LayerManager* p = LayerManager::getInstance();
+    p->procTouchEvent(LayerManager::TouchEvent::TOUCH_ON, x, y);
+}
+
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1OFF
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y)
+{
+    LOGI("com_sample_appmain_LayerManager_LayerManager_procTouchEvent_OFF x:%f y:%f", x, y);
+    LayerManager* p = LayerManager::getInstance();
+    p->procTouchEvent(LayerManager::TouchEvent::TOUCH_OFF, x, y);
+}
+
+JNIEXPORT void JNICALL Java_com_sample_appmain_LayerManager_LayerManager_1procTouchEvent_1MOVE
+        (JNIEnv* env, jobject obj, jfloat x, jfloat y)
+{
+    LOGI("com_sample_appmain_LayerManager_LayerManager_procTouchEvent_MOVE x:%f y:%f", x, y);
+    LayerManager* p = LayerManager::getInstance();
+    p->procTouchEvent(LayerManager::TouchEvent::TOUCH_MOVE, x, y);
+}
