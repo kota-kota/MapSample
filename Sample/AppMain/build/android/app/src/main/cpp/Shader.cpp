@@ -20,7 +20,7 @@ namespace app {
     }
 
     //シェーダ作成チェック
-    bool Shader::isCreated()
+    bool Shader::isCreated() const
     {
         bool ret = false;
         if (this->programId_ != 0) { ret = true; }
@@ -93,23 +93,24 @@ namespace app {
         LOGI("Shader::%s programId:%d\n", __FUNCTION__, this->programId_);
         if (this->programId_ != 0) {
             glDeleteProgram(this->programId_);
+            this->programId_ = 0;
         }
     }
 
     //プログラムIDを取得する
-    UInt32 Shader::getProgramId()
+    UInt32 Shader::getProgramId() const
     {
         return this->programId_;
     }
 
     //Attribute変数を取得する
-    UInt32 Shader::getAttrLocation(const Char8* const attr)
+    UInt32 Shader::getAttrLocation(const Char8* const attr) const
     {
         return GLuint(glGetAttribLocation(this->programId_, attr));
     }
 
     //Uniform変数を取得する
-    UInt32 Shader::getUniformLocation(const Char8* const uniform)
+    UInt32 Shader::getUniformLocation(const Char8* const uniform) const
     {
         return GLuint(glGetUniformLocation(this->programId_, uniform));
     }

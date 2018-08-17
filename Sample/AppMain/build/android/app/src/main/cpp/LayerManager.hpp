@@ -5,9 +5,9 @@
 #include "Shader.hpp"
 #include "Math.hpp"
 
-#include <list>
 #include <thread>
 #include <mutex>
+#include <list>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
@@ -27,6 +27,7 @@ namespace app {
         };
 
         //メンバ変数
+        UInt32 id_;
         Pos2D<Int32> pos_;
         Size<Int32> size_;
         UInt32 fbo_[FBO_MAX];
@@ -34,38 +35,57 @@ namespace app {
 
     public:
         //コンストラクタ
-        Layer();
+        Layer(const UInt32 id);
         //デストラクタ
         ~Layer();
-        //テクスチャID取得
-        UInt32 getTextureID();
-        //座標頂点データID取得
-        UInt32 getCoordVetexID();
-        //テクスチャ座標頂点データID取得
-        UInt32 getTexCoordVetexID();
-        //モデルビュー変換行列を取得
-        Matrix4F getModelViewMatrix();
-        //レイヤー作成チェック
-        bool isCreated();
         //レイヤー作成
-        ReturnCode create(Pos2D<Int32> pos, Size<Int32> size);
+        ReturnCode create(const Size<Int32> size);
         //レイヤー破棄
         void destroy();
+        //レイヤー描画
+        void draw(const Shader& shader);
         //レイヤーに対する描画開始
         void beginDraw();
         //レイヤーに対する描画終了
         void endDraw();
-        //画面上位置取得
-        Pos2D<Int32> getPos() const;
-        //画面上位置更新
-        void updatePos(const Pos2D<Int32> pos);
         //当たり判定
         bool isCollision(const Float x, const Float y);
+        //レイヤーID取得
+        UInt32 getId() const;
+        //レイヤー画面上位置取得
+        Pos2D<Int32> getPos() const;
+        //レイヤー画面上位置更新
+        void updatePos(const Pos2D<Int32> pos);
+        //レイヤーサイズ取得
+        Size<Int32> getSize() const;
 
     private:
         //描画エリアを計算
         Area<Float> calcDrawArea() const;
     };
+
+
+    class LayerView {
+        //メンバ変数
+        Layer* layer_;
+
+    public:
+        //コンストラクタ
+        LayerView();
+        //デストラクタ
+        virtual ~LayerView();
+        //ビュー作成
+        ReturnCode create(Pos2D<Int32> pos, Size<Int32> size);
+        //ビュー破棄
+        void destroy();
+
+    protected:
+        //レイヤーに対する描画開始
+        void beginDraw();
+        //レイヤーに対する描画終了
+        void endDraw();
+    };
+
 
     class LayerManager {
         //メンバ変数
@@ -84,11 +104,12 @@ namespace app {
 
         Shader shader_;
 
-        static const Int32 maxLayerNum_ = 2;
+        static const Int32 maxLayerNum_ = 3;
         Int32 layerNum_;
-        Layer layerList_[maxLayerNum_];
+        Layer* layerList_[maxLayerNum_];
         Int32 touchLayer_;
         Pos2D<Int32> touchPos_;
+        UInt32 lastLayerId_;
 
     private:
         //コンストラクタ
@@ -107,6 +128,10 @@ namespace app {
         void start(void* native, Int32 w, Int32 h);
         //表示更新停止
         void* stop();
+        //レイヤー作成
+        Layer* createLayer(const Size<Int32> size);
+        //レイヤー破棄
+        bool destroyLayer(Layer* const delLayer);
         //タッチイベント
         void procTouchEvent(TouchEvent ev, Float x, Float y);
 

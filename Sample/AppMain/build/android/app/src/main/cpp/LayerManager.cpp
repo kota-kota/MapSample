@@ -1,4 +1,5 @@
 #include "LayerManager.hpp"
+#include "MapView.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -52,8 +53,8 @@ namespace app {
     // Layer
 
     //コンストラクタ
-    Layer::Layer() :
-            pos_(), size_(), fbo_(), vbo_()
+    Layer::Layer(const UInt32 id) :
+            id_(id), pos_(), size_(), fbo_(), vbo_()
     {
         LOGI("Layer::%s\n", __FUNCTION__);
         for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
@@ -71,56 +72,17 @@ namespace app {
         this->destroy();
     }
 
-    //テクスチャID取得
-    UInt32 Layer::getTextureID()
-    {
-        return this->fbo_[FboType::FBO_COLOR];
-    }
-
-    //座標頂点データID取得
-    UInt32 Layer::getCoordVetexID()
-    {
-        return this->vbo_[VboType::VBO_COORD];
-    }
-
-    //テクスチャ座標頂点データID取得
-    UInt32 Layer::getTexCoordVetexID()
-    {
-        return this->vbo_[VboType::VBO_TEXCOORD];
-    }
-
-    //モデルビュー変換行列を取得
-    Matrix4F Layer::getModelViewMatrix()
-    {
-        Matrix4F mv;
-        mv.identify();
-        mv.translate(static_cast<Float>(this->pos_.getX()), static_cast<Float>(this->pos_.getY()), 0.0F);
-        mv.transpose();
-        return mv;
-    }
-
-    //レイヤー作成チェック
-    bool Layer::isCreated()
-    {
-        bool ret = false;
-        if (this->fbo_[FboType::FBO] != 0) { ret = true; }
-        return ret;
-    }
-
     //レイヤー作成
-    ReturnCode Layer::create(Pos2D<Int32> pos, Size<Int32> size)
+    ReturnCode Layer::create(const Size<Int32> size)
     {
         LOGI("Layer::%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
 
-        this->pos_ = pos;
-        this->size_ = size;
-
         //座標
         Float xmin = 0.0F;
         Float ymin = 0.0F;
-        Float xmax = static_cast<Float>(this->size_.getWidth());
-        Float ymax = static_cast<Float>(this->size_.getHeight());
+        Float xmax = static_cast<Float>(size.getWidth());
+        Float ymax = static_cast<Float>(size.getHeight());
         Float coords[] = {
                 xmin, ymin,
                 xmax, ymin,
@@ -141,13 +103,13 @@ namespace app {
         //カラーバッファ用のテクスチャを用意する
         glGenTextures(1, &this->fbo_[FboType::FBO_COLOR]);
         glBindTexture(GL_TEXTURE_2D, this->fbo_[FboType::FBO_COLOR]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->size_.getWidth(), this->size_.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.getWidth(), size.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //デプスバッファ用のレンダーバッファを用意する
         glGenRenderbuffers(1, &this->fbo_[FboType::FBO_DEPTH]);
         glBindRenderbuffer(GL_RENDERBUFFER, this->fbo_[FboType::FBO_DEPTH]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->size_.getWidth(), this->size_.getHeight());
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.getWidth(), size.getHeight());
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         //フレームバッファオブジェクトを作成する
@@ -186,6 +148,9 @@ namespace app {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         LOGI("Layer::%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
 
+        //サイズを保持
+        this->size_ = size;
+
         retCode = OK;
 
         END:
@@ -206,6 +171,54 @@ namespace app {
         glDeleteBuffers(VboType::VBO_MAX, &this->vbo_[0]);
     }
 
+    //レイヤー描画
+    void Layer::draw(const Shader& shader)
+    {
+        GLuint attr_point = shader.getAttrLocation("attr_point");
+        GLuint attr_uv = shader.getAttrLocation("attr_uv");
+        GLuint unif_mv = shader.getUniformLocation("unif_mv");
+        GLuint unif_texture = shader.getUniformLocation("unif_texture");
+
+        //テクスチャマッピングを有効にする
+        glEnable(GL_TEXTURE_2D);
+        glEnableVertexAttribArray(attr_point);
+        glEnableVertexAttribArray(attr_uv);
+
+        glBindTexture(GL_TEXTURE_2D, this->fbo_[FboType::FBO_COLOR]);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        //テクスチャユニット0を指定
+        glUniform1i(unif_texture, 0);
+
+        //モデルビュー変換行列をシェーダへ転送
+        Matrix4F mv;
+        mv.identify();
+        mv.translate(static_cast<Float>(this->pos_.getX()), static_cast<Float>(this->pos_.getY()), 0.0F);
+        mv.transpose();
+        glUniformMatrix4fv(unif_mv, 1, GL_FALSE, mv[0]);
+
+        //頂点データ転送
+        glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_COORD]);
+        glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, this->vbo_[VboType::VBO_TEXCOORD]);
+        glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        //描画
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        //テクスチャマッピングを無効にする
+        glDisableVertexAttribArray(attr_point);
+        glDisableVertexAttribArray(attr_uv);
+        glDisable(GL_TEXTURE_2D);
+    }
+
     //レイヤーに対する描画開始
     void Layer::beginDraw()
     {
@@ -218,18 +231,6 @@ namespace app {
     {
         //フレームバッファオブジェクトの結合を解除する
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    //画面上位置取得
-    Pos2D<Int32> Layer::getPos() const
-    {
-        return this->pos_;
-    }
-
-    //画面上位置更新
-    void Layer::updatePos(const Pos2D<Int32> pos)
-    {
-        this->pos_ = pos;
     }
 
     //当たり判定
@@ -248,6 +249,30 @@ namespace app {
         return ret;
     }
 
+    //レイヤーID取得
+    UInt32 Layer::getId() const
+    {
+        return this->id_;
+    }
+
+    //レイヤー画面上位置取得
+    Pos2D<Int32> Layer::getPos() const
+    {
+        return this->pos_;
+    }
+
+    //レイヤー画面上位置更新
+    void Layer::updatePos(const Pos2D<Int32> pos)
+    {
+        this->pos_ = pos;
+    }
+
+    //レイヤーサイズ取得
+    Size<Int32> Layer::getSize() const
+    {
+        return this->size_;
+    }
+
     //描画エリアを計算
     Area<Float> Layer::calcDrawArea() const
     {
@@ -260,6 +285,65 @@ namespace app {
 
 
 
+
+    //------------------------------------------------------------------------------------
+    // LayerView
+
+    //コンストラクタ
+    LayerView::LayerView() :
+            layer_(nullptr)
+    {
+        LOGI("Layer::%s\n", __FUNCTION__);
+    }
+
+    //デストラクタ
+    LayerView::~LayerView()
+    {
+        LOGI("Layer::%s\n", __FUNCTION__);
+        this->destroy();
+    }
+
+    //ビュー作成
+    ReturnCode LayerView::create(Pos2D<Int32> pos, Size<Int32> size)
+    {
+        ReturnCode rc = NG_ERROR;
+
+        //レイヤー作成
+        LayerManager* layerManager = LayerManager::get();
+        this->layer_ = layerManager->createLayer(size);
+        if(this->layer_ != nullptr) {
+            rc = OK;
+        }
+
+        return rc;
+    }
+
+    //ビュー破棄
+    void LayerView::destroy()
+    {
+        //レイヤー破棄
+        LayerManager* layerManager = LayerManager::get();
+        bool isDestroy =layerManager->destroyLayer(this->layer_);
+        if(!isDestroy) {
+            delete this->layer_;
+        }
+        this->layer_ = nullptr;
+    }
+
+    //レイヤーに対する描画開始
+    void LayerView::beginDraw()
+    {
+        this->layer_->beginDraw();
+    }
+
+    //レイヤーに対する描画終了
+    void LayerView::endDraw()
+    {
+        this->layer_->endDraw();
+    }
+
+
+
     //------------------------------------------------------------------------------------
     // LayerManager
 
@@ -267,12 +351,16 @@ namespace app {
     LayerManager::LayerManager() :
             isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
-            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_()
+            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_(), lastLayerId_(0)
     {
         LOGI("LayerManager::%s\n", __FUNCTION__);
 
         //Mathクラスのテスト関数
         app::test_Math();
+
+        for(Int32 i = 0; i < this->maxLayerNum_; i++) {
+            this->layerList_[i] = nullptr;
+        }
 
         //スレッド作成
         this->th_ = std::thread(&LayerManager::mainTask, this);
@@ -349,6 +437,44 @@ namespace app {
         return ret;
     }
 
+    //レイヤー作成
+    Layer* LayerManager::createLayer(const Size<Int32> size)
+    {
+        //レイヤーID発行
+        this->lastLayerId_++;
+
+        //レイヤー作成
+        Layer* layer = new Layer(this->lastLayerId_);
+        const ReturnCode rc = layer->create(size);
+        if(rc != OK) {
+            delete layer;
+            layer = nullptr;
+        }
+
+        //作成したレイヤーを保持
+        this->layerList_[this->layerNum_] = layer;
+        this->layerNum_++;
+
+        return layer;
+    }
+
+    //レイヤー破棄
+    bool LayerManager::destroyLayer(Layer* const delLayer)
+    {
+        bool isDestroy = false;
+        for(Int32 i = 0; i < this->layerNum_; i++) {
+            if(this->layerList_[i]->getId() == delLayer->getId()) {
+                delete this->layerList_[i];
+                this->layerList_[i] = nullptr;
+                this->layerNum_--;
+                isDestroy = true;
+                break;
+            }
+        }
+
+        return isDestroy;
+    }
+
     //タッチイベント
     void LayerManager::procTouchEvent(TouchEvent ev, Float x, Float y)
     {
@@ -357,8 +483,8 @@ namespace app {
             case TOUCH_ON: {
                 LOGI("LayerManager::%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
                 for(Int32 iLayer = this->layerNum_ - 1; iLayer >= 0; iLayer--) {
-                    Layer &layer = this->layerList_[iLayer];
-                    if(layer.isCollision(x, y)) {
+                    Layer* layer = this->layerList_[iLayer];
+                    if(layer->isCollision(x, y)) {
                         this->touchLayer_ = iLayer;
                         break;
                     }
@@ -374,11 +500,11 @@ namespace app {
             case TOUCH_MOVE: {
                 LOGI("LayerManager::%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
                 if(this->touchLayer_ >= 0) {
-                    Layer &layer = this->layerList_[this->touchLayer_];
-                    Pos2D<Int32> layerPos = layer.getPos();
+                    Layer* layer = this->layerList_[this->touchLayer_];
+                    Pos2D<Int32> layerPos = layer->getPos();
                     layerPos.moveX(touchPos.getX() - this->touchPos_.getX());
                     layerPos.moveY(touchPos.getY() - this->touchPos_.getY());
-                    layer.updatePos(layerPos);
+                    layer->updatePos(layerPos);
 
                     this->touchPos_ = touchPos;
                 }
@@ -394,8 +520,8 @@ namespace app {
     {
         LOGI("LayerManager::%s START\n", __FUNCTION__);
         ReturnCode retCode;
-        GLfloat red = 0.0F;
-        GLfloat blue = 0.0F;
+
+        MapView *mapView = new MapView();
 
         //EGL資源の作成
         retCode = this->createEGL();
@@ -461,46 +587,16 @@ namespace app {
                 this->shader_.create(vertex_fbo, fragment_fbo);
             }
 
-            Layer* layer;
-            layer = &this->layerList_[0];
-            if (!layer->isCreated()) {
-                //描画レイヤー作成
-                layer->create(Pos2D<Int32>(0, 0), this->windowSize_);
-                this->layerNum_++;
+            //レイヤー登録
+            if(this->layerNum_ == 0) {
+                mapView->create(Pos2D<Int32>(0, 0), this->windowSize_);
             }
 
-            //FBOに描画
-            layer->beginDraw();
-            glClearColor(red / 255.0F, 0.0F, 0.0F, 1.0F);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glFlush();
-            layer->endDraw();
-
-            layer = &this->layerList_[1];
-            if (!layer->isCreated()) {
-                //描画レイヤー作成
-                layer->create(Pos2D<Int32>(50, 50), Size<Int32>(500, 500));
-                this->layerNum_++;
-            }
-
-            //FBOに描画
-            layer->beginDraw();
-            glClearColor(0.0F, 0.0F, blue / 255.0F, 1.0F);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glFlush();
-            layer->endDraw();
+            //描画
+            mapView->draw();
 
             //レイヤー表示更新
             this->updateLayers();
-
-            red += 1.0F;
-            if(red > 255.0F) {
-                red = 0.0F;
-            }
-            blue += 1.0F;
-            if(blue > 255.0F) {
-                blue = 0.0F;
-            }
 
             //待ち
             std::this_thread::sleep_for(std::chrono::milliseconds(40));
@@ -611,13 +707,6 @@ namespace app {
     //レイヤー表示更新
     void LayerManager::updateLayers()
     {
-        GLuint program = this->shader_.getProgramId();
-        GLuint attr_point = this->shader_.getAttrLocation("attr_point");
-        GLuint attr_uv = this->shader_.getAttrLocation("attr_uv");
-        GLuint unif_proj = this->shader_.getUniformLocation("unif_proj");
-        GLuint unif_mv = this->shader_.getUniformLocation("unif_mv");
-        GLuint unif_texture = this->shader_.getUniformLocation("unif_texture");
-
         //ビューポート設定
         glViewport(0, 0, this->windowSize_.getWidth(), this->windowSize_.getHeight());
 
@@ -626,50 +715,17 @@ namespace app {
         glClear(GL_COLOR_BUFFER_BIT);
 
         //使用するシェーダを指定
+        GLuint program = this->shader_.getProgramId();
         glUseProgram(program);
 
         //プロジェクション変換行列をシェーダへ転送
+        GLuint unif_proj = this->shader_.getUniformLocation("unif_proj");
         glUniformMatrix4fv(unif_proj, 1, GL_FALSE, this->projMat_[0]);
 
-        //テクスチャマッピングを有効にする
-        glEnable(GL_TEXTURE_2D);
-        glEnableVertexAttribArray(attr_point);
-        glEnableVertexAttribArray(attr_uv);
-
+        //各レイヤーの描画
         for(Int32 iLayer = 0; iLayer < this->layerNum_; ++iLayer) {
-            Layer& layer = this->layerList_[iLayer];
-
-            glBindTexture(GL_TEXTURE_2D, layer.getTextureID());
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            //テクスチャユニット0を指定
-            glUniform1i(unif_texture, 0);
-
-            //モデルビュー変換行列をシェーダへ転送
-            Matrix4F mv = layer.getModelViewMatrix();
-            glUniformMatrix4fv(unif_mv, 1, GL_FALSE, mv[0]);
-
-            //頂点データ転送
-            glBindBuffer(GL_ARRAY_BUFFER, layer.getCoordVetexID());
-            glVertexAttribPointer(attr_point, 2, GL_FLOAT, GL_FALSE, 0, 0);
-            glBindBuffer(GL_ARRAY_BUFFER, layer.getTexCoordVetexID());
-            glVertexAttribPointer(attr_uv, 2, GL_FLOAT, GL_FALSE, 0, 0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            //描画
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-            glBindTexture(GL_TEXTURE_2D, 0);
+            this->layerList_[iLayer]->draw(this->shader_);
         }
-
-        //テクスチャマッピングを無効にする
-        glDisableVertexAttribArray(attr_point);
-        glDisableVertexAttribArray(attr_uv);
-        glDisable(GL_TEXTURE_2D);
 
         //表示更新
         (void)eglSwapBuffers(this->eglDpy_, this->eglWin_);

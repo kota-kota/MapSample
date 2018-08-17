@@ -26,6 +26,7 @@ add_library( # Sets the name of the library.
              ${NATIVE_PATH}/LayerManager.cpp
              ${NATIVE_PATH}/Shader.cpp
              ${NATIVE_PATH}/Math.cpp
+             ${NATIVE_PATH}/MapView.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
