@@ -68,19 +68,19 @@ namespace app {
         Pos3D();
         Pos3D(const T x, const T y, const T z);
         //座標設定
-        inline void set(const T x, const T y, const T z);
+        void set(const T x, const T y, const T z);
         //X座標取得・設定・移動
-        inline T getX() const;
-        inline void setX(const T x);
-        inline void moveX(const T xofs);
+        T getX() const;
+        void setX(const T x);
+        void moveX(const T xofs);
         //Y座標取得・設定・移動
-        inline T getY() const;
-        inline void setY(const T y);
-        inline void moveY(const T yofs);
+        T getY() const;
+        void setY(const T y);
+        void moveY(const T yofs);
         //Z座標取得・設定・移動
-        inline T getZ() const;
-        inline void setZ(const T z);
-        inline void moveZ(const T zofs);
+        T getZ() const;
+        void setZ(const T z);
+        void moveZ(const T zofs);
     };
 
     //サイズ
@@ -95,13 +95,13 @@ namespace app {
         Size();
         Size(const T width, const T height);
         //サイズ設定
-        inline void set(const T width, const T height);
+        void set(const T width, const T height);
         //幅取得・設定
-        inline T getWidth() const;
-        inline void setWidth(const T width);
+        T getWidth() const;
+        void setWidth(const T width);
         //高さ取得・設定
-        inline T getHeight() const;
-        inline void setHeight(const T height);
+        T getHeight() const;
+        void setHeight(const T height);
     };
 
     //エリア
@@ -118,19 +118,19 @@ namespace app {
         Area();
         Area(const T xmin, const T ymin, const T xmax, const T ymax);
         //エリア設定
-        inline void set(const T xmin, const T ymin, const T xmax, const T ymax);
+        void set(const T xmin, const T ymin, const T xmax, const T ymax);
         //xmin取得・設定
-        inline T getXMin() const;
-        inline void setXMin(const T xmin);
+        T getXMin() const;
+        void setXMin(const T xmin);
         //ymin取得・設定
-        inline T getYMin() const;
-        inline void setYMin(const T ymin);
+        T getYMin() const;
+        void setYMin(const T ymin);
         //xmax取得・設定
-        inline T getXMax() const;
-        inline void setXMax(const T xmax);
+        T getXMax() const;
+        void setXMax(const T xmax);
         //ymax取得・設定
-        inline T getYMax() const;
-        inline void setYMax(const T ymax);
+        T getYMax() const;
+        void setYMax(const T ymax);
     };
 }
 
