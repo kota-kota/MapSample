@@ -55,7 +55,7 @@ namespace app {
     Layer::Layer() :
             pos_(), size_(), fbo_(), vbo_()
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Layer::%s\n", __FUNCTION__);
         for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
             this->fbo_[i] = 0U;
         }
@@ -67,7 +67,7 @@ namespace app {
     //デストラクタ
     Layer::~Layer()
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Layer::%s\n", __FUNCTION__);
         this->destroy();
     }
 
@@ -110,7 +110,7 @@ namespace app {
     //レイヤー作成
     ReturnCode Layer::create(Pos2D<Int32> pos, Size<Int32> size)
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Layer::%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
 
         this->pos_ = pos;
@@ -166,7 +166,7 @@ namespace app {
         //フレームバッファオブジェクトの結合を解除する
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        LOGI("%s fbo:%d color:%d depth:%d status:0x%x\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH], status);
+        LOGI("Layer::%s fbo:%d color:%d depth:%d status:0x%x\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH], status);
         if(status != GL_FRAMEBUFFER_COMPLETE) { goto END; }
 
         //バーテックスバッファオブジェクトを作成する
@@ -184,13 +184,13 @@ namespace app {
 
         //GL_ARRAY_BUFFERでのバインドを解除
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        LOGI("%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
+        LOGI("Layer::%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
 
         retCode = OK;
 
         END:
         if(retCode != OK) {
-            LOGE("%s !!!ERROR!!!\n", __FUNCTION__);
+            LOGE("Layer::%s !!!ERROR!!!\n", __FUNCTION__);
         }
         return retCode;
     }
@@ -198,11 +198,11 @@ namespace app {
     //レイヤー破棄
     void Layer::destroy()
     {
-        LOGI("%s fbo:%d color:%d depth:%d\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH]);
+        LOGI("Layer::%s fbo:%d color:%d depth:%d\n", __FUNCTION__, this->fbo_[FboType::FBO], this->fbo_[FboType::FBO_COLOR], this->fbo_[FboType::FBO_DEPTH]);
         glDeleteTextures(1, &this->fbo_[FboType::FBO_COLOR]);
         glDeleteRenderbuffers(1, &this->fbo_[FboType::FBO_DEPTH]);
         glDeleteFramebuffers(1, &this->fbo_[FboType::FBO]);
-        LOGI("%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
+        LOGI("Layer::%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
         glDeleteBuffers(VboType::VBO_MAX, &this->vbo_[0]);
     }
 
@@ -263,18 +263,50 @@ namespace app {
     //------------------------------------------------------------------------------------
     // LayerManager
 
-    //インスタンス取得
-    LayerManager* LayerManager::getInstance()
+    //コンストラクタ
+    LayerManager::LayerManager() :
+            isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
+            eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
+            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_()
+    {
+        LOGI("LayerManager::%s\n", __FUNCTION__);
+
+        //Mathクラスのテスト関数
+        app::test_Math();
+
+        //スレッド作成
+        this->th_ = std::thread(&LayerManager::mainTask, this);
+    }
+
+    //デストラクタ
+    LayerManager::~LayerManager()
+    {
+        LOGI("LayerManager::%s\n", __FUNCTION__);
+
+        //タスク終了
+        this->isTask_ = false;
+        this->th_.join();
+    }
+
+    //インスタンス作成
+    void LayerManager::create()
     {
         if(g_instance_ == nullptr) {
             g_instance_ = new LayerManager();
         }
+        LOGI("LayerManager::%s g_instance:%p\n", __FUNCTION__, g_instance_);
+    }
+
+    //インスタンス取得
+    LayerManager* LayerManager::get()
+    {
         return g_instance_;
     }
 
-    //インスタンス削除
-    void LayerManager::delInstance()
+    //インスタンス破棄
+    void LayerManager::destroy()
     {
+        LOGI("LayerManager::%s g_instance:%p\n", __FUNCTION__, g_instance_);
         if(g_instance_ != nullptr) {
             delete g_instance_;
             g_instance_ = nullptr;
@@ -284,7 +316,7 @@ namespace app {
     //表示更新開始
     void LayerManager::start(void* native, Int32 w, Int32 h)
     {
-        LOGI("%s native:%p w:%d h:%d\n", __FUNCTION__, native, w, h);
+        LOGI("LayerManager::%s native:%p w:%d h:%d\n", __FUNCTION__, native, w, h);
 
         this->mtx_.lock();
 
@@ -303,7 +335,7 @@ namespace app {
     //表示更新停止
     void* LayerManager::stop()
     {
-        LOGI("%s native:%p\n", __FUNCTION__, this->native_);
+        LOGI("LayerManager::%s native:%p\n", __FUNCTION__, this->native_);
 
         this->mtx_.lock();
 
@@ -323,7 +355,7 @@ namespace app {
         Pos2D<Int32> touchPos(static_cast<Int32>(x), static_cast<Int32>(y));
         switch(ev) {
             case TOUCH_ON: {
-                LOGI("%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
+                LOGI("LayerManager::%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
                 for(Int32 iLayer = this->layerNum_ - 1; iLayer >= 0; iLayer--) {
                     Layer &layer = this->layerList_[iLayer];
                     if(layer.isCollision(x, y)) {
@@ -335,12 +367,12 @@ namespace app {
                 break;
             }
             case TOUCH_OFF: {
-                LOGI("%s TOUCH_OFF (%f,%f)\n", __FUNCTION__, x, y);
+                LOGI("LayerManager::%s TOUCH_OFF (%f,%f)\n", __FUNCTION__, x, y);
                 this->touchLayer_ = -1;
                 break;
             }
             case TOUCH_MOVE: {
-                LOGI("%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
+                LOGI("LayerManager::%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
                 if(this->touchLayer_ >= 0) {
                     Layer &layer = this->layerList_[this->touchLayer_];
                     Pos2D<Int32> layerPos = layer.getPos();
@@ -357,35 +389,10 @@ namespace app {
         }
     }
 
-    //コンストラクタ
-    LayerManager::LayerManager() :
-            isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
-            eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
-            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_()
-    {
-        LOGI("%s\n", __FUNCTION__);
-
-        //Mathクラスのテスト関数
-        app::test_Math();
-
-        //スレッド作成
-        this->th_ = std::thread(&LayerManager::mainTask, this);
-    }
-
-    //デストラクタ
-    LayerManager::~LayerManager()
-    {
-        LOGI("%s\n", __FUNCTION__);
-
-        //タスク終了
-        this->isTask_ = false;
-        this->th_.join();
-    }
-
     //メインタスク
     void LayerManager::mainTask()
     {
-        LOGI("%s START\n", __FUNCTION__);
+        LOGI("LayerManager::%s START\n", __FUNCTION__);
         ReturnCode retCode;
         GLfloat red = 0.0F;
         GLfloat blue = 0.0F;
@@ -415,7 +422,7 @@ namespace app {
                 //表示更新停止中
                 if(native == nullptr) {
                     //ウィンドウがない→停止中を継続
-                    //LOGI("%s PAUSE\n", __FUNCTION__);
+                    //LOGI("LayerManager::%s PAUSE\n", __FUNCTION__);
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     continue;
                 }
@@ -429,7 +436,7 @@ namespace app {
                 }
 
                 //表示更新停止を終了し、表示更新実施中にする
-                LOGI("%s PAUSE -> RUN\n", __FUNCTION__);
+                LOGI("LayerManager::%s PAUSE -> RUN\n", __FUNCTION__);
                 this->isPause_ = false;
             }
             else {
@@ -441,12 +448,12 @@ namespace app {
                     this->destroyWindowSurface();
 
                     //表示更新を停止する
-                    LOGI("%s RUN -> PAUSE\n", __FUNCTION__);
+                    LOGI("LayerManager::%s RUN -> PAUSE\n", __FUNCTION__);
                     this->isPause_ = true;
                     continue;
                 }
                 //ウィンドウがある→実施中を継続
-                //LOGI("%s RUN\n", __FUNCTION__);
+                //LOGI("LayerManager::%s RUN\n", __FUNCTION__);
             }
 
             if(!this->shader_.isCreated()) {
@@ -503,49 +510,49 @@ namespace app {
 
         END:
         if(retCode != OK) {
-            LOGE("%s !!!ERROR!!!\n", __FUNCTION__);
+            LOGE("LayerManager::%s !!!ERROR!!!\n", __FUNCTION__);
         }
         //EGL資源の解放
         this->destroyWindowSurface();
         this->destroyEGL();
 
         //タスク終了
-        LOGI("%s END (retCode:%d)\n", __FUNCTION__, retCode);
+        LOGI("LayerManager::%s END (retCode:%d)\n", __FUNCTION__, retCode);
     }
 
     //EGL資源作成
     ReturnCode LayerManager::createEGL()
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("LayerManager::%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
         EGLint major = 0, minor = 0;
         EGLint numConfigs = 0;
 
         //EGLディスプレイを取得
         this->eglDpy_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        LOGI("%s eglGetDisplay dpy:%p (err:0x%x)\n", __FUNCTION__, this->eglDpy_, eglGetError());
+        LOGI("LayerManager::%s eglGetDisplay dpy:%p (err:0x%x)\n", __FUNCTION__, this->eglDpy_, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         //EGL初期化
         (void)eglInitialize(this->eglDpy_, &major, &minor);
-        LOGI("%s eglInitialize egl:%d.%d (err:0x%x)\n", __FUNCTION__, major, minor, eglGetError());
+        LOGI("LayerManager::%s eglInitialize egl:%d.%d (err:0x%x)\n", __FUNCTION__, major, minor, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         //EGLコンフィグを取得
         (void)eglChooseConfig(this->eglDpy_, attr_config, &this->eglCfg_, 1, &numConfigs);
-        LOGI("%s eglChooseConfig cfg:%p num:%d (err:0x%x)\n", __FUNCTION__, this->eglCfg_, numConfigs, eglGetError());
+        LOGI("LayerManager::%s eglChooseConfig cfg:%p num:%d (err:0x%x)\n", __FUNCTION__, this->eglCfg_, numConfigs, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         //EGLコンテキストを作成
         this->eglCtx_ = eglCreateContext(this->eglDpy_, this->eglCfg_, EGL_NO_CONTEXT, attr_context);
-        LOGI("%s eglCreateContext ctx:%p (err:0x%x)\n", __FUNCTION__, this->eglCtx_, eglGetError());
+        LOGI("LayerManager::%s eglCreateContext ctx:%p (err:0x%x)\n", __FUNCTION__, this->eglCtx_, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         retCode = OK;
 
         END:
         if(retCode != OK) {
-            LOGE("%s !!!ERROR!!!\n", __FUNCTION__);
+            LOGE("LayerManager::%s !!!ERROR!!!\n", __FUNCTION__);
         }
         return retCode;
     }
@@ -555,12 +562,12 @@ namespace app {
     {
         if (this->eglCtx_ != EGL_NO_CONTEXT) {
             eglDestroyContext(this->eglDpy_, this->eglCtx_);
-            LOGI("%s eglDestroyContext ctx:%p (err:0x%x)\n", __FUNCTION__, this->eglCtx_, eglGetError());
+            LOGI("LayerManager::%s eglDestroyContext ctx:%p (err:0x%x)\n", __FUNCTION__, this->eglCtx_, eglGetError());
             this->eglCtx_ = EGL_NO_CONTEXT;
         }
         if (this->eglDpy_ != EGL_NO_DISPLAY) {
             //TODO: eglTerminate(this->eglDpy_);
-            LOGI("%s eglTerminate dpy:%p (err:0x%x)\n", __FUNCTION__, this->eglDpy_, eglGetError());
+            LOGI("LayerManager::%s eglTerminate dpy:%p (err:0x%x)\n", __FUNCTION__, this->eglDpy_, eglGetError());
             this->eglDpy_ = EGL_NO_DISPLAY;
         }
     }
@@ -571,19 +578,19 @@ namespace app {
         ReturnCode retCode = NG_ERROR;
 
         this->eglWin_ = eglCreateWindowSurface(this->eglDpy_, this->eglCfg_, (NativeWindowType)native, nullptr);
-        LOGI("%s eglCreateWindowSurface win:%p (err:0x%x)\n", __FUNCTION__, this->eglWin_, eglGetError());
+        LOGI("LayerManager::%s eglCreateWindowSurface win:%p (err:0x%x)\n", __FUNCTION__, this->eglWin_, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         //カレント
         (void)eglMakeCurrent(this->eglDpy_, this->eglWin_, this->eglWin_, this->eglCtx_);
-        LOGI("%s eglMakeCurrent bind (err:0x%x)\n", __FUNCTION__, eglGetError());
+        LOGI("LayerManager::%s eglMakeCurrent bind (err:0x%x)\n", __FUNCTION__, eglGetError());
         if(eglGetError() != EGL_SUCCESS) { goto END; }
 
         retCode = OK;
 
         END:
         if(retCode != OK) {
-            LOGE("%s !!!ERROR!!!\n", __FUNCTION__);
+            LOGE("LayerManager::%s !!!ERROR!!!\n", __FUNCTION__);
         }
         return retCode;
     }
@@ -592,11 +599,11 @@ namespace app {
     void LayerManager::destroyWindowSurface()
     {
         (void)eglMakeCurrent(this->eglDpy_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        LOGI("%s eglMakeCurrent unbind (err:0x%x)\n", __FUNCTION__, eglGetError());
+        LOGI("LayerManager::%s eglMakeCurrent unbind (err:0x%x)\n", __FUNCTION__, eglGetError());
 
         if (this->eglWin_ != EGL_NO_SURFACE) {
             eglDestroySurface(this->eglDpy_, this->eglWin_);
-            LOGI("%s eglDestroySurface win:%p (err:0x%x)\n", __FUNCTION__, this->eglWin_, eglGetError());
+            LOGI("LayerManager::%s eglDestroySurface win:%p (err:0x%x)\n", __FUNCTION__, this->eglWin_, eglGetError());
             this->eglWin_ = EGL_NO_SURFACE;
         }
     }

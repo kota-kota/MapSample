@@ -9,13 +9,13 @@ namespace app {
     Shader::Shader() :
             programId_(0)
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Shader::%s\n", __FUNCTION__);
     }
 
     //デストラクタ
     Shader::~Shader()
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Shader::%s\n", __FUNCTION__);
         this->destroy();
     }
 
@@ -30,7 +30,7 @@ namespace app {
     //シェーダを作成する
     ReturnCode Shader::create(const Char8* const vertex, const Char8* const fragment)
     {
-        LOGI("%s\n", __FUNCTION__);
+        LOGI("Shader::%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
         GLuint	vertexId = 0;
         GLuint	fragmentId = 0;
@@ -43,7 +43,7 @@ namespace app {
         glShaderSource(vertexId, 1, &vertex, nullptr);
         glCompileShader(vertexId);
         glGetShaderiv(vertexId, GL_COMPILE_STATUS, &retCompiled);
-        LOGD("%s glCompileShader vertexId:%d (ret:%d)\n", __FUNCTION__, vertexId, retCompiled);
+        LOGD("Shader::%s glCompileShader vertexId:%d (ret:%d)\n", __FUNCTION__, vertexId, retCompiled);
         if (retCompiled == GL_FALSE) {
             goto END;
         }
@@ -53,7 +53,7 @@ namespace app {
         glShaderSource(fragmentId, 1, &fragment, nullptr);
         glCompileShader(fragmentId);
         glGetShaderiv(fragmentId, GL_COMPILE_STATUS, &retCompiled);
-        LOGD("%s glCompileShader fragmentId:%d (ret:%d)\n", __FUNCTION__, fragmentId, retCompiled);
+        LOGD("Shader::%s glCompileShader fragmentId:%d (ret:%d)\n", __FUNCTION__, fragmentId, retCompiled);
         if (retCompiled == GL_FALSE) {
             goto END;
         }
@@ -64,7 +64,7 @@ namespace app {
         glAttachShader(programId, fragmentId);
         glLinkProgram(programId);
         glGetProgramiv(programId, GL_LINK_STATUS, &retLinked);
-        LOGD("%s glLinkProgram programId:%d (ret:%d)\n", __FUNCTION__, programId, retLinked);
+        LOGD("Shader::%s glLinkProgram programId:%d (ret:%d)\n", __FUNCTION__, programId, retLinked);
         if (retLinked == GL_FALSE) {
             goto END;
         }
@@ -90,7 +90,7 @@ namespace app {
     //シェーダを破棄する
     void Shader::destroy()
     {
-        LOGI("%s programId:%d\n", __FUNCTION__, this->programId_);
+        LOGI("Shader::%s programId:%d\n", __FUNCTION__, this->programId_);
         if (this->programId_ != 0) {
             glDeleteProgram(this->programId_);
         }

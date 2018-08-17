@@ -68,14 +68,6 @@ namespace app {
     };
 
     class LayerManager {
-    public:
-        enum TouchEvent {
-            TOUCH_ON,
-            TOUCH_OFF,
-            TOUCH_MOVE,
-        };
-
-    private:
         //メンバ変数
         bool isTask_;
         bool isPause_;
@@ -98,11 +90,19 @@ namespace app {
         Int32 touchLayer_;
         Pos2D<Int32> touchPos_;
 
+    private:
+        //コンストラクタ
+        LayerManager();
+        //デストラクタ
+        ~LayerManager();
+
     public:
+        //インスタンス生成
+        static void create();
         //インスタンス取得
-        static LayerManager* getInstance();
-        //インスタンス削除
-        static void delInstance();
+        static LayerManager* get();
+        //インスタンス破棄
+        static void destroy();
         //表示更新開始
         void start(void* native, Int32 w, Int32 h);
         //表示更新停止
@@ -111,10 +111,6 @@ namespace app {
         void procTouchEvent(TouchEvent ev, Float x, Float y);
 
     private:
-        //コンストラクタ
-        LayerManager();
-        //デストラクタ
-        ~LayerManager();
         //メインタスク
         void mainTask();
         //EGL資源作成

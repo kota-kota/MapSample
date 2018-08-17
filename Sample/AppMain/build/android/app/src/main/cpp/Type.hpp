@@ -25,6 +25,13 @@ namespace app {
         OK = 0,
     };
 
+    //タッチイベント
+    enum TouchEvent {
+        TOUCH_ON,
+        TOUCH_OFF,
+        TOUCH_MOVE,
+    };
+
     //位置(2D)
     template <typename T>
     class Pos2D {
@@ -39,13 +46,13 @@ namespace app {
         //座標設定
         inline void set(const T x, const T y);
         //X座標取得・設定・移動
-        inline T getX() const;
-        inline void setX(const T x);
-        inline void moveX(const T xofs);
+        T getX() const;
+        void setX(const T x);
+        void moveX(const T xofs);
         //Y座標取得・設定・移動
-        inline T getY() const;
-        inline void setY(const T y);
-        inline void moveY(const T yofs);
+        T getY() const;
+        void setY(const T y);
+        void moveY(const T yofs);
     };
 
     //位置(3D)

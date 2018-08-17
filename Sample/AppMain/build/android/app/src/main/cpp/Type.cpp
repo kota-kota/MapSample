@@ -13,7 +13,7 @@ namespace app {
 
     //座標設定
     template <typename T>
-    inline void Pos2D<T>::set(const T x, const T y)
+    void Pos2D<T>::set(const T x, const T y)
     {
         this->x_ = x;
         this->y_ = y;
@@ -21,19 +21,19 @@ namespace app {
 
     //X座標取得・設定・移動
     template <typename T>
-    inline T Pos2D<T>::getX() const { return this->x_; }
+    T Pos2D<T>::getX() const { return this->x_; }
     template <typename T>
-    inline void Pos2D<T>::setX(const T x) { this->x_ = x; }
+    void Pos2D<T>::setX(const T x) { this->x_ = x; }
     template <typename T>
-    inline void Pos2D<T>::moveX(const T xofs) { this->x_ += xofs; }
+    void Pos2D<T>::moveX(const T xofs) { this->x_ += xofs; }
 
     //Y座標取得・設定・移動
     template <typename T>
-    inline T Pos2D<T>::getY() const { return this->y_; }
+    T Pos2D<T>::getY() const { return this->y_; }
     template <typename T>
-    inline void Pos2D<T>::setY(const T y) { this->y_ = y; }
+    void Pos2D<T>::setY(const T y) { this->y_ = y; }
     template <typename T>
-    inline void Pos2D<T>::moveY(const T yofs) { this->y_ += yofs; }
+    void Pos2D<T>::moveY(const T yofs) { this->y_ += yofs; }
 
 
 
@@ -48,7 +48,7 @@ namespace app {
 
     //座標設定
     template <typename T>
-    inline void Pos3D<T>::set(const T x, const T y, const T z)
+    void Pos3D<T>::set(const T x, const T y, const T z)
     {
         this->x_ = x;
         this->y_ = y;
@@ -57,27 +57,27 @@ namespace app {
 
     //X座標取得・設定・移動
     template <typename T>
-    inline T Pos3D<T>::getX() const { return this->x_; }
+    T Pos3D<T>::getX() const { return this->x_; }
     template <typename T>
-    inline void Pos3D<T>::setX(const T x) { this->x_ = x; }
+    void Pos3D<T>::setX(const T x) { this->x_ = x; }
     template <typename T>
-    inline void Pos3D<T>::moveX(const T xofs) { this->x_ += xofs; }
+    void Pos3D<T>::moveX(const T xofs) { this->x_ += xofs; }
 
     //Y座標取得・設定・移動
     template <typename T>
-    inline T Pos3D<T>::getY() const { return this->y_; }
+    T Pos3D<T>::getY() const { return this->y_; }
     template <typename T>
-    inline void Pos3D<T>::setY(const T y) { this->y_ = y; }
+    void Pos3D<T>::setY(const T y) { this->y_ = y; }
     template <typename T>
-    inline void Pos3D<T>::moveY(const T yofs) { this->y_ += yofs; }
+    void Pos3D<T>::moveY(const T yofs) { this->y_ += yofs; }
 
     //Z座標取得・設定・移動
     template <typename T>
-    inline T Pos3D<T>::getZ() const { return this->z_; }
+    T Pos3D<T>::getZ() const { return this->z_; }
     template <typename T>
-    inline void Pos3D<T>::setZ(const T z) { this->z_ = z; }
+    void Pos3D<T>::setZ(const T z) { this->z_ = z; }
     template <typename T>
-    inline void Pos3D<T>::moveZ(const T zofs) { this->z_ += zofs; }
+    void Pos3D<T>::moveZ(const T zofs) { this->z_ += zofs; }
 
 
     //------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ namespace app {
 
     //サイズ設定
     template <typename T>
-    inline void Size<T>::set(const T width, const T height)
+    void Size<T>::set(const T width, const T height)
     {
         this->width_ = width;
         this->height_ = height;
@@ -99,15 +99,15 @@ namespace app {
 
     //幅取得・設定
     template <typename T>
-    inline T Size<T>::getWidth() const { return this->width_; }
+    T Size<T>::getWidth() const { return this->width_; }
     template <typename T>
-    inline void Size<T>::setWidth(const T width) { this->width_ = width; }
+    void Size<T>::setWidth(const T width) { this->width_ = width; }
 
     //高さ取得・設定
     template <typename T>
-    inline T Size<T>::getHeight() const { return this->height_; }
+    T Size<T>::getHeight() const { return this->height_; }
     template <typename T>
-    inline void Size<T>::setHeight(const T height) { this->height_ = height; }
+    void Size<T>::setHeight(const T height) { this->height_ = height; }
 
 
 
@@ -122,7 +122,7 @@ namespace app {
 
     //エリア設定
     template <typename T>
-    inline void Area<T>::set(const T xmin, const T ymin, const T xmax, const T ymax)
+    void Area<T>::set(const T xmin, const T ymin, const T xmax, const T ymax)
     {
         this->xmin_ = xmin;
         this->ymin_ = ymin;
@@ -132,27 +132,27 @@ namespace app {
 
     //xmin取得・設定
     template <typename T>
-    inline T Area<T>::getXMin() const { return this->xmin_; }
+    T Area<T>::getXMin() const { return this->xmin_; }
     template <typename T>
-    inline void Area<T>::setXMin(const T xmin) { this->xmin_ = xmin; }
+    void Area<T>::setXMin(const T xmin) { this->xmin_ = xmin; }
 
     //ymin取得・設定
     template <typename T>
-    inline T Area<T>::getYMin() const { return this->ymin_; }
+    T Area<T>::getYMin() const { return this->ymin_; }
     template <typename T>
-    inline void Area<T>::setYMin(const T ymin) { this->ymin_ = ymin; }
+    void Area<T>::setYMin(const T ymin) { this->ymin_ = ymin; }
 
     //xmax取得・設定
     template <typename T>
-    inline T Area<T>::getXMax() const { return this->xmax_; }
+    T Area<T>::getXMax() const { return this->xmax_; }
     template <typename T>
-    inline void Area<T>::setXMax(const T xmax) { this->xmax_ = xmax; }
+    void Area<T>::setXMax(const T xmax) { this->xmax_ = xmax; }
 
     //ymax取得・設定
     template <typename T>
-    inline T Area<T>::getYMax() const { return this->ymax_; }
+    T Area<T>::getYMax() const { return this->ymax_; }
     template <typename T>
-    inline void Area<T>::setYMax(const T ymax) { this->ymax_ = ymax; }
+    void Area<T>::setYMax(const T ymax) { this->ymax_ = ymax; }
 
 
 

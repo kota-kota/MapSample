@@ -20,8 +20,9 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             ${JNI_PATH}/com_sample_appmain_LayerManager.cpp
+             ${JNI_PATH}/com_sample_appmain_AppMain.cpp
              ${NATIVE_PATH}/Type.cpp
+             ${NATIVE_PATH}/AppMain.cpp
              ${NATIVE_PATH}/LayerManager.cpp
              ${NATIVE_PATH}/Shader.cpp
              ${NATIVE_PATH}/Math.cpp

@@ -14,16 +14,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final static String LOG_TAG = "AppMain";
-    MapSurfaceView mapSurfaceView = null;
+    AppMainView appMainView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG, "MainActivity:onCreate");
         super.onCreate(savedInstanceState);
 
-        //MapSurfaceViewをセット
-        mapSurfaceView = new MapSurfaceView(this);
-        setContentView(mapSurfaceView);
+        //AppMainViewを生成
+        appMainView = new AppMainView(this);
+        appMainView.create();
+
+        //ビューにセット
+        setContentView(appMainView);
 
         //activity_mainレイアウトのViewをセット
         View view = this.getLayoutInflater().inflate(R.layout.activity_main, null);
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(LOG_TAG, "MainActivity:onDestroy");
         super.onDestroy();
 
-        //MapSurfaceViewを破棄
-        mapSurfaceView.destroy();
+        //AppMainViewを破棄
+        appMainView.destroy();
     }
 }

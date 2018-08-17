@@ -3,25 +3,21 @@ package com.sample.appmain;
 import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+public class AppMainView extends SurfaceView implements SurfaceHolder.Callback {
 
     private final static String LOG_TAG = "AppMain";
     //タッチポインタID記憶用
     private int pointerId1 = -1;
     private int pointerId2 = -1;
-    //レイヤー管理オブジェクト
-    LayerManager layerManager;
 
     //コンストラクタ
-    public MapSurfaceView(Context context) {
+    public AppMainView(Context context) {
         super(context);
-        Log.i(LOG_TAG, "MapSurfaceView::MapSurfaceView");
-
-        //レイヤー管理オブジェクトを生成
-        layerManager = new LayerManager();
+        Log.i(LOG_TAG, "AppMainView::AppMainView");
 
         //サーフェースフォルダーを取得
         SurfaceHolder holder = this.getHolder();
@@ -29,29 +25,37 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         holder.addCallback(this);
     }
 
+    //生成
+    public void create() {
+        Log.i(LOG_TAG, "AppMainView::create");
+        //アプリ作成
+        AppMain_create();
+    }
+
     //破棄
     public void destroy() {
-        Log.i(LOG_TAG, "MapSurfaceView::destroy");
-        layerManager.destroy();
+        Log.i(LOG_TAG, "AppMainView::destroy");
+        //アプリ破棄
+        AppMain_destroy();
     }
 
     //Surface作成時　SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.i(LOG_TAG, "MapSurfaceView::surfaceCreated");
+        Log.i(LOG_TAG, "AppMainView::surfaceCreated");
     }
 
     //Surface変化時　SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        Log.i(LOG_TAG, "MapSurfaceView::surfaceChanged format:" + format + " w:" + w + " h:" + h);
-        //表示更新開始
-        layerManager.start(holder.getSurface(), w, h);
+        Log.i(LOG_TAG, "AppMainView::surfaceChanged format:" + format + " w:" + w + " h:" + h);
+        //アプリ開始
+        AppMain_start(holder.getSurface(), w, h);
     }
 
     //Surface解放時　SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.i(LOG_TAG, "MapSurfaceView::surfaceDestroyed");
-        //表示更新停止
-        layerManager.stop();
+        Log.i(LOG_TAG, "AppMainView::surfaceDestroyed");
+        //アプリ停止
+        AppMain_stop();
     }
 
     @Override
@@ -73,7 +77,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 pointerId1 = pointerId;
                 pointerId2 = -1;
                 Log.i(LOG_TAG, "ACTION_DOWN id:" + pointerId + " (" + x + "," + y + ")");
-                layerManager.procTouchEvent_ON(x, y);
+                AppMain_procTouchEvent_ON(x, y);
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
@@ -106,7 +110,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 // ジェスチャー処理
                 if ((pointerId1 >= 0) && (pointerId2 == -1)) {
                     Log.i(LOG_TAG, "ACTION_MOVE<1> (" + x1 + "," + y1 + ")");
-                    layerManager.procTouchEvent_MOVE(x1, y1);
+                    AppMain_procTouchEvent_MOVE(x1, y1);
                 } else if ((pointerId1 == -1) && (pointerId2 >= 0)) {
                     Log.i(LOG_TAG, "ACTION_MOVE<2>  (" + x2 + "," + y2 + ")");
                 } else if ((pointerId1 >= 0) && (pointerId2 >= 0)) {
@@ -118,7 +122,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 pointerId1 = -1;
                 pointerId2 = -1;
                 Log.i(LOG_TAG, "ACTION_UP id:" + pointerId);
-                layerManager.procTouchEvent_OFF(0.0f, 0.0f);
+                AppMain_procTouchEvent_OFF(0.0f, 0.0f);
                 break;
             case MotionEvent.ACTION_POINTER_UP: {
                 if (pointerId1 == pointerId) {
@@ -140,4 +144,16 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         }
         return true;
     }
+
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public native void AppMain_create();
+    public native void AppMain_start(Surface surface, int w, int h);
+    public native void AppMain_stop();
+    public native void AppMain_destroy();
+    public native void AppMain_procTouchEvent_ON(float x, float y);
+    public native void AppMain_procTouchEvent_OFF(float x, float y);
+    public native void AppMain_procTouchEvent_MOVE(float x, float y);
 }
