@@ -7,13 +7,13 @@
 
 #include <thread>
 #include <mutex>
-#include <list>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
 namespace app {
 
     class Layer {
+        //メンバ変数
         enum FboType {
             FBO,
             FBO_COLOR,
@@ -25,8 +25,6 @@ namespace app {
             VBO_TEXCOORD,
             VBO_MAX,
         };
-
-        //メンバ変数
         UInt32 id_;
         Pos2D<Int32> pos_;
         Size<Int32> size_;
@@ -35,11 +33,13 @@ namespace app {
 
     public:
         //コンストラクタ
-        Layer(const UInt32 id);
+        Layer();
         //デストラクタ
         ~Layer();
+        //レイヤー作成済み判定
+        bool isCreated();
         //レイヤー作成
-        ReturnCode create(const Size<Int32> size);
+        ReturnCode create(const UInt32 id, const Pos2D<Int32> pos, const Size<Int32> size);
         //レイヤー破棄
         void destroy();
         //レイヤー描画
@@ -64,30 +64,10 @@ namespace app {
         Area<Float> calcDrawArea() const;
     };
 
-
-    class LayerView {
-        //メンバ変数
-        Layer* layer_;
-
-    public:
-        //コンストラクタ
-        LayerView();
-        //デストラクタ
-        virtual ~LayerView();
-        //ビュー作成
-        ReturnCode create(Pos2D<Int32> pos, Size<Int32> size);
-        //ビュー破棄
-        void destroy();
-
-    protected:
-        //レイヤーに対する描画開始
-        void beginDraw();
-        //レイヤーに対する描画終了
-        void endDraw();
-    };
-
-
     class LayerManager {
+        //定数
+        static const Int32 MAX_LAYER_NUM_ = 8;
+
         //メンバ変数
         bool isTask_;
         bool isPause_;
@@ -104,12 +84,11 @@ namespace app {
 
         Shader shader_;
 
-        static const Int32 maxLayerNum_ = 3;
         Int32 layerNum_;
-        Layer* layerList_[maxLayerNum_];
-        Int32 touchLayer_;
-        Pos2D<Int32> touchPos_;
+        Layer layers_[MAX_LAYER_NUM_];
         UInt32 lastLayerId_;
+        UInt32 touchLayerId_;
+        Pos2D<Int32> lastTouchPos_;
 
     private:
         //コンストラクタ
@@ -129,9 +108,11 @@ namespace app {
         //表示更新停止
         void* stop();
         //レイヤー作成
-        Layer* createLayer(const Size<Int32> size);
+        UInt32 createLayer(const Pos2D<Int32> pos, const Size<Int32> size);
         //レイヤー破棄
-        bool destroyLayer(Layer* const delLayer);
+        void destroyLayer(const UInt32 layerid);
+        //レイヤー取得
+        Layer* getLayer(const UInt32 layerid);
         //タッチイベント
         void procTouchEvent(TouchEvent ev, Float x, Float y);
 

@@ -53,8 +53,8 @@ namespace app {
     // Layer
 
     //コンストラクタ
-    Layer::Layer(const UInt32 id) :
-            id_(id), pos_(), size_(), fbo_(), vbo_()
+    Layer::Layer() :
+            id_(0), pos_(), size_(), fbo_(), vbo_()
     {
         LOGI("Layer::%s\n", __FUNCTION__);
         for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
@@ -69,11 +69,20 @@ namespace app {
     Layer::~Layer()
     {
         LOGI("Layer::%s\n", __FUNCTION__);
-        this->destroy();
+    }
+
+    //レイヤー作成済み判定
+    bool Layer::isCreated()
+    {
+        bool ret = false;
+        if(this->id_ != 0U) {
+            ret = true;
+        }
+        return ret;
     }
 
     //レイヤー作成
-    ReturnCode Layer::create(const Size<Int32> size)
+    ReturnCode Layer::create(const UInt32 id, const Pos2D<Int32> pos, const Size<Int32> size)
     {
         LOGI("Layer::%s\n", __FUNCTION__);
         ReturnCode retCode = NG_ERROR;
@@ -148,7 +157,9 @@ namespace app {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         LOGI("Layer::%s vbo_coord:%d vbo_texcoord:%d\n", __FUNCTION__, this->vbo_[VboType::VBO_COORD], this->vbo_[VboType::VBO_TEXCOORD]);
 
-        //サイズを保持
+        //IDと位置とサイズを保持
+        this->id_ = id;
+        this->pos_ = pos;
         this->size_ = size;
 
         retCode = OK;
@@ -287,80 +298,18 @@ namespace app {
 
 
     //------------------------------------------------------------------------------------
-    // LayerView
-
-    //コンストラクタ
-    LayerView::LayerView() :
-            layer_(nullptr)
-    {
-        LOGI("Layer::%s\n", __FUNCTION__);
-    }
-
-    //デストラクタ
-    LayerView::~LayerView()
-    {
-        LOGI("Layer::%s\n", __FUNCTION__);
-        this->destroy();
-    }
-
-    //ビュー作成
-    ReturnCode LayerView::create(Pos2D<Int32> pos, Size<Int32> size)
-    {
-        ReturnCode rc = NG_ERROR;
-
-        //レイヤー作成
-        LayerManager* layerManager = LayerManager::get();
-        this->layer_ = layerManager->createLayer(size);
-        if(this->layer_ != nullptr) {
-            rc = OK;
-        }
-
-        return rc;
-    }
-
-    //ビュー破棄
-    void LayerView::destroy()
-    {
-        //レイヤー破棄
-        LayerManager* layerManager = LayerManager::get();
-        bool isDestroy =layerManager->destroyLayer(this->layer_);
-        if(!isDestroy) {
-            delete this->layer_;
-        }
-        this->layer_ = nullptr;
-    }
-
-    //レイヤーに対する描画開始
-    void LayerView::beginDraw()
-    {
-        this->layer_->beginDraw();
-    }
-
-    //レイヤーに対する描画終了
-    void LayerView::endDraw()
-    {
-        this->layer_->endDraw();
-    }
-
-
-
-    //------------------------------------------------------------------------------------
     // LayerManager
 
     //コンストラクタ
     LayerManager::LayerManager() :
             isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
-            shader_(), layerNum_(0), layerList_(), touchLayer_(-1), touchPos_(), lastLayerId_(0)
+            shader_(), layerNum_(0), layers_(), lastLayerId_(0), touchLayerId_(0), lastTouchPos_()
     {
         LOGI("LayerManager::%s\n", __FUNCTION__);
 
         //Mathクラスのテスト関数
         app::test_Math();
-
-        for(Int32 i = 0; i < this->maxLayerNum_; i++) {
-            this->layerList_[i] = nullptr;
-        }
 
         //スレッド作成
         this->th_ = std::thread(&LayerManager::mainTask, this);
@@ -438,41 +387,67 @@ namespace app {
     }
 
     //レイヤー作成
-    Layer* LayerManager::createLayer(const Size<Int32> size)
+    UInt32 LayerManager::createLayer(const Pos2D<Int32> pos, const Size<Int32> size)
     {
-        //レイヤーID発行
-        this->lastLayerId_++;
+        UInt32 retLayerId;
 
-        //レイヤー作成
-        Layer* layer = new Layer(this->lastLayerId_);
-        const ReturnCode rc = layer->create(size);
-        if(rc != OK) {
-            delete layer;
-            layer = nullptr;
+        //空きがあるか
+        if(this->layerNum_ < MAX_LAYER_NUM_) {
+            //空きあり
+
+            //レイヤーID発行
+            UInt32 newId = this->lastLayerId_ + 1U;
+            //レイヤー作成
+            Layer layer;
+            const ReturnCode rc = layer.create(newId, pos, size);
+            if(rc == OK) {
+                //作成成功
+
+                //作成したレイヤーを保持
+                this->layers_[this->layerNum_] = layer;
+                this->layerNum_++;
+
+                //最新レイヤーIDを更新
+                this->lastLayerId_ = newId;
+
+                //作成したレイヤーのレイヤーIDをリターン
+                retLayerId = newId;
+            }
+            else {
+                //作成失敗
+                retLayerId = 0U;
+            }
+        }
+        else {
+            //空きなし
+            retLayerId = 0U;
         }
 
-        //作成したレイヤーを保持
-        this->layerList_[this->layerNum_] = layer;
-        this->layerNum_++;
-
-        return layer;
+        return retLayerId;
     }
 
     //レイヤー破棄
-    bool LayerManager::destroyLayer(Layer* const delLayer)
+    void LayerManager::destroyLayer(const UInt32 layerid)
     {
-        bool isDestroy = false;
         for(Int32 i = 0; i < this->layerNum_; i++) {
-            if(this->layerList_[i]->getId() == delLayer->getId()) {
-                delete this->layerList_[i];
-                this->layerList_[i] = nullptr;
-                this->layerNum_--;
-                isDestroy = true;
+            if(this->layers_[i].getId() == layerid) {
+                this->layers_[i].destroy();
                 break;
             }
         }
+    }
 
-        return isDestroy;
+    //レイヤー取得
+    Layer* LayerManager::getLayer(const UInt32 layerid)
+    {
+        Layer* layer = nullptr;
+        for (Int32 i = 0; i < this->layerNum_; i++) {
+            if (this->layers_[i].getId() == layerid) {
+                layer = &this->layers_[i];
+                break;
+            }
+        }
+        return layer;
     }
 
     //タッチイベント
@@ -482,31 +457,30 @@ namespace app {
         switch(ev) {
             case TOUCH_ON: {
                 LOGI("LayerManager::%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
-                for(Int32 iLayer = this->layerNum_ - 1; iLayer >= 0; iLayer--) {
-                    Layer* layer = this->layerList_[iLayer];
-                    if(layer->isCollision(x, y)) {
-                        this->touchLayer_ = iLayer;
+                for(Int32 i = this->layerNum_ - 1; i >= 0; i--) {
+                    if(this->layers_[i].isCollision(x, y)) {
+                        this->touchLayerId_ = this->layers_[i].getId();
                         break;
                     }
                 }
-                this->touchPos_ = touchPos;
+                this->lastTouchPos_ = touchPos;
                 break;
             }
             case TOUCH_OFF: {
                 LOGI("LayerManager::%s TOUCH_OFF (%f,%f)\n", __FUNCTION__, x, y);
-                this->touchLayer_ = -1;
+                this->touchLayerId_ = 0U;
                 break;
             }
             case TOUCH_MOVE: {
                 LOGI("LayerManager::%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
-                if(this->touchLayer_ >= 0) {
-                    Layer* layer = this->layerList_[this->touchLayer_];
+                Layer* layer = this->getLayer(this->touchLayerId_);
+                if(layer != nullptr) {
                     Pos2D<Int32> layerPos = layer->getPos();
-                    layerPos.moveX(touchPos.getX() - this->touchPos_.getX());
-                    layerPos.moveY(touchPos.getY() - this->touchPos_.getY());
+                    layerPos.moveX(touchPos.getX() - this->lastTouchPos_.getX());
+                    layerPos.moveY(touchPos.getY() - this->lastTouchPos_.getY());
                     layer->updatePos(layerPos);
 
-                    this->touchPos_ = touchPos;
+                    this->lastTouchPos_ = touchPos;
                 }
                 break;
             }
@@ -521,7 +495,8 @@ namespace app {
         LOGI("LayerManager::%s START\n", __FUNCTION__);
         ReturnCode retCode;
 
-        MapView *mapView = new MapView();
+        MapView *mapView1 = new MapView();
+        MapView *mapView2 = new MapView();
 
         //EGL資源の作成
         retCode = this->createEGL();
@@ -589,11 +564,14 @@ namespace app {
 
             //レイヤー登録
             if(this->layerNum_ == 0) {
-                mapView->create(Pos2D<Int32>(0, 0), this->windowSize_);
+                mapView1->create(Pos2D<Int32>(0, 0), this->windowSize_);
+                mapView2->create(Pos2D<Int32>(50, 50), Size<Int32>(500, 500));
+                mapView2->changeMapType(MapView::MapType::REAL);
             }
 
             //描画
-            mapView->draw();
+            mapView1->draw();
+            mapView2->draw();
 
             //レイヤー表示更新
             this->updateLayers();
@@ -723,8 +701,8 @@ namespace app {
         glUniformMatrix4fv(unif_proj, 1, GL_FALSE, this->projMat_[0]);
 
         //各レイヤーの描画
-        for(Int32 iLayer = 0; iLayer < this->layerNum_; ++iLayer) {
-            this->layerList_[iLayer]->draw(this->shader_);
+        for(Int32 i = 0; i < this->layerNum_; i++) {
+            this->layers_[i].draw(this->shader_);
         }
 
         //表示更新

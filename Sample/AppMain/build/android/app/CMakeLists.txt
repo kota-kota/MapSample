@@ -23,9 +23,10 @@ add_library( # Sets the name of the library.
              ${JNI_PATH}/com_sample_appmain_AppMain.cpp
              ${NATIVE_PATH}/Type.cpp
              ${NATIVE_PATH}/AppMain.cpp
-             ${NATIVE_PATH}/LayerManager.cpp
              ${NATIVE_PATH}/Shader.cpp
              ${NATIVE_PATH}/Math.cpp
+             ${NATIVE_PATH}/LayerManager.cpp
+             ${NATIVE_PATH}/LayerView.cpp
              ${NATIVE_PATH}/MapView.cpp
              )
 
