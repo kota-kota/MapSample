@@ -16,6 +16,8 @@ namespace app {
 
     private:
         MapType type_;
+        bool isOnTouch_;
+        Pos2D<Int32> lastTouchPos_;
 
     public:
         //コンストラクタ
@@ -26,6 +28,8 @@ namespace app {
         void draw();
         //地図種別を変更
         void changeMapType(const MapType type);
+        //タッチイベント処理
+        virtual bool onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos);
     };
 
 }

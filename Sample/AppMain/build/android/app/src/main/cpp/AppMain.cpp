@@ -82,10 +82,10 @@ namespace app {
         return layerManager->stop();
     }
 
-    //タッチイベント
-    void AppMain::procTouchEvent(TouchEvent ev, Float x, Float y)
+    //タッチイベント処理
+    void AppMain::onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos)
     {
         LayerManager* layerManager = LayerManager::get();
-        layerManager->procTouchEvent(ev, x, y);
+        layerManager->onTouchEvent(ev, pos);
     }
 }

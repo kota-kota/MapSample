@@ -33,6 +33,9 @@ namespace app {
             rc = OK;
         }
 
+        Layer* layer = layerManager->getLayer(this->layerId_);
+        layer->setListenerOnTouchEvent(this, this->callbackTouchEvent);
+
         return rc;
     }
 
@@ -67,5 +70,55 @@ namespace app {
             //描画終了
             layer->endDraw();
         }
+    }
+
+    //指定座標がビュー範囲内か検出
+    bool LayerView::detectCollision(const Pos2D<Float> pos)
+    {
+        bool detect = false;
+        //レイヤー取得
+        LayerManager* layerManager = LayerManager::get();
+        Layer* layer = layerManager->getLayer(this->layerId_);
+        if(layer != nullptr) {
+            detect = layer->detectCollision(pos);
+        }
+        return detect;
+    }
+
+    //ビューの画面上位置取得
+    Pos2D<Int32> LayerView::getPos() const
+    {
+        Pos2D<Int32> pos;
+        //レイヤー取得
+        LayerManager* layerManager = LayerManager::get();
+        Layer* layer = layerManager->getLayer(this->layerId_);
+        if(layer != nullptr) {
+            pos = layer->getPos();
+        }
+        return pos;
+    }
+
+    //ビューの画面上位置更新
+    void LayerView::updatePos(const Pos2D<Int32> pos)
+    {
+        //レイヤー取得
+        LayerManager* layerManager = LayerManager::get();
+        Layer* layer = layerManager->getLayer(this->layerId_);
+        if(layer != nullptr) {
+            layer->updatePos(pos);
+        }
+    }
+
+    //タッチイベント処理
+    bool LayerView::onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos)
+    {
+        LOGI("LayerView::%s\n", __FUNCTION__);
+        return false;
+    }
+
+    //タッチイベントコールバック関数
+    bool LayerView::callbackTouchEvent(void* obj, const TouchEvent ev, const Pos2D<Float> pos)
+    {
+        return static_cast<LayerView*>(obj)->onTouchEvent(ev, pos);
     }
 }

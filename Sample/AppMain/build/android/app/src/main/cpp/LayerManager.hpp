@@ -31,6 +31,9 @@ namespace app {
         UInt32 fbo_[FBO_MAX];
         UInt32 vbo_[VBO_MAX];
 
+        void* obj_;
+        bool (*func_)(void* obj, const TouchEvent, const Pos2D<Float>);
+
     public:
         //コンストラクタ
         Layer();
@@ -48,8 +51,15 @@ namespace app {
         void beginDraw();
         //レイヤーに対する描画終了
         void endDraw();
-        //当たり判定
-        bool isCollision(const Float x, const Float y);
+
+        //タッチイベントリスナー設定
+        void setListenerOnTouchEvent(void* obj, bool (*func)(void* obj, const TouchEvent, const Pos2D<Float>));
+        //タッチイベント処理
+        bool onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos);
+
+        //指定座標がレイヤー範囲内か検出
+        bool detectCollision(const Pos2D<Float> pos);
+
         //レイヤーID取得
         UInt32 getId() const;
         //レイヤー画面上位置取得
@@ -87,8 +97,6 @@ namespace app {
         Int32 layerNum_;
         Layer layers_[MAX_LAYER_NUM_];
         UInt32 lastLayerId_;
-        UInt32 touchLayerId_;
-        Pos2D<Int32> lastTouchPos_;
 
     private:
         //コンストラクタ
@@ -113,8 +121,8 @@ namespace app {
         void destroyLayer(const UInt32 layerid);
         //レイヤー取得
         Layer* getLayer(const UInt32 layerid);
-        //タッチイベント
-        void procTouchEvent(TouchEvent ev, Float x, Float y);
+        //タッチイベント処理
+        void onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos);
 
     private:
         //メインタスク

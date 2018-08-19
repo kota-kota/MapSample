@@ -24,6 +24,18 @@ namespace app {
         void beginDraw();
         //レイヤーに対する描画終了
         void endDraw();
+        //指定座標がビュー範囲内か検出
+        bool detectCollision(const Pos2D<Float> pos);
+        //ビューの画面上位置取得
+        Pos2D<Int32> getPos() const;
+        //ビューの画面上位置更新
+        void updatePos(const Pos2D<Int32> pos);
+        //タッチイベント処理
+        virtual bool onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos);
+
+    public:
+        //タッチイベントコールバック関数
+        static bool callbackTouchEvent(void* obj, const TouchEvent ev, const Pos2D<Float> pos);
     };
 }
 

@@ -23,8 +23,8 @@ namespace app {
         void start(void* native, Int32 w, Int32 h);
         //アプリ停止
         void* stop();
-        //タッチイベント
-        void procTouchEvent(TouchEvent ev, Float x, Float y);
+        //タッチイベント処理
+        void onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos);
     };
 }
 

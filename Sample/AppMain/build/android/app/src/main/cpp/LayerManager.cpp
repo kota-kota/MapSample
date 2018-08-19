@@ -54,7 +54,7 @@ namespace app {
 
     //コンストラクタ
     Layer::Layer() :
-            id_(0), pos_(), size_(), fbo_(), vbo_()
+            id_(0), pos_(), size_(), fbo_(), vbo_(), obj_(nullptr), func_(nullptr)
     {
         LOGI("Layer::%s\n", __FUNCTION__);
         for(Int32 i = 0; i < FboType::FBO_MAX; i++) {
@@ -244,20 +244,37 @@ namespace app {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    //当たり判定
-    bool Layer::isCollision(const Float x, const Float y)
+    //タッチイベントリスナー設定
+    void Layer::setListenerOnTouchEvent(void* obj, bool (*func)(void* obj, const TouchEvent, const Pos2D<Float>))
     {
-        bool ret = false;
+        this->obj_ = obj;
+        this->func_ = func;
+    }
+
+    //タッチイベント処理
+    bool Layer::onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos)
+    {
+        bool isProc = false;
+        if(this->func_ != nullptr) {
+            isProc = this->func_(this->obj_, ev, pos);
+        }
+        return isProc;
+    }
+
+    //指定座標がレイヤー範囲内か検出
+    bool Layer::detectCollision(const Pos2D<Float> pos)
+    {
+        bool detect = false;
 
         Area<Float> area = this->calcDrawArea();
-        if((area.getXMin() <= x) && (x <= area.getXMax()) &&
-           (area.getYMin() <= y) && (y <= area.getYMax()))
+        if((area.getXMin() <= pos.getX()) && (pos.getX() <= area.getXMax()) &&
+           (area.getYMin() <= pos.getY()) && (pos.getY() <= area.getYMax()))
         {
             //当たり
-            ret = true;
+            detect = true;
         }
 
-        return ret;
+        return detect;
     }
 
     //レイヤーID取得
@@ -304,7 +321,7 @@ namespace app {
     LayerManager::LayerManager() :
             isTask_(false), isPause_(false), th_(), mtx_(), windowSize_(), native_(nullptr), projMat_(),
             eglDpy_(EGL_NO_DISPLAY), eglCfg_(nullptr), eglCtx_(EGL_NO_CONTEXT), eglWin_(EGL_NO_SURFACE),
-            shader_(), layerNum_(0), layers_(), lastLayerId_(0), touchLayerId_(0), lastTouchPos_()
+            shader_(), layerNum_(0), layers_(), lastLayerId_(0)
     {
         LOGI("LayerManager::%s\n", __FUNCTION__);
 
@@ -450,42 +467,14 @@ namespace app {
         return layer;
     }
 
-    //タッチイベント
-    void LayerManager::procTouchEvent(TouchEvent ev, Float x, Float y)
+    //タッチイベント処理
+    void LayerManager::onTouchEvent(const TouchEvent ev, const Pos2D<Float> pos)
     {
-        Pos2D<Int32> touchPos(static_cast<Int32>(x), static_cast<Int32>(y));
-        switch(ev) {
-            case TOUCH_ON: {
-                LOGI("LayerManager::%s TOUCH_ON (%f,%f)\n", __FUNCTION__, x, y);
-                for(Int32 i = this->layerNum_ - 1; i >= 0; i--) {
-                    if(this->layers_[i].isCollision(x, y)) {
-                        this->touchLayerId_ = this->layers_[i].getId();
-                        break;
-                    }
-                }
-                this->lastTouchPos_ = touchPos;
+        for(Int32 i = this->layerNum_ - 1; i >= 0; i--) {
+            const bool isProc = this->layers_[i].onTouchEvent(ev, pos);
+            if(isProc) {
                 break;
             }
-            case TOUCH_OFF: {
-                LOGI("LayerManager::%s TOUCH_OFF (%f,%f)\n", __FUNCTION__, x, y);
-                this->touchLayerId_ = 0U;
-                break;
-            }
-            case TOUCH_MOVE: {
-                LOGI("LayerManager::%s TOUCH_MOVE (%f,%f)\n", __FUNCTION__, x, y);
-                Layer* layer = this->getLayer(this->touchLayerId_);
-                if(layer != nullptr) {
-                    Pos2D<Int32> layerPos = layer->getPos();
-                    layerPos.moveX(touchPos.getX() - this->lastTouchPos_.getX());
-                    layerPos.moveY(touchPos.getY() - this->lastTouchPos_.getY());
-                    layer->updatePos(layerPos);
-
-                    this->lastTouchPos_ = touchPos;
-                }
-                break;
-            }
-            default:
-                break;
         }
     }
 

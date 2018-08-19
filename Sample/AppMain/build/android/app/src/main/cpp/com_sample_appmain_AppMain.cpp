@@ -47,7 +47,7 @@ JNIEXPORT void JNICALL Java_com_sample_appmain_AppMainView_AppMain_1procTouchEve
 {
     LOGI("com_sample_appmain_AppMainView_AppMain_procTouchEvent_ON x:%f y:%f", x, y);
     app::AppMain* p = app::AppMain::get();
-    p->procTouchEvent(app::TouchEvent::TOUCH_ON, x, y);
+    p->onTouchEvent(app::TouchEvent::TOUCH_ON, app::Pos2D<app::Float>(x, y));
 }
 
 JNIEXPORT void JNICALL Java_com_sample_appmain_AppMainView_AppMain_1procTouchEvent_1OFF
@@ -55,7 +55,7 @@ JNIEXPORT void JNICALL Java_com_sample_appmain_AppMainView_AppMain_1procTouchEve
 {
     LOGI("com_sample_appmain_AppMainView_AppMain_procTouchEvent_OFF x:%f y:%f", x, y);
     app::AppMain* p = app::AppMain::get();
-    p->procTouchEvent(app::TouchEvent::TOUCH_OFF, x, y);
+    p->onTouchEvent(app::TouchEvent::TOUCH_OFF, app::Pos2D<app::Float>(x, y));
 }
 
 JNIEXPORT void JNICALL Java_com_sample_appmain_AppMainView_AppMain_1procTouchEvent_1MOVE
@@ -63,5 +63,5 @@ JNIEXPORT void JNICALL Java_com_sample_appmain_AppMainView_AppMain_1procTouchEve
 {
     LOGI("com_sample_appmain_AppMainView_AppMain_procTouchEvent_MOVE x:%f y:%f", x, y);
     app::AppMain* p = app::AppMain::get();
-    p->procTouchEvent(app::TouchEvent::TOUCH_MOVE, x, y);
+    p->onTouchEvent(app::TouchEvent::TOUCH_MOVE, app::Pos2D<app::Float>(x, y));
 }
