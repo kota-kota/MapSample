@@ -18,8 +18,8 @@ namespace {
 	static const std::int32_t WIN_POSY = 0;
 
 	//ウィンドウ幅高さ
-	static const std::int32_t WIN_WIDTH = 800;
-	static const std::int32_t WIN_HEIGHT = 400;
+	static const std::int32_t WIN_WIDTH = 500;
+	static const std::int32_t WIN_HEIGHT = 200;
 }
 
 //内部関数
@@ -28,8 +28,6 @@ namespace {
 	//WM_CREATEイベント処理
 	void WndProc_WMCreate(HWND hWnd)
 	{
-		printf("<winproc_create> hWnd:0x%p\n", hWnd);
-
 		//DWWindow作成
 		dw::DWWindow::create(hWnd);
 
@@ -83,7 +81,6 @@ int main()
 
 	//インスタンスハンドル取得
 	HINSTANCE hInstance = ::GetModuleHandle(nullptr);
-	printf("GetModuleHandle %p\n", hInstance);
 
 	//クラス登録情報設定
 	WNDCLASSEX wcex;
@@ -103,10 +100,8 @@ int main()
 	//クラス登録
 	ATOM ret = ::RegisterClassEx(&wcex);
 	if (ret == 0) {
-		printf("[ERROR] %s:%d RegisterClassEx\n", __FUNCTION__, __LINE__);
 		goto END;
 	}
-	printf("RegisterClassEx\n");
 
 	//ウィンドウ作成
 	HWND hWnd = ::CreateWindowEx(
@@ -124,10 +119,8 @@ int main()
 		nullptr
 	);
 	if (hWnd == nullptr) {
-		printf("[ERROR] %s:%d CreateWindowEx\n", __FUNCTION__, __LINE__);
 		goto END;
 	}
-	printf("CreateWindowEx %p\n", hWnd);
 
 	// ウィンドウ表示
 	ShowWindow(hWnd, SW_SHOW);
@@ -140,7 +133,7 @@ int main()
 		DispatchMessage(&msg);
 	}
 
-	END:
+END:
 	//コンソールウィンドウ破棄
 	fclose(fConsole);
 	//::FreeConsole();	//x64で例外発生

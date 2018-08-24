@@ -11,6 +11,12 @@ namespace std {
 
 namespace dw {
 
+	//画像フォーマット
+	enum DWImageFormat {
+		BMP,
+		PNG,
+	};
+
 	//サイズ
 	struct DWSize {
 		std::int32_t	width_;
@@ -41,8 +47,18 @@ namespace dw {
 
 	//テキスト
 	struct DWText {
-		std::int32_t	num_;
+		std::int32_t	textSize_;
+		std::int32_t	textNum_;
 		std::uint16_t	text_[32];
+	};
+
+	//ビットマップ
+	struct DWBitmap {
+		std::int32_t	width_;
+		std::int32_t	height_;
+		std::int32_t	bytePerPixel_;
+		std::int32_t	imageSize_;
+		std::uint8_t*	image_;
 	};
 
 	//時刻
