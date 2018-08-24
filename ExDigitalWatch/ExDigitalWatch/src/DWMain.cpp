@@ -1,5 +1,4 @@
 ﻿#include "DWMain.hpp"
-#include "DWWindow.hpp"
 
 namespace {
 	//DWMainインスタンス
@@ -73,17 +72,19 @@ namespace dw {
 				break;
 			}
 
+			//時刻取得
+			const DWTime dwTime = DWFunc::getTime();
+
 			//描画
 			DWWindow* dwwin = DWWindow::get();
 			dwwin->beginDraw();
-			const DWColor color = { 255.0F, 0.0F, 0.0F, 255.0F };
+			const DWColor color = { 255, 0, 0, 255 };
 			dwwin->clear(color);
 			DWText text = { 0 };
-			text.num_ = 3;
-			text.text_[0] = L'1';
-			text.text_[1] = L'2';
-			text.text_[2] = L':';
-			text.text_[3] = L'\0';
+			text.num_ = dwTime.strNum_;
+			for (std::int32_t i = 0; i < dwTime.strNum_; i++) {
+				text.text_[i] = static_cast<std::uint16_t>(dwTime.str_[i]);
+			}
 			dwwin->drawText(text);
 			dwwin->drawBitmap();
 			dwwin->endDraw();

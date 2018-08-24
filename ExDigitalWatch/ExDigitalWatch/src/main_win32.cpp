@@ -1,5 +1,6 @@
-﻿#include "DWMain.hpp"
-#include "DWWindow.hpp"
+﻿#include "DWType.hpp"
+#include "DWMain.hpp"
+#include "DWUtility.hpp"
 
 #include <Windows.h>
 #include <tchar.h>
@@ -13,12 +14,12 @@ namespace {
 	static const TCHAR* WIN_NAME = TEXT("ExDigitalWatch");
 
 	//ウィンドウ位置
-	static const int WIN_POSX = 0;
-	static const int WIN_POSY = 0;
+	static const std::int32_t WIN_POSX = 0;
+	static const std::int32_t WIN_POSY = 0;
 
 	//ウィンドウ幅高さ
-	static const int WIN_WIDTH = 800;
-	static const int WIN_HEIGHT = 400;
+	static const std::int32_t WIN_WIDTH = 800;
+	static const std::int32_t WIN_HEIGHT = 400;
 }
 
 //内部関数

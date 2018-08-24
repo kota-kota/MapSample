@@ -1,11 +1,14 @@
-﻿#ifndef INCLUDED_DWWINDOW_HPP
-#define INCLUDED_DWWINDOW_HPP
+﻿#ifndef INCLUDED_DWUTILITY_HPP
+#define INCLUDED_DWUTILITY_HPP
 
 #include "DWType.hpp"
 #include <Windows.h>
+#include <time.h>
 #include <mutex>
+
 //OpenGL
 #include <gl/GL.h>
+
 //FreeType
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -70,7 +73,14 @@ namespace dw {
 		//デストラクタ
 		~DWWindow();
 	};
+
+	//DWFuncクラス
+	class DWFunc {
+	public:
+		//時刻取得
+		static DWTime getTime();
+	};
 };
 
 
-#endif //INCLUDED_DWWINDOW_HPP
+#endif //INCLUDED_DWUTILITY_HPP

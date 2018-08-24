@@ -134,12 +134,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main_win32.cpp" />
-    <ClCompile Include="src\DWWindow.cpp" />
+    <ClCompile Include="src\DWUtility.cpp" />
     <ClCompile Include="src\DWMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DWType.hpp" />
-    <ClInclude Include="src\DWWindow.hpp" />
+    <ClInclude Include="src\DWUtility.hpp" />
     <ClInclude Include="src\DWMain.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

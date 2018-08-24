@@ -1,4 +1,4 @@
-﻿#include "DWWindow.hpp"
+﻿#include "DWUtility.hpp"
 
 
 namespace {
@@ -75,10 +75,10 @@ namespace dw {
 	//画面塗りつぶし
 	void DWWindow::clear(const DWColor& color)
 	{
-		GLclampf r = color.r_ / 255.0F;
-		GLclampf g = color.g_ / 255.0F;
-		GLclampf b = color.b_ / 255.0F;
-		GLclampf a = color.a_ / 255.0F;
+		GLclampf r = static_cast<std::float32_t>(color.r_) / 255.0F;
+		GLclampf g = static_cast<std::float32_t>(color.g_) / 255.0F;
+		GLclampf b = static_cast<std::float32_t>(color.b_) / 255.0F;
+		GLclampf a = static_cast<std::float32_t>(color.a_) / 255.0F;
 
 		glClearColor(r, g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -104,6 +104,9 @@ namespace dw {
 		FT_BBox stringBBox;
 
 		DWCoord baseCoord = { 0, 0 };
+
+		//フォントサイズ設定
+		FT_Set_Char_Size(this->ftFace_, fontSize * 64, 0, 96, 0);
 
 		//テキスト文字分ループ
 		for (std::int32_t i = 0; i < text.num_; i++) {
@@ -214,13 +217,13 @@ namespace dw {
 		//描画
 		glColor4ub(fontColor.r_, fontColor.g_, fontColor.b_, fontColor.a_);
 		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.0F, 1.0F);
-		glVertex2i(drawArea.xmin_, drawArea.ymin_);
-		glTexCoord2f(1.0F, 1.0F);
-		glVertex2i(drawArea.xmax_, drawArea.ymin_);
 		glTexCoord2f(0.0F, 0.0F);
-		glVertex2i(drawArea.xmin_, drawArea.ymax_);
+		glVertex2i(drawArea.xmin_, drawArea.ymin_);
 		glTexCoord2f(1.0F, 0.0F);
+		glVertex2i(drawArea.xmax_, drawArea.ymin_);
+		glTexCoord2f(0.0F, 1.0F);
+		glVertex2i(drawArea.xmin_, drawArea.ymax_);
+		glTexCoord2f(1.0F, 1.0F);
 		glVertex2i(drawArea.xmax_, drawArea.ymax_);
 		glEnd();
 
@@ -318,5 +321,28 @@ namespace dw {
 			//デバイスコンテキストを破棄
 			::ReleaseDC(this->hWnd_, this->hDC_);
 		}
+	}
+
+
+
+	//----------------------------------------------------------------
+	// DWFuncクラス
+	//----------------------------------------------------------------
+
+	//時刻取得
+	DWTime DWFunc::getTime()
+	{
+		time_t t = time(nullptr);
+		struct tm tm;
+		(void)localtime_s(&tm, &t);
+
+		DWTime dwTime = { 0 };
+		dwTime.h_ = tm.tm_hour;
+		dwTime.m_ = tm.tm_min;
+		dwTime.s_ = tm.tm_sec;
+		strftime(dwTime.str_, sizeof(dwTime.str_), "%H:%M:%S", &tm);
+		dwTime.strNum_ = strlen(dwTime.str_);
+
+		return dwTime;
 	}
 }

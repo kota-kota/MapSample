@@ -2,6 +2,7 @@
 #define INCLUDED_DWMAIN_HPP
 
 #include "DWType.hpp"
+#include "DWUtility.hpp"
 #include <thread>
 #include <mutex>
 
