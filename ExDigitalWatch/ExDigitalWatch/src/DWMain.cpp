@@ -78,6 +78,8 @@ namespace dw {
 			//描画開始
 			DWWindow* dwwin = DWWindow::get();
 			dwwin->beginDraw();
+
+			//画面クリア
 			const DWColor color = { 255, 255, 255, 255 };
 			dwwin->clear(color);
 
