@@ -7,12 +7,14 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class AppMainView extends SurfaceView implements SurfaceHolder.Callback {
+public class AppMainView extends SurfaceView implements SurfaceHolder.Callback, TouchManager.TouchManagerListener {
 
     private final static String LOG_TAG = "AppMain";
     //タッチポインタID記憶用
     private int pointerId1 = -1;
     private int pointerId2 = -1;
+
+    TouchManager touchManager;
 
     //コンストラクタ
     public AppMainView(Context context) {
@@ -23,6 +25,10 @@ public class AppMainView extends SurfaceView implements SurfaceHolder.Callback {
         SurfaceHolder holder = this.getHolder();
         //取得したサーフェースホルダーにコールバック機能を追加
         holder.addCallback(this);
+
+        //タッチマネージャー
+        touchManager = new TouchManager(context);
+        touchManager.setListener(this);
     }
 
     //生成
@@ -67,82 +73,29 @@ public class AppMainView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         performClick();
-        final int action = event.getActionMasked();
-        final int pointerIndex = event.getActionIndex();
-        final int pointerId = event.getPointerId(pointerIndex);
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                float x = event.getX(pointerIndex);
-                float y = event.getY(pointerIndex);
-                pointerId1 = pointerId;
-                pointerId2 = -1;
-                Log.i(LOG_TAG, "ACTION_DOWN id:" + pointerId + " (" + x + "," + y + ")");
-                AppMain_procTouchEvent_ON(x, y);
-                break;
-            }
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                if (pointerId2 == -1) {
-                    float x = event.getX(pointerIndex);
-                    float y = event.getY(pointerIndex);
-                    pointerId2 = pointerId;
-                    Log.i(LOG_TAG, "ACTION_POINTER_DOWN id:" + pointerId + " (" + x + "," + y + ")");
-                } else if (pointerId1 == -1) {
-                    float x = event.getX(pointerIndex);
-                    float y = event.getY(pointerIndex);
-                    pointerId1 = pointerId;
-                    Log.i(LOG_TAG, "ACTION_POINTER_DOWN id:" + pointerId + " (" + x + "," + y + ")");
-                }
-                break;
-            }
-            case MotionEvent.ACTION_MOVE: {
-                float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
-                if (pointerId1 >= 0) {
-                    final int i = event.findPointerIndex(pointerId1);
-                    x1 = event.getX(i);
-                    y1 = event.getY(i);
-                }
-                if (pointerId2 >= 0) {
-                    final int i = event.findPointerIndex(pointerId2);
-                    x2 = event.getX(i);
-                    y2 = event.getY(i);
-                }
+        return touchManager.onTouchEvent(event);
+    }
 
-                // ジェスチャー処理
-                if ((pointerId1 >= 0) && (pointerId2 == -1)) {
-                    Log.i(LOG_TAG, "ACTION_MOVE<1> (" + x1 + "," + y1 + ")");
-                    AppMain_procTouchEvent_MOVE(x1, y1);
-                } else if ((pointerId1 == -1) && (pointerId2 >= 0)) {
-                    Log.i(LOG_TAG, "ACTION_MOVE<2>  (" + x2 + "," + y2 + ")");
-                } else if ((pointerId1 >= 0) && (pointerId2 >= 0)) {
-                    Log.i(LOG_TAG, "ACTION_MOVE<1,2> (" + x1 + "," + y1 + ") (" + x2 + "," + y2 + ")");
-                }
-                break;
-            }
-            case MotionEvent.ACTION_UP:
-                pointerId1 = -1;
-                pointerId2 = -1;
-                Log.i(LOG_TAG, "ACTION_UP id:" + pointerId);
-                AppMain_procTouchEvent_OFF(0.0f, 0.0f);
-                break;
-            case MotionEvent.ACTION_POINTER_UP: {
-                if (pointerId1 == pointerId) {
-                    pointerId1 = -1;
-                } else if (pointerId2 == pointerId) {
-                    pointerId2 = -1;
-                }
-                Log.i(LOG_TAG, "ACTION_POINTER_UP id:" + pointerId);
-                break;
-            }
-            case MotionEvent.ACTION_CANCEL:
-                pointerId1 = -1;
-                pointerId2 = -1;
-                Log.i(LOG_TAG, "ACTION_CANCEL");
-                break;
-
-            default:
-                break;
-        }
-        return true;
+    public void onTouchDown(float x, float y) {
+        Log.i(LOG_TAG, "onTouchDown (" + x + "," + y + ")");
+    }
+    public void onTouchUp(float x, float y) {
+        Log.i(LOG_TAG, "onTouchUp (" + x + "," + y + ")");
+    }
+    public void onDrag(float x, float y) {
+        Log.i(LOG_TAG, "onDrag (" + x + "," + y + ")");
+    }
+    public void onFlick() {
+        Log.i(LOG_TAG, "onFlick");
+    }
+    public void onPinch() {
+        Log.i(LOG_TAG, "onPinch");
+    }
+    public void onTwist() {
+        Log.i(LOG_TAG, "onTwist");
+    }
+    public void onTilt() {
+        Log.i(LOG_TAG, "onTilt");
     }
 
     /**
