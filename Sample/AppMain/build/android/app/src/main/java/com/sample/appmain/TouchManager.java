@@ -6,12 +6,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-import java.util.EventListener;
-
-public class TouchManager implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestureListener {
+public class TouchManager {
 
     //リスナーインターフェース
-    public interface TouchManagerListener extends EventListener {
+    public interface TouchManagerListener {
         void onTouchDown(float x, float y);
         void onTouchUp(float x, float y);
         void onDrag(float x, float y);
@@ -19,6 +17,18 @@ public class TouchManager implements GestureDetector.OnGestureListener, ScaleGes
         void onPinch();
         void onTwist();
         void onTilt();
+    }
+
+    //アクション
+    public enum Action {
+        NONE,
+        DOWN,
+        UP,
+        DRAG,
+        FLICK,
+        PINCH,
+        TWIST,
+        TILT,
     }
 
     private final static String LOG_TAG = "AppMain";
@@ -34,8 +44,8 @@ public class TouchManager implements GestureDetector.OnGestureListener, ScaleGes
 
     //コンストラクタ
     public TouchManager(Context context) {
-        gesture = new GestureDetector(context, this);
-        scaleGesture = new ScaleGestureDetector(context, this);
+        gesture = new GestureDetector(context, new GestureListener());
+        scaleGesture = new ScaleGestureDetector(context, new ScaleGestureListener());
     }
 
     //リスナー登録
@@ -68,59 +78,6 @@ public class TouchManager implements GestureDetector.OnGestureListener, ScaleGes
             //チルト中はピンチ判定しない
             scaleGesture.onTouchEvent(event);
         }
-        return true;
-    }
-
-    //ScaleGestureDetector: ピンチ開始
-    public boolean onScaleBegin(ScaleGestureDetector detector) {
-        Log.i(LOG_TAG, "onScaleBegin");
-        return true;
-    }
-
-    //ScaleGestureDetector: ピンチ終了
-    public void onScaleEnd(ScaleGestureDetector detector) {
-        Log.i(LOG_TAG, "onScaleEnd");
-    }
-
-    //ScaleGestureDetector: ピンチ中
-    public boolean onScale(ScaleGestureDetector detector) {
-        Log.i(LOG_TAG, "onScale");
-        listener.onPinch();
-        return true;
-    }
-
-    //GestureDetector: タッチON
-    public boolean onDown(MotionEvent event) {
-        //ACTION_DOWNで拾うため何もしない
-        return true;
-    }
-
-    //GestureDetector: タッチOFF
-    public boolean onSingleTapUp(MotionEvent event) {
-        //ACTION_UPで拾うため何もしない
-        return true;
-    }
-
-    //GestureDetector: タッチON後に少し留まった
-    public void onShowPress(MotionEvent event) {
-        //使い道がわからないので何もしない
-    }
-
-    //GestureDetector: 長押し検知
-    public void onLongPress(MotionEvent event) {
-        //何もしない
-    }
-
-    //GestureDetector: スクロール
-    public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {
-        //ACTION_MOVEで拾うため何もしない
-        return true;
-    }
-
-    //GestureDetector: フリック
-    public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX, float velocityY) {
-        Log.i(LOG_TAG, "onFling");
-        listener.onFlick();
         return true;
     }
 
@@ -231,5 +188,69 @@ public class TouchManager implements GestureDetector.OnGestureListener, ScaleGes
     private float getAngle(float x1, float y1, float x2, float y2) {
         double angle = Math.atan2(y2 - y1, x2 - x1) * 180d / Math.PI;
         return (float)angle;
+    }
+
+    //ScaleGestureDetectorのリスナー実装クラス
+    private class ScaleGestureListener implements ScaleGestureDetector.OnScaleGestureListener {
+
+        //ピンチ開始
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            Log.i(LOG_TAG, "onScaleBegin");
+            return true;
+        }
+
+        //ピンチ終了
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            Log.i(LOG_TAG, "onScaleEnd");
+        }
+
+        //ピンチ中
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            Log.i(LOG_TAG, "onScale");
+            listener.onPinch();
+            return true;
+        }
+    }
+
+    //GestureDetectorのリスナー実装クラス
+    private class GestureListener implements GestureDetector.OnGestureListener {
+
+        //GestureDetector: タッチON
+        public boolean onDown(MotionEvent event) {
+            //ACTION_DOWNで拾うため何もしない
+            return true;
+        }
+
+        //GestureDetector: タッチOFF
+        public boolean onSingleTapUp(MotionEvent event) {
+            //ACTION_UPで拾うため何もしない
+            return true;
+        }
+
+        //GestureDetector: タッチON後に少し留まった
+        public void onShowPress(MotionEvent event) {
+            //使い道がわからないので何もしない
+        }
+
+        //GestureDetector: 長押し検知
+        public void onLongPress(MotionEvent event) {
+            //何もしない
+        }
+
+        //GestureDetector: スクロール
+        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {
+            //ACTION_MOVEで拾うため何もしない
+            return true;
+        }
+
+        //GestureDetector: フリック
+        public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX, float velocityY) {
+            Log.i(LOG_TAG, "onFling");
+            listener.onFlick();
+            return true;
+        }
     }
 }

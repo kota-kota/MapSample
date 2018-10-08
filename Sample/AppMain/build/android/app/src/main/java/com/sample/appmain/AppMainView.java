@@ -1,20 +1,25 @@
 package com.sample.appmain;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.TextView;
 
-public class AppMainView extends SurfaceView implements SurfaceHolder.Callback, TouchManager.TouchManagerListener {
+import java.util.Locale;
+
+public class AppMainView extends SurfaceView implements SurfaceHolder.Callback, TouchGestureDetector.TouchGestureListener {
 
     private final static String LOG_TAG = "AppMain";
-    //タッチポインタID記憶用
-    private int pointerId1 = -1;
-    private int pointerId2 = -1;
 
-    TouchManager touchManager;
+    //タッチジェスチャ検出用
+    TouchGestureDetector mTouchGestureDetector;
+    //デバッグ表示用
+    private int mTextViewNum;
+    private TextView mTextViews[];
 
     //コンストラクタ
     public AppMainView(Context context) {
@@ -26,9 +31,16 @@ public class AppMainView extends SurfaceView implements SurfaceHolder.Callback, 
         //取得したサーフェースホルダーにコールバック機能を追加
         holder.addCallback(this);
 
-        //タッチマネージャー
-        touchManager = new TouchManager(context);
-        touchManager.setListener(this);
+        //タッチジェスチャ検出オブジェクト生成
+        mTouchGestureDetector = new TouchGestureDetector(context, 2);
+        //リスナー登録
+        mTouchGestureDetector.setListener(this);
+    }
+
+    //デバッグ表示用テキストビュー設定
+    public void setDebugTextView(TextView textViews[], int textViewNum) {
+        mTextViewNum = textViewNum;
+        mTextViews = textViews;
     }
 
     //生成
@@ -73,28 +85,54 @@ public class AppMainView extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         performClick();
-        return touchManager.onTouchEvent(event);
+        return mTouchGestureDetector.onTouchEvent(event);
     }
 
-    public void onTouchDown(float x, float y) {
-        Log.i(LOG_TAG, "onTouchDown (" + x + "," + y + ")");
+    public void onDown(TouchPoint touchPoints[], int iTouchPoint) {
+        //Log.i(LOG_TAG, "onDown");
+        if(touchPoints[iTouchPoint] != null) {
+            if((iTouchPoint < mTextViewNum) && (mTextViews[iTouchPoint] != null)) {
+                PointF point = touchPoints[iTouchPoint].getLastPoint();
+                String text = String.format(Locale.US, "onDown\t\tx:%4.1f y:%4.1f", point.x, point.y);
+                mTextViews[iTouchPoint].setText(text);
+            }
+        }
     }
-    public void onTouchUp(float x, float y) {
-        Log.i(LOG_TAG, "onTouchUp (" + x + "," + y + ")");
+    public void onUp(TouchPoint touchPoints[], int iTouchPoint) {
+        //Log.i(LOG_TAG, "onUp");
+        if(touchPoints[iTouchPoint] != null) {
+            if((iTouchPoint < mTextViewNum) && (mTextViews[iTouchPoint] != null)) {
+                PointF point = touchPoints[iTouchPoint].getLastPoint();
+                String text = String.format(Locale.US, "onUp\t\t\t\tx:%4.1f y:%4.1f", point.x, point.y);
+                mTextViews[iTouchPoint].setText(text);
+            }
+        }
     }
-    public void onDrag(float x, float y) {
-        Log.i(LOG_TAG, "onDrag (" + x + "," + y + ")");
+    public void onMove(TouchPoint touchPoints[], int iTouchPoint) {
+        //Log.i(LOG_TAG, "onMove");
+        if(touchPoints[iTouchPoint] != null) {
+            if((iTouchPoint < mTextViewNum) && (mTextViews[iTouchPoint] != null)) {
+                PointF point = touchPoints[iTouchPoint].getLastPoint();
+                String text = String.format(Locale.US, "onMove\t\tx:%4.1f y:%4.1f", point.x, point.y);
+                mTextViews[iTouchPoint].setText(text);
+            }
+        }
     }
-    public void onFlick() {
+    public void onDrag(Vector vec) {
+        Log.i(LOG_TAG, "onDrag");
+        String text = String.format(Locale.US, "onDrag\t\tx:%4.1f y:%4.1f", vec.getX(), vec.getY());
+        mTextViews[2].setText(text);
+    }
+    public void onFlick(TouchGestureDetector detector) {
         Log.i(LOG_TAG, "onFlick");
     }
-    public void onPinch() {
+    public void onPinch(TouchGestureDetector detector) {
         Log.i(LOG_TAG, "onPinch");
     }
-    public void onTwist() {
+    public void onTwist(TouchGestureDetector detector) {
         Log.i(LOG_TAG, "onTwist");
     }
-    public void onTilt() {
+    public void onTilt(TouchGestureDetector detector) {
         Log.i(LOG_TAG, "onTilt");
     }
 
